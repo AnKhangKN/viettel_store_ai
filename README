@@ -1,0 +1,25 @@
+Sao khi clone về mởi vscode với thư mục gốc (viettel_ai) -> .../viettel_ai
+
+- Mở teminal (Ctrl + Shift + `) 
+- Nhìn xuống teminal vừa mở gốc trên bên phải kế dấu + có dấu mũi tên xuống bấm vào tìm và chọn " Gitbash "
+
+- git pull origin main (để lấy code mới nhất về)
+
+Web
+- cd web 
+- npm i
+- npm run dev
+
+cd ..
+
+Server
+- cd server 
+- python -m venv .venv hoặc py -m venv .venv
+- source .venv/Scripts/activate
+- pip install -r requirements.txt (chỉ cần làm lần đầu tiên)
+- python run.py
+
+Sau khi làm xong muốn up code lên lại
+- git add .
+- git commit -m "message"
+- git push origin main

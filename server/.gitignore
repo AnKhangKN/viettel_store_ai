@@ -1,0 +1,109 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# =========================
+# Virtual Environment
+# =========================
+.venv/
+venv/
+env/
+
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.local
+.env.development
+.env.production
+
+# Cho phép commit file mẫu
+!.env.example
+
+# =========================
+# Flask
+# =========================
+instance/
+.webassets-cache/
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+
+# =========================
+# Testing
+# =========================
+.pytest_cache/
+.coverage
+htmlcov/
+
+# =========================
+# Build
+# =========================
+build/
+dist/
+*.egg-info/
+
+# =========================
+# IDE
+# =========================
+
+# VS Code
+.vscode/
+
+# JetBrains
+.idea/
+
+# =========================
+# OS Files
+# =========================
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# =========================
+# Database
+# =========================
+
+# SQLite nếu dùng local test
+*.db
+*.sqlite3
+
+# =========================
+# Jupyter
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# AI / LangChain
+# =========================
+.langchain/
+.langgraph/
+
+# =========================
+# Secrets
+# =========================
+secrets/
+credentials/
+service-account.json
+
+# =========================
+# Temporary Files
+# =========================
+tmp/
+temp/
+*.tmp
+
+# =========================
+# Migrations (nếu muốn commit thì bỏ phần này)
+# =========================
+# migrations/
