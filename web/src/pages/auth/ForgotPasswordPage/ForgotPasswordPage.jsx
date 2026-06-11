@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ForgetPasswordPage = () => (
+const ForgotPasswordPage = () => (
   <div className="auth-wrapper">
     <div className="auth-card">
       <h2 className="auth-title">Quên Mật Khẩu</h2>
@@ -20,4 +20,4 @@ const ForgetPasswordPage = () => (
     </div>
   </div>
 );
-export default ForgetPasswordPage;
+export default ForgotPasswordPage;

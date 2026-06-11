@@ -13,10 +13,10 @@ export const routes = [
     page: React.lazy(() => import("../pages/auth/RegisterPage/RegisterPage")),
   },
   {
-    path: "/forget-password",
-    name: "Forget Password",
+    path: "/forgot-password",
+    name: "Forgot Password",
     page: React.lazy(() =>
-      import("../pages/auth/ForgetPasswordPage/ForgetPasswordPage")
+      import("../pages/auth/ForgotPasswordPage/ForgotPasswordPage")
     ),
   },
 
@@ -27,6 +27,18 @@ export const routes = [
     page: React.lazy(() => import("../pages/user/HomePage/HomePage")),
     isShowUserLayout: true,
   },
+  {
+    path: "/about",
+    name: "About",
+    page: React.lazy(() => import("../pages/user/AboutPage/AboutPage")),
+    isShowUserLayout: true,
+  },
 
   //   Admin
+  {
+    path: "/admin/dashboard",
+    name: "Dashboard",
+    page: React.lazy(() => import("../pages/admin/DashboardPage/DashboardPage")),
+    isShowAdminLayout: true,
+  }
 ];
