@@ -7,6 +7,18 @@ export const routes = [
     name: "Login",
     page: React.lazy(() => import("../pages/auth/LoginPage/LoginPage")),
   },
+  {
+    path: "/register",
+    name: "Register",
+    page: React.lazy(() => import("../pages/auth/RegisterPage/RegisterPage")),
+  },
+  {
+    path: "/forget-password",
+    name: "Forget Password",
+    page: React.lazy(() =>
+      import("../pages/auth/ForgetPasswordPage/ForgetPasswordPage")
+    ),
+  },
 
   //   User
   {
