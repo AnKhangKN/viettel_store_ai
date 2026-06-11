@@ -1,7 +1,10 @@
-const NotFoundPage = () => {
-  return (
-    <div>NotFoundPage</div>
-  )
-}
+import React from 'react';
 
-export default NotFoundPage
+const NotFoundPage = () => (
+  <div className="auth-wrapper" style={{flexDirection: 'column'}}>
+    <h1 style={{fontSize: '5rem', fontWeight: 'bold', color: '#1d4ed8'}}>404</h1>
+    <p style={{fontSize: '1.25rem', marginBottom: '1rem'}}>Trang không tồn tại!</p>
+    <a href="/login" className="auth-button" style={{width: 'auto', padding: '0.5rem 1.5rem'}}>Về trang chủ</a>
+  </div>
+);
+export default NotFoundPage;

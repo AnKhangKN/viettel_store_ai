@@ -17,9 +17,34 @@ Server
 - python -m venv .venv hoặc py -m venv .venv
 - source .venv/Scripts/activate
 - pip install -r requirements.txt (chỉ cần làm lần đầu tiên)
-- python run.py
+- python app.py
 
 Sau khi làm xong muốn up code lên lại
 - git add .
 - git commit -m "message"
+- git push origin main
+
+
+Trước khi code cần
+- git pull origin main
+D:\viettel_store_ai>
+- cd web
+D:\viettel_store_ai\web>
+- npm run dev 
+-> chạy giao diện Web
+
+- cd ..
+D:\viettel_store_ai>
+
+- cd server
+D:\viettel_store_ai\server>
+- source .venv/Scripts/activate
+- python app.py
+-> chạy server gửi api
+
+Sau khi code xong muốn push lên
+- cd ..
+D:\viettel_store_ai>
+- git add .
+- git commit -m 'ghi gì cũng đc'
 - git push origin main

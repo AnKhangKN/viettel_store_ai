@@ -1,4 +1,9 @@
-/* Reset CSS */
+/* 1. Kích hoạt Tailwind CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 2. Phần Reset CSS của bạn giữ nguyên ở dưới */
 *,
 *::before,
 *::after {
@@ -14,13 +19,7 @@ html {
 body {
   min-width: 320px;
   min-height: 100vh;
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.5;
   color: #212529;
   background-color: #ffffff;
@@ -37,28 +36,4 @@ a {
   text-decoration: none;
 }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-  border: none;
-  background: none;
-}
-
-img,
-picture,
-svg,
-video {
-  display: block;
-  max-width: 100%;
-}
-
-ul,
-ol {
-  list-style: none;
-}
+/* ... các phần còn lại của bạn giữ nguyên ... */

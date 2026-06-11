@@ -1,42 +1,24 @@
-import React from "react";
-import { Routes, Route } from "react-router-dom";
-
-import { routes } from "./routes";
-import UserLayout from "./layout/UserLayout/UserLayout";
-import AdminLayout from "./layout/AdminLayout/AdminLayout";
-import NotFoundPage from "./pages/NotFoundPage/NotFoundPage";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import LoginPage from './pages/auth/LoginPage/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage/RegisterPage';
+import ForgetPasswordPage from './pages/auth/ForgetPasswordPage/ForgetPasswordPage';
+import NotFoundPage from './pages/NotFoundPage/NotFoundPage';
 
 function App() {
   return (
+    <Router>
       <Routes>
-        {routes.map((route, index) => {
-          const Page = route.page;
-
-          let Layout = React.Fragment;
-
-          if (route.isShowUserLayout) {
-            Layout = UserLayout;
-          }
-
-          if (route.isShowAdminLayout) {
-            Layout = AdminLayout;
-          }
-
-          return (
-            <Route
-              key={index}
-              path={route.path}
-              element={
-                <Layout>
-                  <Page />
-                </Layout>
-              }
-            />
-          );
-        })}
-
+        {/* Tự động chuyển về trang login khi vào trang chủ */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgetPasswordPage />} />
+        
+        {/* Trang 404 cho các đường dẫn sai */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+    </Router>
   );
 }
 
