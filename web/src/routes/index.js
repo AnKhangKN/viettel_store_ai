@@ -27,6 +27,12 @@ export const routes = [
     page: React.lazy(() => import("../pages/user/HomePage/HomePage")),
     isShowUserLayout: true,
   },
+  {
+    path: "/about",
+    name: "About",
+    page: React.lazy(() => import("../pages/user/AboutPage/AboutPage")),
+    isShowUserLayout: true,
+  },
 
   //   Admin
 ];
