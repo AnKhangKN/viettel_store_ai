@@ -1,7 +1,6 @@
 import React from 'react';
-// Import Header và Sidebar từ đúng đường dẫn trong dự án của bạn
-import HeaderComponent from '../../components/user/HeaderComponent/HeaderComponent';
-import SidebarComponent from '../../components/user/SidebarComponent/SidebarComponent';
+import HeaderComponent from "../../components/user/HeaderComponent/HeaderComponent";
+import SidebarComponent from "../../components/user/SidebarComponent/SidebarComponent";
 
 const UserLayout = ({ children }) => {
   return (
@@ -15,7 +14,7 @@ const UserLayout = ({ children }) => {
           <SidebarComponent />
         </div>
 
-        {/* Phần nội dung chính (nơi chứa các trang như Home, About...) */}
+        {/* Phần nội dung chính */}
         <main className="flex-1 overflow-y-auto p-6">
           {children}
         </main>

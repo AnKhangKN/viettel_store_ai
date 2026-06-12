@@ -1,9 +1,5 @@
-/* 1. Kích hoạt Tailwind CSS */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* 2. Phần Reset CSS của bạn giữ nguyên ở dưới */
 *,
 *::before,
 *::after {
