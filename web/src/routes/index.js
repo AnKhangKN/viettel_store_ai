@@ -15,24 +15,30 @@ export const routes = [
   {
     path: "/forget-password",
     name: "Forget Password",
-    page: React.lazy(() =>
-      import("../pages/auth/ForgetPasswordPage/ForgetPasswordPage")
-    ),
+    page: React.lazy(() => import("../pages/auth/ForgotPasswordPage/ForgotPasswordPage")),
   },
 
   //   User
   {
     path: "/",
     name: "Home",
-    page: React.lazy(() => import("../pages/user/HomePage/HomePage")),
+    page: React.lazy(() => import("../Components/user/HomePage/HomePage")),
+    isShowUserLayout: true,
+  },
+
+  {
+    path: "/package",
+    name: "Package",
+    page: React.lazy(() => import("../../src/Components/user/PackagePage/PackagePage")),
     isShowUserLayout: true,
   },
   {
-    path: "/about",
-    name: "About",
-    page: React.lazy(() => import("../pages/user/AboutPage/AboutPage")),
+    path: "/chatbot",
+    name: "Chatbot",
+    page: React.lazy(() => import("../../src/Components/user/ChatbotPage/ChatbotPage")),
     isShowUserLayout: true,
   },
+  
 
   //   Admin
 ];
