@@ -7,10 +7,16 @@ export const routes = [
     name: "Login",
     page: React.lazy(() => import("../pages/auth/LoginPage/LoginPage")),
   },
-  {
+ {
     path: "/register",
     name: "Register",
     page: React.lazy(() => import("../pages/auth/RegisterPage/RegisterPage")),
+  },
+  {
+    //path: "/register-service",
+    //name: "Register Service",
+    //page: React.lazy(() => import("../pages/user/RegisterServicePage/RegisterServicePage")),
+    //isShowUserLayout: true,
   },
   {
     path: "/forget-password",
@@ -25,20 +31,18 @@ export const routes = [
     page: React.lazy(() => import("../Components/user/HomePage/HomePage")),
     isShowUserLayout: true,
   },
-
   {
     path: "/package",
     name: "Package",
-    page: React.lazy(() => import("../../src/Components/user/PackagePage/PackagePage")),
+    page: React.lazy(() => import("../Components/user/PackagePage/PackagePage")),
     isShowUserLayout: true,
   },
   {
     path: "/chatbot",
     name: "Chatbot",
-    page: React.lazy(() => import("../../src/Components/user/ChatbotPage/ChatbotPage")),
+    page: React.lazy(() => import("../Components/user/ChatbotPage/ChatbotPage")),
     isShowUserLayout: true,
   },
-  
 
   //   Admin
 ];
