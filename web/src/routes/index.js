@@ -43,6 +43,26 @@ export const routes = [
     page: React.lazy(() => import("../pages/user/ChatbotPage/ChatbotPage")),
     isShowUserLayout: true,
   },
-
+    {
+    path: "/appointment",
+    name: "Appointment",
+    page: React.lazy(() => import("../pages/user/Appointment/Appointment")),
+    isShowUserLayout: true,
+  },
+    {
+    path: "/buysim",
+    name: "Buy Sim",
+    page: React.lazy(() => import("../pages/user/BuySim/BuySim")),
+    isShowUserLayout: true,
+  },
+    {
+    path: "/lookup",
+    name: "Lookup",
+    page: React.lazy(() => import("../pages/user/Lookup/Lookup")),
+    isShowUserLayout: true,
+  },
+    
+    
+    
   //   Admin
 ];
