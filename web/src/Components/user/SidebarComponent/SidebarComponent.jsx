@@ -45,30 +45,30 @@ const SidebarComponent = () => {
   ];
 
   return (
-    <div className="w-64 h-screen bg-white border-r border-neutral-200 flex flex-col justify-between select-none font-sans">
+    <div className="w-64 h-full bg-[#161616] border-r border-white/[0.07] flex flex-col justify-between select-none font-sans">
       <div className="w-full">
         
-        {/* Khối Header Sidebar - Đỏ Đậm Đồng Bộ Sang Trọng */}
-        <div className="bg-[#bd0000] p-5 border-b border-[#990000] flex items-center gap-3 shadow-sm cursor-pointer" onClick={() => navigate('/')}>
-          <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white text-xl font-black">V</div>
+        {/* Header Sidebar */}
+        <div className="bg-gradient-to-r from-[#8b0000] to-[#cc0000] p-5 border-b border-white/10 flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+          <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center text-white text-xl font-black">V</div>
           <div className="text-white font-black text-lg tracking-tight">Viettel Store</div>
         </div>
 
-        {/* Danh sách Menu Items - Cách xa nhau và chữ bự */}
-        <div className="px-3 py-6 space-y-3">
+        {/* Menu Items */}
+        <div className="px-3 py-6 space-y-1">
           {menuItems.map((item, idx) => {
             const isActive = location.pathname === item.path;
             return (
               <div
                 key={idx}
                 onClick={() => navigate(item.path)}
-                className={`flex items-center gap-4 px-4 py-3.5 rounded-xl text-base font-bold transition-all duration-200 cursor-pointer ${
+                className={`flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                   isActive 
-                    ? "bg-red-50 text-[#bd0000] shadow-sm" 
-                    : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                    ? "bg-red-600/15 text-red-400 border border-red-500/20" 
+                    : "text-neutral-400 hover:bg-white/[0.05] hover:text-white border border-transparent"
                 }`}
               >
-                <div className={`shrink-0 ${isActive ? "text-[#bd0000]" : "text-neutral-400 group-hover:text-neutral-600"}`}>
+                <div className={`shrink-0 ${isActive ? "text-red-400" : "text-neutral-500"}`}>
                   {item.icon}
                 </div>
                 <span className="tracking-tight">{item.label}</span>
@@ -78,9 +78,9 @@ const SidebarComponent = () => {
         </div>
       </div>
 
-      {/* Footer Sidebar */}
-      <div className="p-4 border-t border-neutral-100 text-center">
-        <span className="text-[11px] text-neutral-400 font-medium">© 2026 Viettel Store AI</span>
+      {/* Footer */}
+      <div className="p-4 border-t border-white/[0.07] text-center">
+        <span className="text-[11px] text-neutral-600 font-medium">© 2026 Viettel Store AI</span>
       </div>
     </div>
   );

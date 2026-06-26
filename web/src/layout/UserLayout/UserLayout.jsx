@@ -4,18 +4,16 @@ import SidebarComponent from "../../components/user/SidebarComponent/SidebarComp
 
 const UserLayout = ({ children }) => {
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      {/* Header - Trên cùng */}
+    <div className="flex flex-col h-screen bg-[#121212]">
+      {/* Header */}
       <HeaderComponent />
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar - Bên trái */}
-        <div className="w-64 bg-white border-r shadow-sm">
-          <SidebarComponent />
-        </div>
+        {/* Sidebar */}
+        <SidebarComponent />
 
-        {/* Phần nội dung chính */}
-        <main className="flex-1 overflow-y-auto p-6">
+        {/* Main content */}
+        <main className="flex-1 overflow-y-auto bg-gray-100">
           {children}
         </main>
       </div>
