@@ -28,19 +28,19 @@ export const routes = [
   {
     path: "/",
     name: "Home",
-    page: React.lazy(() => import("../Components/user/HomePage/HomePage")),
+    page: React.lazy(() => import("../pages/user/HomePage/HomePage")),
     isShowUserLayout: true,
   },
   {
     path: "/package",
     name: "Package",
-    page: React.lazy(() => import("../Components/user/PackagePage/PackagePage")),
+    page: React.lazy(() => import("../pages/user/PackagePage/PackagePage")),
     isShowUserLayout: true,
   },
   {
     path: "/chatbot",
     name: "Chatbot",
-    page: React.lazy(() => import("../Components/user/ChatbotPage/ChatbotPage")),
+    page: React.lazy(() => import("../pages/user/ChatbotPage/ChatbotPage")),
     isShowUserLayout: true,
   },
 
