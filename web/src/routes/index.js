@@ -23,6 +23,11 @@ export const routes = [
     name: "Forget Password",
     page: React.lazy(() => import("../pages/auth/ForgotPasswordPage/ForgotPasswordPage")),
   },
+  {
+    path: "/logout",
+    name: "Logout",
+    page: React.lazy(() => import("../pages/auth/LogoutPage/LogoutPage")),
+  },
 
   //   User
   {

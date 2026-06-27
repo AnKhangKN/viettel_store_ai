@@ -21,7 +21,9 @@ function App() {
             path={route.path}
             element={
               <Layout>
-                <Page />
+                <React.Suspense fallback={<div>Loading...</div>}>
+                  <Page />
+                </React.Suspense>
               </Layout>
             }
           />

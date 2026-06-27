@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Phone,
@@ -20,6 +20,22 @@ export default function HomePage() {
     { maGoi: 'V200C', tenGoi: 'V200C', giaTien: '200.000đ', dungLuong: '4GB/Ngày', thoiHan: '30 ngày', moTa: 'Miễn phí gọi nội mạng dưới 20 phút + 100 phút ngoại mạng' },
     { maGoi: '5G150', tenGoi: '5G150', giaTien: '150.000đ', dungLuong: '6GB/Ngày', thoiHan: '30 ngày', moTa: 'Trải nghiệm data 5G siêu tốc độ cao' },
   ];
+
+  const backgroundImages = [
+    'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80'
+  ];
+  
+  const [currentBg, setCurrentBg] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentBg((prev) => (prev + 1) % backgroundImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 font-sans antialiased">
@@ -62,8 +78,29 @@ export default function HomePage() {
       </header>
 
       {/* 2. BANNER CÁC GÓI CƯỚC NỔI BẬT (HERO SECTION) */}
-      <section className="relative bg-gradient-to-r from-[#EE0033] to-[#A00022] text-white py-28 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&w=1200&q=80')] opacity-10 bg-cover bg-center"></div>
+      <section className="relative bg-gradient-to-r from-[#EE0033] to-[#A00022] text-white py-28 px-4 overflow-hidden" style={{ perspective: '1200px' }}>
+        {backgroundImages.map((img, index) => {
+          let transformClass = '';
+          if (index === currentBg) {
+             transformClass = 'translate-x-0 opacity-20 scale-100 z-10'; 
+          } else if (index === (currentBg - 1 + backgroundImages.length) % backgroundImages.length) {
+             // Outgoing image slides to the right
+             transformClass = 'translate-x-full opacity-0 scale-90 z-0'; 
+          } else {
+             // Incoming image comes from the left
+             transformClass = '-translate-x-full opacity-0 scale-90 z-0'; 
+          }
+
+          return (
+            <div 
+              key={index}
+              className={`absolute inset-0 bg-cover bg-center transition-all duration-[1500ms] ease-in-out ${transformClass}`}
+              style={{ 
+                backgroundImage: `url('${img}')`,
+              }}
+            ></div>
+          );
+        })}
         <div className="max-w-7xl mx-auto relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
 
           <div className="space-y-6">
@@ -139,7 +176,7 @@ export default function HomePage() {
             </div>
           </button>
 
-          <button className="flex items-center p-4 rounded-xl bg-white border-2 border-purple-200 shadow-[0_6px_0_#e9d5ff] hover:shadow-[0_8px_0_#d8b4fe] hover:-translate-y-1 active:shadow-[0_0px_0_#d8b4fe] active:translate-y-1 transition-all duration-200 text-left group">
+          <Link to="/chatbot" className="flex items-center p-4 rounded-xl bg-white border-2 border-purple-200 shadow-[0_6px_0_#e9d5ff] hover:shadow-[0_8px_0_#d8b4fe] hover:-translate-y-1 active:shadow-[0_0px_0_#d8b4fe] active:translate-y-1 transition-all duration-200 text-left group">
             <div className="p-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white mr-4 shadow-md group-hover:scale-105 transition-transform">
               <Sparkles className="w-6 h-6" />
             </div>
@@ -153,7 +190,7 @@ export default function HomePage() {
               </h4>
               <p className="text-base text-gray-500 mt-1">Trợ lý ảo hỗ trợ 24/7</p>
             </div>
-          </button>
+          </Link>
 
         </div>
       </section>

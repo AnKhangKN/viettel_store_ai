@@ -1,7 +1,10 @@
 import React from 'react'
 import { FaUser, FaSignOutAlt, FaBell } from 'react-icons/fa'
+import { useNavigate, Link } from 'react-router-dom'
 
 const HeaderComponent = () => {
+  const navigate = useNavigate()
+
   return (
     <header className="bg-gradient-to-r from-red-600 to-red-700 shadow-md">
       <div className="flex items-center justify-between px-6 py-4">
@@ -31,9 +34,13 @@ const HeaderComponent = () => {
           </div>
 
           {/* Logout */}
-          <button className="p-2 text-white hover:text-red-100 hover:bg-red-500 rounded-lg transition-colors" title="Đăng xuất">
+          <Link 
+            to="/logout"
+            className="p-2 text-white hover:text-red-100 hover:bg-red-500 rounded-lg transition-colors flex items-center justify-center" 
+            title="Đăng xuất"
+          >
             <FaSignOutAlt size={20} />
-          </button>
+          </Link>
         </div>
       </div>
     </header>
