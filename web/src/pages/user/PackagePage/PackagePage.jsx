@@ -52,8 +52,8 @@ export default function PackagePage() {
             <nav className="hidden md:flex items-center gap-8 font-medium">
               <Link to="/" className="text-gray-600 hover:text-[#EE0033] transition">Trang chủ</Link>
               <Link to="/package" className="text-[#EE0033] border-b-2 border-[#EE0033] pb-1">Gói cước</Link>
-              <a href="#" className="text-gray-600 hover:text-[#EE0033] transition">Dịch vụ di động</a>
-              <a href="#" className="text-gray-600 hover:text-[#EE0033] transition">Tin tức</a>
+              <Link to="/mobile-services" className="text-gray-600 hover:text-[#EE0033] transition">Dịch vụ di động</Link>
+              <Link to="/news" className="text-gray-600 hover:text-[#EE0033] transition">Tin tức</Link>
             </nav>
             <div className="flex items-center space-x-6">
               <div className="flex items-center text-[#EE0033] font-bold bg-red-50 px-4 py-2 rounded-full border border-red-100">

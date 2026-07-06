@@ -55,8 +55,8 @@ export default function HomePage() {
             <nav className="hidden md:flex items-center gap-8 font-medium">
               <Link to="/" className="text-[#EE0033] border-b-2 border-[#EE0033] pb-1">Trang chủ</Link>
               <Link to="/package" className="text-gray-600 hover:text-[#EE0033] transition">Gói cước</Link>
-              <a href="#" className="text-gray-600 hover:text-[#EE0033] transition">Dịch vụ di động</a>
-              <a href="#" className="text-gray-600 hover:text-[#EE0033] transition">Tin tức</a>
+              <Link to="/mobile-services" className="text-gray-600 hover:text-[#EE0033] transition">Dịch vụ di động</Link>
+              <Link to="/news" className="text-gray-600 hover:text-[#EE0033] transition">Tin tức</Link>
             </nav>
 
             {/* Số tổng đài & Tiện ích */}

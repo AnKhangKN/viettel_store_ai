@@ -9,9 +9,26 @@ const HeaderComponent = () => {
     <header className="bg-gradient-to-r from-red-600 to-red-700 shadow-md">
       <div className="flex items-center justify-between px-6 py-4">
         {/* Logo - Trái */}
-        <div className="flex items-center gap-2">
-          <div className="text-2xl font-bold text-white">⚡</div>
-          <h1 className="text-xl font-bold text-white">Viettel Store</h1>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <div className="text-2xl font-bold text-white">⚡</div>
+            <h1 className="text-xl font-bold text-white">Viettel Store</h1>
+          </div>
+          
+          {/* Branch Selector */}
+          <div className="hidden md:flex items-center bg-red-700/50 rounded-lg px-3 py-1.5 border border-red-500/50">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-100 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <select className="bg-transparent text-white text-sm focus:outline-none cursor-pointer appearance-none outline-none font-medium">
+              <option className="text-gray-900" value="all">Tất cả chi nhánh (63 Tỉnh/Thành)</option>
+              <option className="text-gray-900" value="hanoi">Hà Nội</option>
+              <option className="text-gray-900" value="hcm">TP. Hồ Chí Minh</option>
+              <option className="text-gray-900" value="danang">Đà Nẵng</option>
+              <option className="text-gray-900" value="cantho">Cần Thơ</option>
+            </select>
+          </div>
         </div>
 
         {/* User Menu - Phải */}
