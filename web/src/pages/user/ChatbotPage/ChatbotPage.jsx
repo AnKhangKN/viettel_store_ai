@@ -112,39 +112,14 @@ export default function ChatbotPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans flex flex-col antialiased">
+    <div className="h-[calc(100vh-184px)] bg-gray-50 text-gray-800 font-sans flex flex-col antialiased">
 
-      {/* 1. TOP NAVIGATION HEADER */}
-      <header className="bg-white shadow-sm border-b border-gray-200 z-10 flex-shrink-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center space-x-3">
-              <span className="text-3xl font-black tracking-wider text-[#EE0033]">viettel</span>
-              <div className="h-5 w-px bg-gray-300 hidden sm:block"></div>
-              <span className="text-sm font-semibold text-purple-600 tracking-wide hidden sm:flex items-center bg-purple-50 px-3 py-1 rounded-full border border-purple-100">
-                <Sparkles className="w-4 h-4 mr-1 text-purple-500" /> AI Assistant
-              </span>
-            </div>
-
-            <nav className="hidden md:flex space-x-8 font-medium">
-              <a href="#" className="text-gray-600 hover:text-[#EE0033] transition">Trang chủ</a>
-              <a href="#" className="text-gray-600 hover:text-[#EE0033] transition">Gói cước</a>
-              <a href="#" className="text-[#EE0033] border-b-2 border-[#EE0033] pb-1">AI Chatbot</a>
-            </nav>
-
-            <div className="flex items-center text-[#EE0033] font-bold bg-red-50 px-4 py-2 rounded-full border border-red-100 text-sm">
-              <Phone className="w-4 h-4 mr-2" />
-              <span>Tổng đài: 1800 8098</span>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* 2. CHAT WORKSPACE SECTION */}
       <div className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 flex flex-col lg:flex-row gap-6 min-h-0">
 
         {/* THANH PANEL GỢI Ý BÊN TRÁI (QUICK SUGGESTIONS) */}
-        <aside className="w-full lg:w-80 flex flex-col gap-4 flex-shrink-0">
+        <aside className="w-full lg:w-80 flex flex-col gap-4 flex-shrink-0 overflow-y-auto min-h-0 pr-2">
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
             <h2 className="text-sm font-black text-gray-900 flex items-center tracking-wide uppercase mb-3 text-[#EE0033]">
               <HelpCircle className="w-4 h-4 mr-2" /> Câu hỏi thường gặp
