@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Search, ShoppingCart, Eye } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const BuySim = () => {
   const simList = [
@@ -142,15 +143,15 @@ const BuySim = () => {
 
               {/* Nút */}
               <div className="flex gap-3">
-                <button className="flex-1 flex items-center justify-center gap-2 border border-gray-300 rounded-xl py-3 hover:bg-gray-100 transition">
+                <Link to={`/buysim/${sim.maSim}`} className="flex-1 flex items-center justify-center gap-2 border border-gray-300 rounded-xl py-3 hover:bg-gray-100 transition text-gray-700">
                   <Eye size={18} />
                   Chi tiết
-                </button>
+                </Link>
 
-                <button className="flex-1 flex items-center justify-center gap-2 bg-[#EE0033] text-white rounded-xl py-3 hover:bg-red-700 transition">
+                <Link to={`/buysim/${sim.maSim}`} className="flex-1 flex items-center justify-center gap-2 bg-[#EE0033] text-white rounded-xl py-3 hover:bg-red-700 transition">
                   <ShoppingCart size={18} />
                   Đặt mua
-                </button>
+                </Link>
               </div>
             </div>
           ))}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Search,
   Phone,
@@ -7,11 +7,13 @@ import {
   Filter,
   CheckCircle2,
   ArrowRight,
+  ArrowLeft,
   Sparkles,
   MessageSquare
 } from 'lucide-react';
 
 export default function PackagePage() {
+  const navigate = useNavigate();
   // Dữ liệu mock dựa trên cấu trúc bảng GoiCuoc
   const initialGoiCuoc = [
     { maGoi: 'ST90', tenGoi: 'ST90', giaTien: '90.000đ', dungLuong: '30GB', thoiHan: '30 ngày', moTa: 'Ưu đãi sinh viên, miễn phí Data truy cập Tiktok', loai: 'Data' },
@@ -40,31 +42,6 @@ export default function PackagePage() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 font-sans antialiased">
 
-      {/* HEADER ĐỒNG BỘ VỚI HOMEPAGE */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            {/* Logo Viettel */}
-            <div className="flex-shrink-0 flex items-center cursor-pointer group" onClick={() => window.location.href='/'}>
-              <span className="text-[2.5rem] font-black tracking-tighter text-[#EE0033] drop-shadow-sm group-hover:text-[#A00022] transition-colors duration-300">viettel</span>
-              <div className="w-2.5 h-2.5 bg-[#EE0033] rounded-full ml-1 mt-4 group-hover:animate-bounce shadow-sm"></div>
-            </div>
-            <nav className="hidden md:flex items-center gap-8 font-medium">
-              <Link to="/" className="text-gray-600 hover:text-[#EE0033] transition">Trang chủ</Link>
-              <Link to="/package" className="text-[#EE0033] border-b-2 border-[#EE0033] pb-1">Gói cước</Link>
-              <Link to="/mobile-services" className="text-gray-600 hover:text-[#EE0033] transition">Dịch vụ di động</Link>
-              <Link to="/news" className="text-gray-600 hover:text-[#EE0033] transition">Tin tức</Link>
-            </nav>
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center text-[#EE0033] font-bold bg-red-50 px-4 py-2 rounded-full border border-red-100">
-                <Phone className="w-4 h-4 mr-2" />
-                <span>Tổng đài: 1800 8098</span>
-              </div>
-              <button className="text-gray-600 hover:text-[#EE0033]"><User className="w-5 h-5" /></button>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* TIÊU ĐỀ TRANG TẬP TRUNG */}
       <section className="bg-gradient-to-r from-gray-900 to-slate-800 text-white py-12 px-4 shadow-inner">
@@ -154,11 +131,16 @@ export default function PackagePage() {
                 </div>
 
                 {/* Các nút Chức năng: Xem chi tiết & Đăng ký gói cước */}
-                <div className="p-6 pt-0 grid grid-cols-2 gap-4 bg-gray-50/50 border-t border-gray-100">
-                  <button className="w-full bg-white border border-gray-300 text-gray-600 font-bold py-2.5 rounded-xl text-base hover:bg-gray-100 transition shadow-sm">
+                <div className="p-4 md:p-6 pt-0 flex flex-col xl:flex-row gap-3 md:gap-4 bg-gray-50/50 border-t border-gray-100">
+                  <button 
+                    translate="no"
+                    onClick={() => navigate(`/package/${pkg.maGoi}`)}
+                    className="w-full bg-white border border-gray-300 text-gray-600 font-bold py-2.5 md:py-3 rounded-xl text-sm md:text-base hover:bg-gray-100 transition shadow-sm flex items-center justify-center whitespace-nowrap">
                     Xem chi tiết
                   </button>
-                  <button className="w-full bg-[#EE0033] text-white font-bold py-2.5 rounded-xl text-base hover:bg-[#CC002D] transition shadow-md shadow-red-600/10 flex items-center justify-center">
+                  <button 
+                    onClick={() => navigate(`/register-package/${pkg.maGoi}`)}
+                    className="w-full bg-[#EE0033] text-white font-bold py-2.5 md:py-3 rounded-xl text-sm md:text-base hover:bg-[#CC002D] transition shadow-md shadow-red-600/10 flex items-center justify-center whitespace-nowrap">
                     Đăng ký gói cước
                   </button>
                 </div>

@@ -10,10 +10,23 @@ import {
   Clock,
   ArrowRight,
   Sparkles,
-  Bot
+  Bot,
+  MapPin
 } from 'lucide-react';
 
 export default function HomePage() {
+  const branchStores = [
+    { name: "Viettel Store Tôn Thất Thuyết", address: "Số 8 Tôn Thất Thuyết, Mỹ Đình, Nam Từ Liêm, Hà Nội", mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.088657434524!2d105.78018311540228!3d21.029139593144177!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ab4cd0c66f05%3A0xea31563511af2e54!2zOCBQLiBUw7RuIFRo4bqldCBUaHV54bq_dCwgTeG7uSDEkMOsbmgsIEPhuqd1IEdp4bqleSwgSMOgIE7hu5lpLCBWaWV0bmFt!5e0!3m2!1sen!2s!4v1684307525330!5m2!1sen!2s" },
+    { name: "Viettel Store Thái Hà", address: "Số 119 Thái Hà, Đống Đa, Hà Nội", mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.629472658957!2d105.81966241540203!3d21.007484493883713!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ac81d5995b05%3A0x6b170c9cb0ef126a!2zMTE5IFRow6FpIEjDoCwgVHJ1bmcgTGnhu4d0LCDEkOG7kW5nIMSQYSwgSMOgIE7hu5lpLCBWaWV0bmFt!5e0!3m2!1sen!2s!4v1684307682941!5m2!1sen!2s" },
+    { name: "Viettel Store Quận 1", address: "166C Trần Hưng Đạo, P. Nguyễn Cư Trinh, Quận 1, TP. HCM", mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.467885408605!2d106.68953181533423!3d10.775424562157793!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f3af505f93d%3A0x5a18a00bf8e3919f!2s166C%20Tr%E1%BA%A7n%20H%C6%B0ng%20%C4%90%E1%BA%A1o%2C%20Ph%C6%B0%E1%BB%9Dng%20Nguy%E1%BB%85n%20C%C6%B0%20Trinh%2C%20Qu%E1%BA%ADn%201%2C%20Th%C3%A0nh%20ph%E1%BB%91%20H%E1%BB%93%20Ch%C3%AD%20Minh%2C%20Vietnam!5e0!3m2!1sen!2s!4v1684307771234!5m2!1sen!2s" },
+    { name: "Viettel Store Quận 10", address: "Số 282 Đường 3/2, Quận 10, TP. HCM", mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.539820468307!2d106.6669933153342!3d10.770287562255793!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752edd9d311543%3A0x7d01cd6fb33230be!2s282%20Ba%20Th%C3%A1ng%20Hai%2C%20Ph%C6%B0%E1%BB%9Dng%2012%2C%20Qu%E1%BA%ADn%2010%2C%20Th%C3%A0nh%20ph%E1%BB%91%20H%E1%BB%93%20Ch%C3%AD%20Minh%2C%20Vietnam!5e0!3m2!1sen!2s!4v1684307771235!5m2!1sen!2s" },
+    { name: "Viettel Store Đà Nẵng", address: "Hùng Vương, Hải Châu 1, Hải Châu, Đà Nẵng", mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3834.0203534945396!2d108.2195043153835!3d16.06443424383186!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31421834277b06cb%3A0xc6822cce8c5a2c!2sH%C3%B9ng%20V%C6%B0%C6%A1ng%2C%20H%E1%BA%A3i%20Ch%C3%A2u%201%2C%20H%E1%BA%A3i%20Ch%C3%A2u%2C%20%C4%90%C3%A0%20N%E1%BA%B5ng%2C%20Vietnam!5e0!3m2!1sen!2s!4v1684307844000!5m2!1sen!2s" },
+    { name: "Viettel Store Cần Thơ", address: "355 Nguyễn Văn Cừ, Ninh Kiều, Cần Thơ", mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3928.8415184420365!2d105.77749001532822!3d10.027052975276632!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31a08823b2c6cf75%3A0x1d4d3d8db1ef5c20!2zQ8OibiBUaMahLCBWaWV0bmFt!5e0!3m2!1sen!2s!4v1684307901000!5m2!1sen!2s" },
+    { name: "Viettel Store Nha Trang", address: "Lê Thánh Tôn, Lộc Thọ, Nha Trang", mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3898.889392261537!2d109.19565531536344!3d12.24135543202976!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317067781190bc1b%3A0x4a9d702d7e6381db!2zTmjDoCBUcmFuZywgS2jDoW5oIEjDsmEsIFZpZXRuYW0!5e0!3m2!1sen!2s!4v1684307955000!5m2!1sen!2s" }
+  ];
+
+  const [selectedStore, setSelectedStore] = useState(branchStores[0]);
+
   // Dữ liệu gói cước nổi bật
   const hotPackages = [
     { maGoi: 'ST90N', tenGoi: 'ST90N', giaTien: '90.000đ', dungLuong: '4GB/Ngày', thoiHan: '30 ngày', moTa: 'Miễn phí data truy cập Tiktok' },
@@ -40,42 +53,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 font-sans antialiased">
 
-      {/* 1. TOP BAR & HEADER */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
 
-            {/* Logo Viettel */}
-            <div className="flex-shrink-0 flex items-center cursor-pointer group">
-              <span className="text-[2.5rem] font-black tracking-tighter text-[#EE0033] drop-shadow-sm group-hover:text-[#A00022] transition-colors duration-300">viettel</span>
-              <div className="w-2.5 h-2.5 bg-[#EE0033] rounded-full ml-1 mt-4 group-hover:animate-bounce shadow-sm"></div>
-            </div>
-
-            {/* Menu chính */}
-            <nav className="hidden md:flex items-center gap-8 font-medium">
-              <Link to="/" className="text-[#EE0033] border-b-2 border-[#EE0033] pb-1">Trang chủ</Link>
-              <Link to="/package" className="text-gray-600 hover:text-[#EE0033] transition">Gói cước</Link>
-              <Link to="/mobile-services" className="text-gray-600 hover:text-[#EE0033] transition">Dịch vụ di động</Link>
-              <Link to="/news" className="text-gray-600 hover:text-[#EE0033] transition">Tin tức</Link>
-            </nav>
-
-            {/* Số tổng đài & Tiện ích */}
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center text-[#EE0033] font-bold bg-red-50 px-4 py-2 rounded-full border border-red-100">
-                <Phone className="w-4 h-4 mr-2 animate-pulse" />
-                <span>Tổng đài: 1800 8098</span>
-              </div>
-              <button className="text-gray-600 hover:text-[#EE0033]">
-                <Search className="w-5 h-5" />
-              </button>
-              <button className="text-gray-600 hover:text-[#EE0033]">
-                <User className="w-5 h-5" />
-              </button>
-            </div>
-
-          </div>
-        </div>
-      </header>
 
       {/* 2. BANNER CÁC GÓI CƯỚC NỔI BẬT (HERO SECTION) */}
       <section className="relative bg-gradient-to-r from-[#EE0033] to-[#A00022] text-white py-28 px-4 overflow-hidden" style={{ perspective: '1200px' }}>
@@ -115,10 +93,10 @@ export default function HomePage() {
               Đăng ký ngay hôm nay để nhận ưu đãi lên đến 6GB Data tốc độ cao mỗi ngày. Lướt web, xem phim, chiến game thả ga không lo ngắt quãng!
             </p>
             <div className="flex flex-wrap gap-4 pt-2">
-              <button className="bg-white text-[#EE0033] font-black px-8 py-3.5 rounded-xl shadow-[0_6px_0_#e5e7eb] hover:shadow-[0_8px_0_#d1d5db] hover:-translate-y-1 active:shadow-[0_0px_0_#d1d5db] active:translate-y-1 transition-all flex items-center group">
+              <Link to="/package" className="bg-white text-[#EE0033] font-black px-8 py-3.5 rounded-xl shadow-[0_6px_0_#e5e7eb] hover:shadow-[0_8px_0_#d1d5db] hover:-translate-y-1 active:shadow-[0_0px_0_#d1d5db] active:translate-y-1 transition-all flex items-center group">
                 Đăng ký ngay
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </button>
+              </Link>
               <button className="border-2 border-white/80 text-white font-bold px-8 py-3.5 rounded-lg hover:bg-white/10 transition">
                 Tìm hiểu thêm
               </button>
@@ -146,7 +124,7 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-          <button className="flex items-center p-4 rounded-xl bg-white border-2 border-red-100 shadow-[0_6px_0_#fecaca] hover:shadow-[0_8px_0_#fca5a5] hover:-translate-y-1 active:shadow-[0_0px_0_#fca5a5] active:translate-y-1 transition-all duration-200 text-left group">
+          <Link to="/package" className="flex items-center p-4 rounded-xl bg-white border-2 border-red-100 shadow-[0_6px_0_#fecaca] hover:shadow-[0_8px_0_#fca5a5] hover:-translate-y-1 active:shadow-[0_0px_0_#fca5a5] active:translate-y-1 transition-all duration-200 text-left group">
             <div className="p-4 rounded-xl bg-[#EE0033] text-white mr-4 shadow-md group-hover:scale-105 transition-transform">
               <Smartphone className="w-6 h-6" />
             </div>
@@ -154,9 +132,9 @@ export default function HomePage() {
               <h4 className="font-bold text-gray-900 group-hover:text-[#EE0033] transition">Xem gói cước</h4>
               <p className="text-base text-gray-500 mt-2 leading-relaxed">Tra cứu ưu đãi Data, Thoại</p>
             </div>
-          </button>
+          </Link>
 
-          <button className="flex items-center p-4 rounded-xl bg-white border-2 border-red-100 shadow-[0_6px_0_#fecaca] hover:shadow-[0_8px_0_#fca5a5] hover:-translate-y-1 active:shadow-[0_0px_0_#fca5a5] active:translate-y-1 transition-all duration-200 text-left group">
+          <Link to="/buysim" className="flex items-center p-4 rounded-xl bg-white border-2 border-red-100 shadow-[0_6px_0_#fecaca] hover:shadow-[0_8px_0_#fca5a5] hover:-translate-y-1 active:shadow-[0_0px_0_#fca5a5] active:translate-y-1 transition-all duration-200 text-left group">
             <div className="p-4 rounded-xl bg-[#EE0033] text-white mr-4 shadow-md group-hover:scale-105 transition-transform">
               <CreditCard className="w-6 h-6" />
             </div>
@@ -164,9 +142,9 @@ export default function HomePage() {
               <h4 className="font-bold text-gray-900 group-hover:text-[#EE0033] transition">Mua SIM online</h4>
               <p className="text-base text-gray-500 mt-2 leading-relaxed">Chọn số đẹp, giao tận nhà</p>
             </div>
-          </button>
+          </Link>
 
-          <button className="flex items-center p-4 rounded-xl bg-white border-2 border-red-100 shadow-[0_6px_0_#fecaca] hover:shadow-[0_8px_0_#fca5a5] hover:-translate-y-1 active:shadow-[0_0px_0_#fca5a5] active:translate-y-1 transition-all duration-200 text-left group">
+          <Link to="/appointment" className="flex items-center p-4 rounded-xl bg-white border-2 border-red-100 shadow-[0_6px_0_#fecaca] hover:shadow-[0_8px_0_#fca5a5] hover:-translate-y-1 active:shadow-[0_0px_0_#fca5a5] active:translate-y-1 transition-all duration-200 text-left group">
             <div className="p-4 rounded-xl bg-[#EE0033] text-white mr-4 shadow-md group-hover:scale-105 transition-transform">
               <Clock className="w-6 h-6" />
             </div>
@@ -174,7 +152,7 @@ export default function HomePage() {
               <h4 className="font-bold text-gray-900 group-hover:text-[#EE0033] transition">Đặt lịch tại quầy</h4>
               <p className="text-base text-gray-500 mt-2 leading-relaxed">Hẹn giờ trước, không lo đợi</p>
             </div>
-          </button>
+          </Link>
 
           <Link to="/chatbot" className="flex items-center p-4 rounded-xl bg-white border-2 border-purple-200 shadow-[0_6px_0_#e9d5ff] hover:shadow-[0_8px_0_#d8b4fe] hover:-translate-y-1 active:shadow-[0_0px_0_#d8b4fe] active:translate-y-1 transition-all duration-200 text-left group">
             <div className="p-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white mr-4 shadow-md group-hover:scale-105 transition-transform">
@@ -202,9 +180,9 @@ export default function HomePage() {
             <span className="text-base font-bold text-[#EE0033] tracking-wider uppercase">Gợi ý dành cho bạn</span>
             <h2 className="text-3xl font-black text-gray-900 mt-1">Các Gói Cước Thịnh Hành Nhất</h2>
           </div>
-          <a href="#" className="text-[#EE0033] font-bold flex items-center mt-4 md:mt-0 hover:underline">
+          <Link to="/package" className="text-[#EE0033] font-bold flex items-center mt-4 md:mt-0 hover:underline">
             Xem tất cả gói cước <ArrowRight className="w-4 h-4 ml-1" />
-          </a>
+          </Link>
         </div>
 
         {/* Grid danh sách */}
@@ -236,12 +214,267 @@ export default function HomePage() {
 
               {/* Footer Card Action */}
               <div className="p-6 pt-0 border-t border-gray-50 bg-gray-50/50 group-hover:bg-white transition-colors">
-                <button className="w-full bg-white border-2 border-gray-200 text-gray-700 font-bold py-2.5 rounded-xl shadow-[0_4px_0_#e5e7eb] hover:shadow-[0_6px_0_#d1d5db] hover:-translate-y-1 active:shadow-[0_0px_0_#d1d5db] active:translate-y-1 hover:border-gray-300 transition-all">
+                <Link to={`/register-package/${pkg.maGoi}`} className="w-full bg-white border-2 border-gray-200 text-gray-700 font-bold py-2.5 rounded-xl shadow-[0_4px_0_#e5e7eb] hover:shadow-[0_6px_0_#d1d5db] hover:-translate-y-1 active:shadow-[0_0px_0_#d1d5db] active:translate-y-1 hover:border-gray-300 transition-all flex items-center justify-center">
                   Đăng ký gói
-                </button>
+                </Link>
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* WHY CHOOSE VIETTEL SECTION */}
+      <section className="bg-white py-20 relative overflow-hidden">
+        {/* Background Decorative Elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-red-50 rounded-full blur-3xl opacity-50 -mr-20 -mt-20 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-50 rounded-full blur-3xl opacity-50 -ml-20 -mb-20 pointer-events-none"></div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-16">
+            <span className="text-[#EE0033] font-bold tracking-widest uppercase text-sm mb-2 block">Giá trị đích thực</span>
+            <h2 className="text-3xl md:text-4xl font-black text-gray-900">Vì sao nên chọn Viettel?</h2>
+            <div className="w-20 h-1.5 bg-[#EE0033] mx-auto mt-6 rounded-full"></div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {/* Feature 1 */}
+            <div className="text-center group">
+              <div className="w-20 h-20 mx-auto bg-red-50 rounded-2xl flex items-center justify-center mb-6 group-hover:-translate-y-2 transition-transform duration-300 shadow-sm border border-red-100">
+                <Sparkles className="w-10 h-10 text-[#EE0033]" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-[#EE0033] transition-colors">Sóng khỏe mọi nơi</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Phủ sóng 99% diện tích Việt Nam. Dù bạn ở miền núi, hải đảo hay vùng sâu vùng xa, Viettel luôn đồng hành cùng bạn.
+              </p>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="text-center group">
+              <div className="w-20 h-20 mx-auto bg-blue-50 rounded-2xl flex items-center justify-center mb-6 group-hover:-translate-y-2 transition-transform duration-300 shadow-sm border border-blue-100">
+                <Smartphone className="w-10 h-10 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">Công nghệ 5G tiên phong</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Trải nghiệm internet siêu tốc độ với mạng 5G hàng đầu. Tải phim, chiến game thả ga không độ trễ.
+              </p>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="text-center group">
+              <div className="w-20 h-20 mx-auto bg-green-50 rounded-2xl flex items-center justify-center mb-6 group-hover:-translate-y-2 transition-transform duration-300 shadow-sm border border-green-100">
+                <User className="w-10 h-10 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-green-600 transition-colors">Chăm sóc 24/7</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Đội ngũ tổng đài viên và trợ lý ảo AI luôn sẵn sàng hỗ trợ bạn bất kể ngày đêm, mọi lúc mọi nơi.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* STATS SECTION */}
+      <section className="bg-[#EE0033] py-16 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-white/20">
+            <div className="px-4">
+              <div className="text-4xl md:text-5xl font-black mb-2 drop-shadow-md">70M+</div>
+              <div className="text-red-100 font-medium text-sm md:text-base uppercase tracking-wide">Khách hàng tin dùng</div>
+            </div>
+            <div className="px-4">
+              <div className="text-4xl md:text-5xl font-black mb-2 drop-shadow-md">99%</div>
+              <div className="text-red-100 font-medium text-sm md:text-base uppercase tracking-wide">Phủ sóng toàn quốc</div>
+            </div>
+            <div className="px-4">
+              <div className="text-4xl md:text-5xl font-black mb-2 drop-shadow-md">63</div>
+              <div className="text-red-100 font-medium text-sm md:text-base uppercase tracking-wide">Tỉnh thành & Đảo xa</div>
+            </div>
+            <div className="px-4">
+              <div className="text-4xl md:text-5xl font-black mb-2 drop-shadow-md">24/7</div>
+              <div className="text-red-100 font-medium text-sm md:text-base uppercase tracking-wide">Hỗ trợ khách hàng</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* UTILITY SERVICES SECTION */}
+      <section className="bg-gray-50 py-24 border-y border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <span className="text-[#EE0033] font-bold tracking-widest uppercase text-sm mb-2 block">Hệ sinh thái đa dạng</span>
+            <h2 className="text-3xl md:text-4xl font-black text-gray-900">Dịch vụ Tiện ích Hàng đầu</h2>
+            <div className="w-20 h-1.5 bg-[#EE0033] mx-auto mt-6 rounded-full"></div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* 1. Gói cước */}
+            <div className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all border border-gray-100 group">
+              <div className="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <CreditCard className="w-7 h-7 text-[#EE0033]" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Gói cước di động</h3>
+              <p className="text-gray-500 mb-6">Đa dạng gói Data, Thoại, Combo siêu ưu đãi phù hợp mọi nhu cầu.</p>
+              <Link to="/package" className="text-[#EE0033] font-bold flex items-center group-hover:underline">Khám phá <ArrowRight className="w-4 h-4 ml-1" /></Link>
+            </div>
+            
+            {/* 2. Kho SIM */}
+            <div className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all border border-gray-100 group">
+              <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Smartphone className="w-7 h-7 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Kho SIM số đẹp</h3>
+              <p className="text-gray-500 mb-6">Sở hữu ngay SIM VIP, phong thủy, thần tài với giá cực kỳ hấp dẫn.</p>
+              <Link to="/buysim" className="text-blue-600 font-bold flex items-center group-hover:underline">Khám phá <ArrowRight className="w-4 h-4 ml-1" /></Link>
+            </div>
+
+            {/* 3. AI Chatbot */}
+            <div className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all border border-gray-100 group">
+              <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <MessageSquare className="w-7 h-7 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Trợ lý AI Chatbot</h3>
+              <p className="text-gray-500 mb-6">Giải đáp thắc mắc, tư vấn gói cước tự động 24/7 thông minh.</p>
+              <Link to="/chatbot" className="text-purple-600 font-bold flex items-center group-hover:underline">Khám phá <ArrowRight className="w-4 h-4 ml-1" /></Link>
+            </div>
+
+            {/* 4. Đặt lịch */}
+            <div className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all border border-gray-100 group">
+              <div className="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <User className="w-7 h-7 text-orange-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Đặt lịch tại quầy</h3>
+              <p className="text-gray-500 mb-6">Chủ động thời gian, không lo xếp hàng chờ đợi khi đến giao dịch.</p>
+              <Link to="/appointment" className="text-orange-600 font-bold flex items-center group-hover:underline">Khám phá <ArrowRight className="w-4 h-4 ml-1" /></Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* APP DOWNLOAD SECTION */}
+      <section className="bg-white py-24 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-[3rem] p-8 md:p-16 flex flex-col md:flex-row items-center border border-red-100">
+            <div className="md:w-1/2 mb-10 md:mb-0">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full text-[#EE0033] font-bold text-sm shadow-sm mb-6 border border-red-100">
+                <Bot className="w-5 h-5" /> Siêu ứng dụng My Viettel
+              </div>
+              <h2 className="text-3xl md:text-5xl font-black text-gray-900 leading-tight mb-6">
+                Mọi tiện ích Viettel <br/> nay đã nằm trong <span className="text-[#EE0033]">tầm tay bạn</span>
+              </h2>
+              <p className="text-gray-600 text-lg mb-8 max-w-lg leading-relaxed">
+                Quản lý cước phí, đăng ký gói data, mua sắm thả ga và nhận vô vàn voucher khuyến mãi mỗi ngày. Tải ứng dụng ngay!
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <button className="bg-gray-900 hover:bg-black text-white px-8 py-4 rounded-xl font-bold transition flex items-center gap-3">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.04 2.26-.79 3.55-.86 1.48-.07 2.76.67 3.56 1.6-3.05 1.73-2.54 5.31.25 6.34-.69 1.77-1.49 3.65-2.44 5.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+                  <div>
+                    <div className="text-[10px] uppercase font-medium">Download on the</div>
+                    <div className="text-lg leading-none">App Store</div>
+                  </div>
+                </button>
+                <button className="bg-gray-900 hover:bg-black text-white px-8 py-4 rounded-xl font-bold transition flex items-center gap-3">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M3.6 20.9l11.8-6.8-4-3.9-7.8 10.7zM2 3.1v17.8c0 .4.2.7.5.8l8-10.9L2 3.1zM16.6 13.4l4.5-2.6c.7-.4.7-1.1 0-1.5l-4.5-2.6-2.5 2.5 2.5 2.6zM11.4 10L3.3 2.1c-.2-.1-.4-.1-.6-.1-.3 0-.6.1-.7.4l9.4 7.6z"/></svg>
+                  <div>
+                    <div className="text-[10px] uppercase font-medium">GET IT ON</div>
+                    <div className="text-lg leading-none">Google Play</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+            <div className="md:w-1/2 flex justify-center relative">
+              <div className="w-72 h-72 bg-gradient-to-br from-red-400 to-pink-500 rounded-full blur-3xl opacity-30 absolute top-10 animate-pulse"></div>
+              {/* Mockup Frame */}
+              <div className="w-64 h-[500px] bg-white border-[8px] border-gray-900 rounded-[3rem] shadow-2xl relative z-10 overflow-hidden flex flex-col">
+                <div className="w-32 h-6 bg-gray-900 absolute top-0 left-1/2 -translate-x-1/2 rounded-b-3xl z-20"></div>
+                <div className="bg-[#EE0033] h-40 w-full p-4 text-white pt-10">
+                  <div className="font-bold">Viettel Store</div>
+                  <div className="text-2xl font-black mt-2">12,500 Điểm</div>
+                </div>
+                <div className="flex-1 bg-gray-50 p-4">
+                  <div className="w-full h-24 bg-white rounded-xl shadow-sm mb-4"></div>
+                  <div className="w-full h-24 bg-white rounded-xl shadow-sm mb-4"></div>
+                  <div className="w-full h-24 bg-white rounded-xl shadow-sm"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PROMO BANNER SECTION */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mb-10">
+        <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-black rounded-3xl p-8 md:p-12 relative overflow-hidden shadow-2xl flex flex-col md:flex-row items-center justify-between">
+          <div className="absolute top-0 right-0 p-12 opacity-10">
+            <svg className="w-64 h-64 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 3.83L18.17 20H5.83L12 5.83z"/></svg>
+          </div>
+          
+          <div className="relative z-10 md:w-2/3 mb-8 md:mb-0">
+            <div className="inline-block bg-yellow-400 text-gray-900 font-bold px-3 py-1 rounded-md text-sm mb-4">Ưu đãi độc quyền</div>
+            <h2 className="text-3xl md:text-4xl font-black text-white mb-4 leading-tight">
+              Giảm ngay 20% khi <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">mua SIM số đẹp</span> online
+            </h2>
+            <p className="text-gray-300 text-lg">Chương trình áp dụng duy nhất trong tháng này. Giao SIM tận nhà miễn phí 100%.</p>
+          </div>
+          
+          <div className="relative z-10">
+            <Link to="/buysim" className="bg-[#EE0033] hover:bg-red-700 text-white font-black px-8 py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(238,0,51,0.5)] flex items-center hover:scale-105">
+              Chọn số ngay
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* MAP & BRANCHES SECTION */}
+      <section className="bg-gray-50 py-24 border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-sm font-black text-[#EE0033] tracking-widest uppercase mb-3">Mạng lưới toàn quốc</h2>
+            <h3 className="text-3xl md:text-4xl font-black text-gray-900">Hệ thống chi nhánh Viettel</h3>
+            <p className="mt-4 text-gray-500 max-w-2xl mx-auto">Tìm kiếm cửa hàng Viettel gần nhất để được hỗ trợ trực tiếp, nhanh chóng và chu đáo nhất.</p>
+          </div>
+
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col lg:flex-row">
+            {/* List of branches */}
+            <div className="w-full lg:w-1/3 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-gray-100 bg-white">
+              <div className="relative mb-6">
+                <Search className="absolute left-4 top-3.5 text-gray-400 w-5 h-5" />
+                <input type="text" placeholder="Tìm theo tỉnh/thành phố..." className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-[#EE0033] outline-none" />
+              </div>
+              
+              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                {branchStores.map((store, i) => {
+                  const isActive = selectedStore.name === store.name;
+                  return (
+                    <div 
+                      key={i} 
+                      onClick={() => setSelectedStore(store)}
+                      className={`p-4 rounded-xl cursor-pointer border transition-colors ${isActive ? 'border-[#EE0033] bg-red-50' : 'border-gray-100 hover:border-[#EE0033] hover:bg-red-50 bg-white'}`}
+                    >
+                      <h4 className="font-bold text-gray-900 text-sm mb-1">{store.name}</h4>
+                      <p className="text-xs text-gray-500 leading-relaxed flex items-start gap-1">
+                        <MapPin className="w-3.5 h-3.5 text-[#EE0033] flex-shrink-0 mt-0.5" />
+                        {store.address}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Map iframe */}
+            <div className="w-full lg:w-2/3 min-h-[400px] lg:min-h-full bg-gray-200 relative">
+              <iframe 
+                key={selectedStore.name}
+                src={selectedStore.mapUrl} 
+                className="absolute inset-0 w-full h-full"
+                style={{ border: 0 }} 
+                allowFullScreen="" 
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
+            </div>
+          </div>
         </div>
       </section>
 

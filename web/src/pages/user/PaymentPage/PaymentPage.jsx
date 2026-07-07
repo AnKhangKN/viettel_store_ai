@@ -152,8 +152,8 @@ const PaymentPage = () => {
                   <span className="font-medium text-gray-900">{new Date().toLocaleString('vi-VN')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Trạng thái</span>
-                  <span className="font-bold text-green-600">Hoàn tất</span>
+                  <span className="text-gray-500 whitespace-nowrap">Trạng thái</span>
+                  <span className="font-bold text-green-600 whitespace-nowrap">Hoàn tất</span>
                 </div>
               </div>
 

@@ -43,6 +43,18 @@ export const routes = [
     isShowUserLayout: true,
   },
   {
+    path: "/package/:id",
+    name: "Package Detail",
+    page: React.lazy(() => import("../pages/user/PackageDetailPage/PackageDetailPage")),
+    isShowUserLayout: true,
+  },
+  {
+    path: "/register-package/:id",
+    name: "Register Package",
+    page: React.lazy(() => import("../pages/user/RegisterPackagePage/RegisterPackagePage")),
+    isShowUserLayout: true,
+  },
+  {
     path: "/chatbot",
     name: "Chatbot",
     page: React.lazy(() => import("../pages/user/ChatbotPage/ChatbotPage")),
@@ -58,6 +70,12 @@ export const routes = [
     path: "/buysim",
     name: "Buy Sim",
     page: React.lazy(() => import("../pages/user/BuySim/BuySim")),
+    isShowUserLayout: true,
+  },
+  {
+    path: "/buysim/:id",
+    name: "Buy Sim Checkout",
+    page: React.lazy(() => import("../pages/user/SimCheckoutPage/SimCheckoutPage")),
     isShowUserLayout: true,
   },
     {

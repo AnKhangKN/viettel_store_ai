@@ -1,18 +1,32 @@
 import React from 'react'
 import { FaUser, FaSignOutAlt, FaBell } from 'react-icons/fa'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 
 const HeaderComponent = () => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const isHomePage = location.pathname === '/'
 
   return (
     <header className="bg-gradient-to-r from-red-600 to-red-700 shadow-md">
       <div className="flex items-center justify-between px-6 py-4">
-        {/* Logo - Trái */}
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="text-2xl font-bold text-white">⚡</div>
-            <h1 className="text-xl font-bold text-white">Viettel Store</h1>
+        {/* Back Button & Logo - Trái */}
+        <div className="flex items-center gap-2 md:gap-6">
+          <div className="flex items-center">
+            {!isHomePage && (
+              <button 
+                onClick={() => navigate(-1)} 
+                className="mr-4 w-9 h-9 flex items-center justify-center text-white bg-red-800/30 hover:bg-red-800/60 border border-red-500/30 rounded-full transition-all"
+                title="Quay lại"
+              >
+                <ArrowLeft size={18} />
+              </button>
+            )}
+            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <div className="text-2xl font-bold text-white">⚡</div>
+              <h1 className="text-xl font-bold text-white hidden sm:block">Viettel Store</h1>
+            </Link>
           </div>
           
           {/* Branch Selector */}
