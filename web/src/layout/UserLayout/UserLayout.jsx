@@ -21,7 +21,7 @@ const UserLayout = ({ children }) => {
         {/* Main content */}
         <main className="flex-1 overflow-y-auto bg-gray-100 relative">
           {/* Professional Back Button Bar */}
-          {!isHomePage && !location.pathname.startsWith('/package') && (
+          {!isHomePage && (
             <div className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
               <div className="px-6 h-14 flex items-center">
                 <button 

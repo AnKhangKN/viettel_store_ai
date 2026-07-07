@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { FaUser, FaSignOutAlt, FaBell } from 'react-icons/fa'
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
@@ -7,6 +7,27 @@ const HeaderComponent = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const isHomePage = location.pathname === '/'
+
+  const [notifications, setNotifications] = useState([])
+  const [showNotifications, setShowNotifications] = useState(false)
+
+  useEffect(() => {
+    // Mock fetch for notifications
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch('http://127.0.0.1:5000/api/notifications/')
+        const data = await res.json()
+        if (data.status === 'success') {
+          setNotifications(data.data)
+        }
+      } catch (err) {
+        console.error("Failed to fetch notifications", err)
+      }
+    }
+    fetchNotifications()
+  }, [])
+
+  const unreadCount = notifications.filter(n => !n.is_read).length
 
   return (
     <header className="bg-gradient-to-r from-red-600 to-red-700 shadow-md">
@@ -48,10 +69,45 @@ const HeaderComponent = () => {
         {/* User Menu - Phải */}
         <div className="flex items-center gap-6">
           {/* Notification Bell */}
-          <button className="relative p-2 text-white hover:text-red-100 hover:bg-red-500 rounded-lg transition-colors">
-            <FaBell size={20} />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-yellow-400 rounded-full"></span>
-          </button>
+          <div className="relative">
+            <button 
+              className="relative p-2 text-white hover:text-red-100 hover:bg-red-500 rounded-lg transition-colors"
+              onClick={() => setShowNotifications(!showNotifications)}
+            >
+              <FaBell size={20} />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 text-[10px] font-bold flex items-center justify-center bg-yellow-400 text-red-900 rounded-full">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* Notifications Dropdown */}
+            {showNotifications && (
+              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 border border-gray-200 overflow-hidden">
+                <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                  <h3 className="text-sm font-semibold text-gray-800">Thông báo của bạn</h3>
+                </div>
+                <div className="max-h-96 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="p-4 text-center text-sm text-gray-500">
+                      Không có thông báo nào.
+                    </div>
+                  ) : (
+                    notifications.map(notif => (
+                      <div key={notif.id} className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${!notif.is_read ? 'bg-red-50/50' : ''}`}>
+                        <h4 className="text-sm font-semibold text-gray-800">{notif.title}</h4>
+                        <p className="text-xs text-gray-600 mt-1">{notif.message}</p>
+                        <span className="text-[10px] text-gray-400 mt-2 block">
+                          {new Date(notif.created_at).toLocaleString('vi-VN')}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* User Profile */}
           <div className="flex items-center gap-3 pl-6 border-l border-red-500">

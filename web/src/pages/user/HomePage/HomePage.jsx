@@ -93,8 +93,8 @@ export default function HomePage() {
               Đăng ký ngay hôm nay để nhận ưu đãi lên đến 6GB Data tốc độ cao mỗi ngày. Lướt web, xem phim, chiến game thả ga không lo ngắt quãng!
             </p>
             <div className="flex flex-wrap gap-4 pt-2">
-              <Link to="/package" className="bg-white text-[#EE0033] font-black px-8 py-3.5 rounded-xl shadow-[0_6px_0_#e5e7eb] hover:shadow-[0_8px_0_#d1d5db] hover:-translate-y-1 active:shadow-[0_0px_0_#d1d5db] active:translate-y-1 transition-all flex items-center group">
-                Đăng ký ngay
+              <Link to="/package" className="bg-white font-black px-8 py-3.5 rounded-xl shadow-[0_6px_0_#e5e7eb] hover:shadow-[0_8px_0_#d1d5db] hover:-translate-y-1 active:shadow-[0_0px_0_#d1d5db] active:translate-y-1 transition-all flex items-center group" style={{ color: '#EE0033' }}>
+                Dịch vụ gói cước
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Link>
               <button className="border-2 border-white/80 text-white font-bold px-8 py-3.5 rounded-lg hover:bg-white/10 transition">
@@ -270,6 +270,30 @@ export default function HomePage() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* VIDEO SECTION */}
+      <section className="bg-gray-50 py-20 border-t border-gray-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <span className="text-[#EE0033] font-bold tracking-widest uppercase text-sm mb-2 block">Trải nghiệm không giới hạn</span>
+            <h2 className="text-3xl md:text-4xl font-black text-gray-900">Khám Phá Công Nghệ Viettel</h2>
+            <div className="w-20 h-1.5 bg-[#EE0033] mx-auto mt-6 rounded-full"></div>
+          </div>
+          
+          <div className="relative w-full overflow-hidden rounded-2xl shadow-2xl border-4 border-white aspect-video bg-black group">
+            {/* Play button overlay (optional, since youtube has one, but can add polish) */}
+            <iframe 
+              className="absolute top-0 left-0 w-full h-full"
+              src="https://www.youtube.com/embed/5dmLpdy3Lr8?si=O39kM2-W8q8y9QzN&amp;controls=1&amp;rel=0&amp;autoplay=1&amp;mute=1" 
+              title="YouTube video player" 
+              frameBorder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+              allowFullScreen>
+            </iframe>
+          </div>
+          <p className="text-center text-gray-500 mt-6 italic">Viettel - Theo cách của bạn</p>
         </div>
       </section>
 

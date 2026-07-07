@@ -19,13 +19,6 @@ const MobileServicesPage = () => {
       features: ['Sim lộc phát', 'Sim tứ quý', 'Giao sim tận nhà']
     },
     {
-      id: 3,
-      title: 'Chuyển Vùng Quốc Tế',
-      description: 'Kết nối liên tục mọi lúc mọi nơi trên thế giới với dịch vụ Roaming giá cước cực rẻ.',
-      icon: <Globe className="w-8 h-8 text-red-600" />,
-      features: ['Phủ sóng 200+ quốc gia', 'Đăng ký dễ dàng', 'Cước phí minh bạch']
-    },
-    {
       id: 4,
       title: 'Dịch Vụ GTGT',
       description: 'Trải nghiệm hàng ngàn tiện ích hấp dẫn: Nhạc chờ, thông báo cuộc gọi nhỡ, chữ ký cuộc gọi...',

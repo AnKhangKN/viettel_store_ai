@@ -24,7 +24,7 @@ const NewsPage = () => {
       id: 2,
       title: 'Hướng dẫn bảo mật thông tin cá nhân trên ứng dụng di động',
       excerpt: 'Cập nhật ngay các mẹo nhỏ nhưng vô cùng hữu ích để bảo vệ tài khoản và dữ liệu cá nhân của bạn trên không gian mạng.',
-      image: 'https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?auto=format&fit=crop&q=80&w=800&ixlib=rb-4.0.3',
+      image: 'https://picsum.photos/seed/article2/800/600',
       date: '21/10/2026',
       category: 'Mẹo Hay'
     },
@@ -32,7 +32,7 @@ const NewsPage = () => {
       id: 3,
       title: 'Top 5 Smartphone đáng mua nhất hỗ trợ mạng 5G',
       excerpt: 'Bạn đang tìm kiếm một chiếc điện thoại mới để trải nghiệm 5G? Dưới đây là những lựa chọn tốt nhất trong tầm giá.',
-      image: 'https://images.unsplash.com/photo-1598327105666-5b89351cb315?auto=format&fit=crop&q=80&w=800&ixlib=rb-4.0.3',
+      image: 'https://picsum.photos/seed/article3/800/600',
       date: '19/10/2026',
       category: 'Sản Phẩm'
     },
@@ -40,7 +40,7 @@ const NewsPage = () => {
       id: 4,
       title: 'Chương trình tri ân khách hàng thân thiết cuối năm',
       excerpt: 'Hàng ngàn phần quà hấp dẫn đang chờ đón quý khách hàng đã đồng hành cùng chúng tôi trong suốt thời gian qua.',
-      image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=800&ixlib=rb-4.0.3',
+      image: 'https://picsum.photos/seed/article4/800/600',
       date: '18/10/2026',
       category: 'Khuyến Mãi'
     },
@@ -48,7 +48,7 @@ const NewsPage = () => {
       id: 5,
       title: 'Viettel Store chính thức mở bán iPhone 15 Pro Max',
       excerpt: 'Khách hàng đặt trước sẽ nhận được nhiều phần quà giá trị cùng ưu đãi giảm giá lên đến 2 triệu đồng.',
-      image: 'https://images.unsplash.com/photo-1695048064979-5db4f36a5814?auto=format&fit=crop&q=80&w=800&ixlib=rb-4.0.3',
+      image: 'https://picsum.photos/seed/article5/800/600',
       date: '15/10/2026',
       category: 'Sản Phẩm'
     },
@@ -56,7 +56,7 @@ const NewsPage = () => {
       id: 6,
       title: 'Cách chuyển đổi eSim miễn phí ngay trên ứng dụng MyViettel',
       excerpt: 'Không cần ra cửa hàng, bạn hoàn toàn có thể tự chuyển đổi sang eSim chỉ với vài thao tác đơn giản trên điện thoại.',
-      image: 'https://images.unsplash.com/photo-1601972599720-36938d4ecd31?auto=format&fit=crop&q=80&w=800&ixlib=rb-4.0.3',
+      image: 'https://picsum.photos/seed/article6/800/600',
       date: '12/10/2026',
       category: 'Mẹo Hay'
     },
@@ -64,7 +64,7 @@ const NewsPage = () => {
       id: 7,
       title: 'Hợp tác chiến lược: Viettel nâng cấp hạ tầng viễn thông toàn cầu',
       excerpt: 'Sự kiện đánh dấu bước ngoặt quan trọng trong việc đưa công nghệ cáp quang và 5G Việt Nam vươn tầm quốc tế.',
-      image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800&ixlib=rb-4.0.3',
+      image: 'https://picsum.photos/seed/article7/800/600',
       date: '08/10/2026',
       category: 'Tin Nổi Bật'
     },
@@ -72,7 +72,7 @@ const NewsPage = () => {
       id: 8,
       title: 'Ưu đãi cực sốc: Tặng 50% giá trị thẻ nạp vào ngày Vàng',
       excerpt: 'Cơ hội tuyệt vời để nạp năng lượng cho dế yêu với chương trình khuyến mãi nạp thẻ hấp dẫn nhất tháng.',
-      image: 'https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?auto=format&fit=crop&q=80&w=800&ixlib=rb-4.0.3',
+      image: 'https://picsum.photos/seed/article8/800/600',
       date: '05/10/2026',
       category: 'Khuyến Mãi'
     }
