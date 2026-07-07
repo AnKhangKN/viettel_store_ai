@@ -16,7 +16,9 @@ Server
 - cd server 
 - python -m venv .venv hoặc py -m venv .venv
 - source .venv/Scripts/activate
-- pip install -r requirements.txt (chỉ cần làm lần đầu tiên)
+- (chỉ cần làm lần đầu tiên)
+    + pip install -r requirements.txt   
+    + pip install -r requirements-dev.txt
 - python app.py
 
 Sau khi làm xong muốn up code lên lại
