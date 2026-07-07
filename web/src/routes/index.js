@@ -65,4 +65,18 @@ export const routes = [
     
     
   //   Admin
+  {
+    path: "/admin",
+    name: "Admin",
+    page: React.lazy(() => import("../pages/admin/DashboardPage/DashboardPage")),
+    isShowAdminLayout: true,
+  },
+  {
+    path: "/admin/new",
+    name: "New Page",
+    page: React.lazy(() => import("../pages/admin/NewPage/NewPage")),
+    isShowAdminLayout: true,
+  },
+  
+  
 ];
