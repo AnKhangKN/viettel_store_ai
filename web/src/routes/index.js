@@ -7,7 +7,7 @@ export const routes = [
     name: "Login",
     page: React.lazy(() => import("../pages/auth/LoginPage/LoginPage")),
   },
- {
+  {
     path: "/register",
     name: "Register",
     page: React.lazy(() => import("../pages/auth/RegisterPage/RegisterPage")),
@@ -28,6 +28,8 @@ export const routes = [
     name: "Logout",
     page: React.lazy(() => import("../pages/auth/LogoutPage/LogoutPage")),
   },
+
+
 
   //   User
   {
@@ -60,13 +62,13 @@ export const routes = [
     page: React.lazy(() => import("../pages/user/ChatbotPage/ChatbotPage")),
     isShowUserLayout: true,
   },
-    {
+  {
     path: "/appointment",
     name: "Appointment",
     page: React.lazy(() => import("../pages/user/Appointment/Appointment")),
     isShowUserLayout: true,
   },
-    {
+  {
     path: "/buysim",
     name: "Buy Sim",
     page: React.lazy(() => import("../pages/user/BuySim/BuySim")),
@@ -78,7 +80,7 @@ export const routes = [
     page: React.lazy(() => import("../pages/user/SimCheckoutPage/SimCheckoutPage")),
     isShowUserLayout: true,
   },
-    {
+  {
     path: "/lookup",
     name: "Lookup",
     page: React.lazy(() => import("../pages/user/Lookup/Lookup")),
@@ -162,6 +164,16 @@ export const routes = [
     page: React.lazy(() => import("../pages/user/StoreLocatorPage/StoreLocatorPage")),
     isShowUserLayout: true,
   },
-    
+
+  // Staff
+  {
+    path: "/staff/dashboard",
+    name: "Staff Dashboard",
+    page: React.lazy(() => import("../pages/staff/DashboardPage/DashboardPage")),
+    isShowStaffLayout: true,
+  },
+
   //   Admin
+
+
 ];
