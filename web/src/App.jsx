@@ -15,8 +15,8 @@ function App() {
         let Layout = React.Fragment;
 
         if (route.isShowUserLayout) Layout = UserLayout;
-        if (route.isShowAdminLayout) Layout = AdminLayout;
         if (route.isShowStaffLayout) Layout = StaffLayout;
+        if (route.isShowAdminLayout) Layout = AdminLayout;
 
         return (
           <Route
