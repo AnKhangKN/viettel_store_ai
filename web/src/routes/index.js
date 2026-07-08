@@ -177,5 +177,24 @@ export const routes = [
     isShowAdminLayout: true,
   },
   
-  
+  //  Staff
+   {
+    path: "/staff",
+    name: "Staff",
+    page: React.lazy(() => import("../pages/staff/DashboardPage/DashboardPage")),
+    isShowStaffLayout: true,
+  },
+  {
+    path: "/staff/waiting-list",
+    name: "Waiting List",
+    page: React.lazy(() => import("../pages/staff/WaitingList/WaitingList")),
+    isShowStaffLayout: true,
+  },
+  {
+    path: "/staff/package",
+    name: "Package",
+    page: React.lazy(() => import("../pages/staff/PackagePageStaff/PackagePageStaff")),
+    isShowStaffLayout: true,
+  }
+
 ];

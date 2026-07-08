@@ -2,7 +2,7 @@ import React from 'react'
 
 const HeaderComponentAdmin = () => {
   return (
-    <div>HeaderComponentAdminfffff</div>
+    <div>HeaderComponentAdmin</div>
   )
 }
 
