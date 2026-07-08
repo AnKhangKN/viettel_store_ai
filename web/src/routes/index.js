@@ -173,7 +173,7 @@ export const routes = [
     isShowStaffLayout: true,
   },
 
-  //   Admin
+  // Admin
 
 
 ];

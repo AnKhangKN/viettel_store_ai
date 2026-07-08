@@ -2,7 +2,9 @@ import React from 'react'
 
 const DashboardPage = () => {
     return (
-        <div>DashboardPage</div>
+        <div>
+            <p>DashboardPage new update</p>
+        </div>
     )
 }
 
