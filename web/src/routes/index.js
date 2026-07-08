@@ -86,7 +86,18 @@ export const routes = [
     page: React.lazy(() => import("../pages/user/Lookup/Lookup")),
     isShowUserLayout: true,
   },
-
+  {
+    path: "/mobile-services",
+    name: "Mobile Services",
+    page: React.lazy(() => import("../pages/user/MobileServicesPage/MobileServicesPage")),
+    isShowUserLayout: true,
+  },
+  {
+    path: "/mobile-services/:id",
+    name: "Mobile Services Detail",
+    page: React.lazy(() => import("../pages/user/MobileServiceDetailPage/MobileServiceDetailPage")),
+    isShowUserLayout: true,
+  },
   {
     path: "/payment",
     name: "Payment",
