@@ -1,4 +1,4 @@
-viettel_store_ai/
+server/
 │
 ├── app/
 │   │

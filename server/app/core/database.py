@@ -1,17 +1,23 @@
-import psycopg2
+import asyncpg
+from app.core.config import Config
+pool = None
 
-from psycopg2.extras import RealDictCursor
+async def connect():
 
-from core.config import config
+    global pool
 
-
-def get_connection():
-
-    return psycopg2.connect(
-        host=config.DB_HOST,
-        port=config.DB_PORT,
-        database=config.DB_NAME,
-        user=config.DB_USER,
-        password=config.DB_PASSWORD,
-        cursor_factory=RealDictCursor
+    pool = await asyncpg.create_pool(
+        host=Config.DB_HOST,
+        port=Config.DB_PORT,
+        user=Config.DB_USER,
+        password=Config.DB_PASSWORD,
+        database=Config.DB_NAME,
     )
+
+async def disconnect():
+
+    global pool
+
+    if pool:
+        await pool.close()
+        pool = None

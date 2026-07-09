@@ -15,7 +15,7 @@ cd ..
 Server
 - cd server 
 - python -m venv .venv hoặc py -m venv .venv
-- source .venv/Scripts/activate
+- source .venv/Scripts/activate (Nếu mất (.venv trên đầu thì gõ lại))
 - pip install -r requirements.txt (chỉ cần làm lần đầu tiên) 
 - fastapi dev
 
