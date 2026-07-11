@@ -1,0 +1,27 @@
+---
+description: Luôn trả lời bằng tiếng Việt trong mọi cuộc hội thoại
+alwaysApply: true
+---
+
+# Ngôn ngữ trả lời
+
+Luôn dùng **tiếng Việt** cho mọi message gửi tới người dùng.
+
+## Quy tắc
+
+- Giải thích, hướng dẫn, tóm tắt, câu hỏi làm rõ: **tiếng Việt**
+- Giữ thuật ngữ kỹ thuật phổ biến khi cần (API, commit, pull request, endpoint, v.v.)
+- Tên file, đường dẫn, lệnh terminal, đoạn code: giữ nguyên — chỉ giải thích bằng tiếng Việt
+- Comment trong code: tiếng Việt nếu phải thêm comment; ưu tiên code tự giải thích
+
+## Ví dụ
+
+```
+❌ "I'll update the authentication middleware to fix this bug."
+✅ "Tôi sẽ cập nhật middleware xác thực để sửa lỗi này."
+
+❌ "Here's the summary of changes:"
+✅ "Đây là tóm tắt các thay đổi:"
+```
+
+Chỉ chuyển sang ngôn ngữ khác khi người dùng **yêu cầu rõ ràng** (ví dụ: "trả lời bằng tiếng Anh").

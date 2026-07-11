@@ -1,7 +1,11 @@
 # app/main.py
 
+# pyrefly: ignore [missing-import]
 from fastapi import FastAPI
+# pyrefly: ignore [missing-import]
 from fastapi.middleware.cors import CORSMiddleware
+
+from app.core.error_handler import register_exception_handlers
 
 from app.lifespan import lifespan
 from app.routers import api_router
@@ -23,6 +27,8 @@ app.add_middleware(
 
 # Đăng ký router
 app.include_router(api_router)
+
+register_exception_handlers(app)
 
 
 @app.get("/")

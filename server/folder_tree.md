@@ -81,7 +81,7 @@ server/
 │   │   │   │   # Xử lý chuỗi
 │   │   │   │
 │   │   │   ├── pagination_util.py
-│   │   │   │   # Pagination
+│   │   │   │   # Pagination (phân trang)
 │   │   │   │
 │   │   │   └── estimate_wait_util.py
 │   │   │       # Tính thời gian chờ

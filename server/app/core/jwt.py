@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, UTC
 import jwt
+# pyrefly: ignore [missing-import]
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
 
@@ -94,3 +95,12 @@ class Jwt:
                 "success": False,
                 "message": "Invalid refresh token",
             }
+
+
+from app.core.config import Config
+
+jwt_handler = Jwt(
+    access_secret=Config.JWT_SECRET or "your_jwt_secret_key",
+    refresh_secret=Config.JWT_SECRET or "your_jwt_secret_key",
+    algorithm=Config.JWT_ALGORITHM or "HS256"
+)

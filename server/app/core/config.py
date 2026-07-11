@@ -1,19 +1,13 @@
 from pathlib import Path
 import os
+# pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-print("BASE_DIR:", BASE_DIR)
-
 env_path = BASE_DIR / ".env.development"
-print("ENV PATH:", env_path)
-print("EXISTS:", env_path.exists())
 
 load_dotenv(env_path)
-
-print("DB_PORT =", os.getenv("DB_PORT"))
-
 
 class Config:
 

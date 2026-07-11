@@ -1,8 +1,11 @@
+# pyrefly: ignore [missing-import]
 import asyncpg
 from app.core.config import Config
-pool = None
 
-async def connect():
+pool: asyncpg.Pool | None = None
+
+
+async def connect() -> None:
 
     global pool
 
@@ -14,10 +17,17 @@ async def connect():
         database=Config.DB_NAME,
     )
 
-async def disconnect():
+
+async def disconnect() -> None:
 
     global pool
 
     if pool:
         await pool.close()
         pool = None
+
+
+def get_pool() -> asyncpg.Pool:
+    if pool is None:
+        raise RuntimeError("Database pool is not initialized")
+    return pool
