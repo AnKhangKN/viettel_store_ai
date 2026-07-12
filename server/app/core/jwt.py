@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta, UTC
 import jwt
-# pyrefly: ignore [missing-import]
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
 
@@ -99,11 +98,21 @@ class Jwt:
 
 from app.core.config import Config
 
+jwt_secret = Config.JWT_SECRET
+jwt_refresh_secret_env = Config.JWT_REFRESH_SECRET
+jwt_algorithm = Config.JWT_ALGORITHM
+
+if jwt_secret is None:
+    raise ValueError("JWT_SECRET environment variable is not configured")
+if jwt_algorithm is None:
+    raise ValueError("JWT_ALGORITHM environment variable is not configured")
+
+jwt_refresh_secret = jwt_refresh_secret_env or jwt_secret
+
 jwt_handler = Jwt(
-    access_secret=Config.JWT_SECRET or "your_jwt_secret_key",
-    refresh_secret=Config.JWT_SECRET or "your_jwt_secret_key",
-    algorithm=Config.JWT_ALGORITHM or "HS256"
+    access_secret=jwt_secret,
+    refresh_secret=jwt_refresh_secret,
+    algorithm=jwt_algorithm
 )
 
-# Alias for backwards compatibility / imports in other files
 jwt_service = jwt_handler

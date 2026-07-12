@@ -1,19 +1,59 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { login } from '../../../api/auth/auth.api';
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '../../../features/auth/authSlice';
+import { decodeToken } from '../../../utils/jwt';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const res = await login(email, password);
+      if (res.success && res.data) {
+        const { accessToken, user } = res.data;
+        const decoded = decodeToken(accessToken);
+        const role = decoded?.quyen || 'user';
+        
+        dispatch(setCredentials({ 
+          accessToken, 
+          user: { ...user, role } 
+        }));
+
+        if (role === 'admin') {
+          navigate('/admin');
+        } else if (role === 'staff') {
+          navigate('/staff');
+        } else {
+          navigate('/');
+        }
+      } else {
+        setError(res.message || 'Đăng nhập không thành công.');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Có lỗi xảy ra trong quá trình đăng nhập.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8f9fa] relative overflow-hidden p-4">
       {/* Decorative background blobs */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-[100px] opacity-50 animate-pulse"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#EE0033] rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
-
+ 
       <div className="flex w-full max-w-6xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10 border border-gray-100">
         
         {/* Left Side - Branding */}
@@ -49,18 +89,21 @@ const LoginPage = () => {
             </div>
           </div>
         </div>
-
+ 
         {/* Right Side - Login Form */}
         <div className="w-full md:w-7/12 p-8 md:p-16 lg:px-24 flex flex-col justify-center bg-white">
           <div className="mb-10">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Chào mừng trở lại! 👋</h2>
             <p className="text-gray-500 text-base">Vui lòng đăng nhập để tiếp tục quản lý tài khoản</p>
           </div>
+ 
+          <form onSubmit={handleLoginSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 text-[#EE0033] border border-red-200 px-5 py-4 rounded-2xl text-sm font-bold animate-fade-in-up">
+                {error}
+              </div>
+            )}
 
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            navigate('/');
-          }} className="space-y-6">
             {/* Email Input */}
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -75,7 +118,7 @@ const LoginPage = () => {
                 required
               />
             </div>
-
+ 
             {/* Password Input */}
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -99,7 +142,7 @@ const LoginPage = () => {
                 </button>
               </div>
             </div>
-
+ 
             {/* Forgot Password Link */}
             <div className="flex justify-end pt-2">
               <a
@@ -109,13 +152,14 @@ const LoginPage = () => {
                 Quên mật khẩu?
               </a>
             </div>
-
+ 
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full bg-[#EE0033] text-white font-black py-4 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:shadow-[0_0px_0_#A00022] active:translate-y-1 transition-all duration-200 text-lg mt-4"
+              disabled={loading}
+              className="w-full bg-[#EE0033] text-white font-black py-4 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:shadow-[0_0px_0_#A00022] active:translate-y-1 transition-all duration-200 text-lg mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Đăng Nhập
+              {loading ? 'Đang đăng nhập...' : 'Đăng Nhập'}
             </button>
 
             {/* Divider */}

@@ -11,4 +11,6 @@ class AuthRoutes:
 
         self.router.post("/register")(AuthController().register)
         self.router.post("/login")(AuthController().login)
-        self.router.post("/logout")(AuthController().logout)
+        self.router.delete("/logout")(AuthController().logout)
+        self.router.get("/me")(AuthController().me)
+        self.router.post("/refresh-token")(AuthController().refresh_token)

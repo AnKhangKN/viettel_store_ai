@@ -1,14 +1,25 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../../api/auth/auth.api';
+import { clearCredentials } from '../../../features/auth/authSlice';
 
 const LogoutPage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    // Perform logout logic here (e.g., clear localStorage, cookies, context)
-    // localStorage.removeItem('token');
-    // localStorage.removeItem('user');
-  }, []);
+    const handleLogout = async () => {
+      try {
+        await logout();
+      } catch (err) {
+        console.error("Lỗi đăng xuất API:", err);
+      } finally {
+        dispatch(clearCredentials());
+      }
+    };
+    handleLogout();
+  }, [dispatch]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8f9fa] relative overflow-hidden p-4">

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaLock, FaEye, FaEyeSlash, FaArrowLeft, FaCheckCircle, FaFacebook } from 'react-icons/fa';
+import { register } from '../../../api/auth/auth.api';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -8,7 +9,8 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agree, setAgree] = useState(false);
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     fullName: '', email: '', phone: '', password: '', confirmPassword: ''
   });
@@ -17,38 +19,34 @@ const RegisterPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     if (!agree) {
-      alert('Vui lòng đồng ý với điều khoản sử dụng');
+      setError('Vui lòng đồng ý với điều khoản sử dụng');
       return;
     }
-    if(formData.password !== formData.confirmPassword) {
-      alert('Mật khẩu xác nhận không khớp!');
+    if (formData.password !== formData.confirmPassword) {
+      setError('Mật khẩu xác nhận không khớp!');
       return;
     }
-    // Thành công -> Chuyển sang bước xác thực OTP
-    setStep(2);
-  };
-
-  const handleVerifyOTP = (e) => {
-    e.preventDefault();
-    const code = otp.join('');
-    if(code.length === 6) {
-      alert('Đăng ký tài khoản thành công!');
-      navigate('/login');
-    }
-  };
-
-  const handleOtpChange = (index, value) => {
-    if (value.length > 1) value = value.slice(0, 1);
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-    // Tự động nhảy sang ô nhập tiếp theo
-    if (value && index < 5) {
-      const nextInput = document.getElementById(`reg-otp-${index + 1}`);
-      if(nextInput) nextInput.focus();
+    setLoading(true);
+    setError('');
+    try {
+      const res = await register(
+        formData.fullName,
+        formData.phone,
+        formData.email,
+        formData.password
+      );
+      if (res.success) {
+        setStep(2);
+      } else {
+        setError(res.message || 'Đăng ký không thành công.');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Có lỗi xảy ra trong quá trình đăng ký.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -112,6 +110,12 @@ const RegisterPage = () => {
               </div>
 
               <form onSubmit={handleRegisterSubmit} className="space-y-5 pb-8">
+                {error && (
+                  <div className="bg-red-50 text-[#EE0033] border border-red-200 px-5 py-4 rounded-2xl text-sm font-bold animate-fade-in-up">
+                    {error}
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">Họ và Tên</label>
@@ -153,8 +157,8 @@ const RegisterPage = () => {
                   </label>
                 </div>
 
-                <button type="submit" className="w-full bg-[#EE0033] text-white font-black py-4 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:translate-y-1 active:shadow-[0_0px_0_#A00022] transition-all text-lg mt-4">
-                  Tiếp Tục
+                <button type="submit" disabled={loading} className="w-full bg-[#EE0033] text-white font-black py-4 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:translate-y-1 active:shadow-[0_0px_0_#A00022] transition-all text-lg mt-4 disabled:opacity-50 disabled:cursor-not-allowed">
+                  {loading ? 'Đang đăng ký...' : 'Tiếp Tục'}
                 </button>
               </form>
             </div>
@@ -165,35 +169,19 @@ const RegisterPage = () => {
               <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center mb-6">
                 <FaCheckCircle className="text-3xl text-green-500" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Xác Thực Email</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Đăng Ký Thành Công!</h2>
               <p className="text-gray-500 text-base mb-8 leading-relaxed">
-                Hệ thống vừa gửi một mã OTP gồm 6 chữ số đến email <br/>
-                <span className="font-bold text-[#EE0033]">{formData.email}</span>. Vui lòng kiểm tra hộp thư đến (hoặc thư rác).
+                Tài khoản của bạn đã được tạo thành công với email <br/>
+                <span className="font-bold text-[#EE0033]">{formData.email}</span>. Vui lòng tiến hành đăng nhập để trải nghiệm dịch vụ.
               </p>
 
-              <form onSubmit={handleVerifyOTP} className="space-y-8">
-                <div className="flex justify-between gap-2 sm:gap-4">
-                  {otp.map((digit, index) => (
-                    <input
-                      key={index}
-                      id={`reg-otp-${index}`}
-                      type="text"
-                      maxLength="1"
-                      value={digit}
-                      onChange={(e) => handleOtpChange(index, e.target.value)}
-                      className="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-black bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-[#EE0033] focus:bg-white transition-all text-gray-800 outline-none"
-                      required
-                    />
-                  ))}
-                </div>
-                <button type="submit" className="w-full bg-[#EE0033] text-white font-black py-4 rounded-2xl shadow-[0_6px_0_#A00022] hover:-translate-y-1 active:translate-y-1 transition-all text-lg">
-                  Hoàn Tất Đăng Ký
-                </button>
-              </form>
-              
-              <p className="text-center mt-8 text-gray-500">
-                Chưa nhận được mã? <button className="text-[#EE0033] font-bold hover:underline">Gửi lại (60s)</button>
-              </p>
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="w-full bg-[#EE0033] text-white font-black py-4 rounded-2xl shadow-[0_6px_0_#A00022] hover:-translate-y-1 active:translate-y-1 transition-all text-lg flex items-center justify-center cursor-pointer"
+              >
+                Đăng Nhập Ngay
+              </button>
             </div>
           )}
 

@@ -50,6 +50,7 @@ Repository (Tương tác Cơ sở dữ liệu qua raw SQL)
 
 ### 2.1 Stack Công nghệ & Libraries
 - **Core**: React 19, React Router DOM v7.
+- **State Management & API**: Redux Toolkit (để quản lý global state) và Axios (để call/lấy API từ server).
 - **CSS / Styling**: Tailwind CSS v4, Vanilla CSS.
 - **Icons**: Lucide React, React Icons, Ant Design Icons.
 - Tránh cài đặt thêm các thư viện giao diện nặng nề trừ khi có yêu cầu đặc biệt.
@@ -80,3 +81,21 @@ Repository (Tương tác Cơ sở dữ liệu qua raw SQL)
 - Chạy thử frontend: Chạy lệnh `npm run dev` từ thư mục `web/`.
 - Commit thông điệp rõ ràng, tập trung vào tác vụ vừa hoàn thành.
 - **Tạo API thay vì tự động chạy script insert**: Khi nhận được yêu cầu thêm đối tượng hoặc dữ liệu mới (ví dụ: thêm chi nhánh, thêm nhân viên...), AI chỉ thiết lập/xây dựng cấu trúc API tương ứng (Router -> Controller -> Service -> Repository), không được tự ý viết và chạy các file script để insert trực tiếp dữ liệu ảo vào database trừ khi người dùng có yêu cầu cụ thể.
+
+---
+
+## 4. Quy định cấu hình môi trường & Bảo mật
+
+### 4.1 Quản lý biến môi trường (No Example Defaults)
+- Các cấu hình (cổng, khóa bảo mật...) bắt buộc phải đọc trực tiếp từ `.env` / `.env.development`.
+- Không tự ý đính kèm giá trị dự phòng mặc định (như `or "your_jwt_secret"` hoặc `os.getenv("PORT", 8000)`) trong mã nguồn hoặc file cấu hình trung tâm.
+- Sử dụng các câu lệnh kiểm tra kiểu dữ liệu nghiêm ngặt (`if variable is None: raise ValueError(...)`) hoặc chú thích `# type: ignore` để xử lý cảnh báo kiểm tra kiểu tĩnh (Pyrefly) thay vì đính kèm chuỗi mặc định vào `os.getenv`.
+
+### 4.2 Cấu hình Cookie & Tên miền chạy Local (Same-site)
+- Môi trường chạy local dev sử dụng cookie HTTP-Only với cấu hình `SameSite="Lax"`.
+- Trình duyệt chỉ gửi kèm cookie Lax nếu cổng Frontend và Backend chạy cùng một tên miền (Ví dụ: Frontend `http://localhost:5173` và Backend `http://localhost:8000`). Tránh chạy lệch tên miền như `localhost` (web) và `127.0.0.1` (api).
+
+### 4.3 Khóa bảo mật Token riêng biệt
+- Sử dụng 2 khóa bảo mật (Secret Key) riêng biệt để nâng cao tính an toàn:
+  - `JWT_SECRET`: Dùng để ký và xác thực Access Token.
+  - `JWT_REFRESH_SECRET`: Dùng để ký và xác thực Refresh Token.

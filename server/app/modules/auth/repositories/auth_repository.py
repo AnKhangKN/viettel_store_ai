@@ -59,6 +59,22 @@ class AuthRepository:
             so_dien_thoai
         )
 
+    async def find_by_id(self, id_khach_hang: str):
+        sql = """
+            SELECT
+                id_khach_hang,
+                ten_dang_nhap,
+                ho_ten,
+                email,
+                so_dien_thoai,
+                vai_tro,
+                trang_thai
+            FROM khachhang
+            WHERE id_khach_hang = $1 AND da_xoa = false
+        """
+        db_uuid = uuid.UUID(id_khach_hang) if isinstance(id_khach_hang, str) else id_khach_hang
+        return await get_pool().fetchrow(sql, db_uuid)
+
     
 
     

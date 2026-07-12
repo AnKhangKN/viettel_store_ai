@@ -109,4 +109,55 @@ class AuthService:
             "message": "Đăng xuất thành công"
         }
 
+    async def get_current_user_info(self, payload: dict):
+        id_khach_hang = payload.get("id_khach_hang")
+        if not id_khach_hang:
+            raise AppException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message="Token không hợp lệ"
+            )
+        
+        user = await self.repository.find_by_id(id_khach_hang)
+        if not user:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Người dùng không tồn tại"
+            )
+        
+        return {
+            "success": True,
+            "data": {
+                "id": str(user["id_khach_hang"]),
+                "name": user["ho_ten"],
+                "email": user["email"],
+                "phone": user["so_dien_thoai"],
+                "role": user["vai_tro"]
+            }
+        }
+
+    async def refresh_token(self, refresh_token: str | None, response: Response):
+        if not refresh_token:
+            raise AppException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                message="Không tìm thấy refresh token"
+            )
+
+        print("Refresh token:", refresh_token)
+
+        res = jwt_handler.handle_refresh_token(refresh_token)
+        if not res["success"]:
+            raise AppException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                message=str(res.get("message", "Refresh token không hợp lệ"))
+            )
+
+        new_access_token = res["accessToken"]
+
+        return {
+            "success": True,
+            "data": {
+                "accessToken": new_access_token
+            }
+        }
+
     
