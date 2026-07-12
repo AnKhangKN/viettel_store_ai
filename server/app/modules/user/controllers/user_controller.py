@@ -1,5 +1,5 @@
 from app.modules.user.services.user_service import UserService
-from app.modules.user.schemas.user_schema import EmployeeCreateRequest, EmployeeApproveRequest
+from app.modules.user.schemas.user_schema import EmployeeCreateRequest, EmployeeApproveRequest, AccountRoleUpdateRequest
 
 class UserController:
 
@@ -23,3 +23,9 @@ class UserController:
 
     async def get_customer_details(self, id_khach_hang: str):
         return await self.service.get_customer_details(id_khach_hang)
+
+    async def get_all_accounts(self):
+        return await self.service.get_all_accounts()
+
+    async def update_account_role(self, id_khach_hang: str, body: AccountRoleUpdateRequest):
+        return await self.service.update_account_role(id_khach_hang, body)

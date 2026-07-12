@@ -153,3 +153,27 @@ class UserRepository:
         """
         db_uuid = uuid.UUID(id_khach_hang) if isinstance(id_khach_hang, str) else id_khach_hang
         return await get_pool().fetchrow(sql, db_uuid)
+
+    async def get_all_accounts(self):
+        sql = """
+            SELECT 
+                id_khach_hang,
+                ho_ten,
+                email,
+                vai_tro,
+                trang_thai
+            FROM khachhang
+            WHERE da_xoa = false
+            ORDER BY ngay_tao DESC
+        """
+        return await get_pool().fetch(sql)
+
+    async def update_account_role(self, id_khach_hang: str, vai_tro: str):
+        sql = """
+            UPDATE khachhang
+            SET vai_tro = $2, cap_nhat = CURRENT_TIMESTAMP
+            WHERE id_khach_hang = $1 AND da_xoa = false
+            RETURNING id_khach_hang, ho_ten, email, vai_tro, trang_thai
+        """
+        db_uuid = uuid.UUID(id_khach_hang) if isinstance(id_khach_hang, str) else id_khach_hang
+        return await get_pool().fetchrow(sql, db_uuid, vai_tro)

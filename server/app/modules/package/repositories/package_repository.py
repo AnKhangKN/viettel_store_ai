@@ -54,3 +54,36 @@ class PackageRepository:
             WHERE ten_goi = $1 AND da_xoa = false
         """
         return await get_pool().fetchrow(sql, ten_goi)
+
+    async def get_all_packages(self):
+        sql = """
+            SELECT 
+                id_goi, 
+                ten_goi, 
+                gia_cuoc, 
+                thoi_han_ngay, 
+                dung_luong_gb, 
+                trang_thai
+            FROM goicuoc
+            WHERE da_xoa = false
+            ORDER BY ngay_tao DESC
+        """
+        return await get_pool().fetch(sql)
+
+    async def get_package_by_id(self, id_goi: str):
+        sql = """
+            SELECT 
+                id_goi, 
+                ten_goi, 
+                gia_cuoc, 
+                thoi_han_ngay, 
+                dung_luong_gb, 
+                so_phut_goi,
+                so_sms,
+                mo_ta,
+                trang_thai
+            FROM goicuoc
+            WHERE id_goi = $1 AND da_xoa = false
+        """
+        goi_uuid = uuid.UUID(id_goi) if isinstance(id_goi, str) else id_goi
+        return await get_pool().fetchrow(sql, goi_uuid)

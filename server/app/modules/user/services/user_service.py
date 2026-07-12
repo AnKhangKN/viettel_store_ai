@@ -3,7 +3,8 @@ from app.core.exceptions import AppException
 from app.common.utils.uuid import generate_uuid7
 from app.core.security import hash_password
 from app.modules.user.repositories.user_repository import UserRepository
-from app.modules.user.schemas.user_schema import EmployeeCreateRequest, EmployeeApproveRequest
+from app.modules.user.schemas.user_schema import EmployeeCreateRequest, EmployeeApproveRequest, AccountRoleUpdateRequest
+from app.common.enums.role_enum import RoleEnum
 from app.modules.branch.repositories.branch_repository import BranchRepository
 
 class UserService:
@@ -171,5 +172,49 @@ class UserService:
                 "email": r["email"],
                 "dia_chi": r["dia_chi"],
                 "trang_thai": r["trang_thai"]
+            }
+        }
+
+    async def get_all_accounts(self):
+        rows = await self.repository.get_all_accounts()
+        accounts = []
+        for r in rows:
+            accounts.append({
+                "id_khach_hang": str(r["id_khach_hang"]),
+                "ho_ten": r["ho_ten"],
+                "email": r["email"],
+                "vai_tro": r["vai_tro"],
+                "trang_thai": r["trang_thai"]
+            })
+        return {
+            "success": True,
+            "data": accounts
+        }
+
+    async def update_account_role(self, id_khach_hang: str, body: AccountRoleUpdateRequest):
+        valid_roles = {role.value for role in RoleEnum}
+        role_lower = body.vai_tro.lower()
+        if role_lower not in valid_roles:
+            raise AppException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message=f"Vai trò '{body.vai_tro}' không hợp lệ. Phải thuộc: {', '.join(valid_roles)}"
+            )
+
+        res = await self.repository.update_account_role(id_khach_hang, role_lower)
+        if not res:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Tài khoản không tồn tại hoặc đã bị xóa"
+            )
+
+        return {
+            "success": True,
+            "message": "Cập nhật quyền tài khoản thành công",
+            "data": {
+                "id_khach_hang": str(res["id_khach_hang"]),
+                "ho_ten": res["ho_ten"],
+                "email": res["email"],
+                "vai_tro": res["vai_tro"],
+                "trang_thai": res["trang_thai"]
             }
         }

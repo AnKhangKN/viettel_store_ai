@@ -104,3 +104,6 @@ jwt_handler = Jwt(
     refresh_secret=Config.JWT_SECRET or "your_jwt_secret_key",
     algorithm=Config.JWT_ALGORITHM or "HS256"
 )
+
+# Alias for backwards compatibility / imports in other files
+jwt_service = jwt_handler

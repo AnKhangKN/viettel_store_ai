@@ -63,8 +63,8 @@ class AuthService:
             )
 
         payload = {
-            "userId": str(user["id_khach_hang"]),
-            "role": user["vai_tro"]
+            "id_khach_hang": str(user["id_khach_hang"]),
+            "quyen": user["vai_tro"]
         }
 
         access_token = jwt_handler.create_access_token(payload)

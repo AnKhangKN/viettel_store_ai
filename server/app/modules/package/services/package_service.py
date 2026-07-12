@@ -46,3 +46,42 @@ class PackageService:
                 "trang_thai": res["trang_thai"]
             }
         }
+
+    async def get_all_packages(self):
+        records = await self.repository.get_all_packages()
+        data = []
+        for record in records:
+            data.append({
+                "id_goi": str(record["id_goi"]),
+                "ten_goi": record["ten_goi"],
+                "gia_cuoc": float(record["gia_cuoc"]),
+                "thoi_han_ngay": record["thoi_han_ngay"],
+                "dung_luong_gb": float(record["dung_luong_gb"]),
+                "trang_thai": record["trang_thai"]
+            })
+        return {
+            "success": True,
+            "data": data
+        }
+
+    async def get_package_by_id(self, id_goi: str):
+        record = await self.repository.get_package_by_id(id_goi)
+        if not record:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Gói cước không tồn tại hoặc đã bị xóa"
+            )
+        return {
+            "success": True,
+            "data": {
+                "id_goi": str(record["id_goi"]),
+                "ten_goi": record["ten_goi"],
+                "gia_cuoc": float(record["gia_cuoc"]),
+                "thoi_han_ngay": record["thoi_han_ngay"],
+                "dung_luong_gb": float(record["dung_luong_gb"]),
+                "so_phut_goi": record["so_phut_goi"],
+                "so_sms": record["so_sms"],
+                "mo_ta": record["mo_ta"],
+                "trang_thai": record["trang_thai"]
+            }
+        }

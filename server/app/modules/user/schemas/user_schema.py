@@ -12,3 +12,6 @@ class EmployeeCreateRequest(BaseModel):
 
 class EmployeeApproveRequest(BaseModel):
     trang_thai: str = Field(..., description="Trạng thái duyệt ('HoatDong', 'Khoa', 'ChoXacThuc')")
+
+class AccountRoleUpdateRequest(BaseModel):
+    vai_tro: str = Field(..., description="Vai trò mới ('admin', 'staff', 'user')")
