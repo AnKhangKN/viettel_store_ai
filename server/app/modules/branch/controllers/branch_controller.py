@@ -14,3 +14,7 @@ class BranchController:
 
     async def get_branch_details(self, id_chi_nhanh: str):
         return await self.service.get_branch_details(id_chi_nhanh)
+
+    async def update_branch(self, id_chi_nhanh: str, body: BranchCreateRequest):
+        return await self.service.update_branch(id_chi_nhanh, body)
+

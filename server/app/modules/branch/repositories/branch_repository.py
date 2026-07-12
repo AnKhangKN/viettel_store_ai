@@ -73,3 +73,36 @@ class BranchRepository:
         """
         db_uuid = uuid.UUID(id_chi_nhanh) if isinstance(id_chi_nhanh, str) else id_chi_nhanh
         return await get_pool().fetchrow(sql, db_uuid)
+
+    async def update(
+        self,
+        id_chi_nhanh: str,
+        ten_chi_nhanh: str,
+        dia_chi: str,
+        so_hotline: str,
+        gio_lam_viec: str,
+        trang_thai: str
+    ):
+        sql = """
+            UPDATE chinhanh
+            SET
+                ten_chi_nhanh = $2,
+                dia_chi = $3,
+                so_hotline = $4,
+                gio_lam_viec = $5,
+                trang_thai = $6,
+                cap_nhat = CURRENT_TIMESTAMP
+            WHERE id_chi_nhanh = $1 AND da_xoa = false
+            RETURNING id_chi_nhanh, ten_chi_nhanh, dia_chi, so_hotline, gio_lam_viec, trang_thai
+        """
+        db_uuid = uuid.UUID(id_chi_nhanh) if isinstance(id_chi_nhanh, str) else id_chi_nhanh
+        return await get_pool().fetchrow(
+            sql,
+            db_uuid,
+            ten_chi_nhanh,
+            dia_chi,
+            so_hotline,
+            gio_lam_viec,
+            trang_thai
+        )
+

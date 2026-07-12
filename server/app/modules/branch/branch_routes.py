@@ -14,3 +14,5 @@ class BranchRoutes:
         self.router.post("", dependencies=[Depends(get_current_admin)])(controller.create_branch)
         self.router.get("")(controller.get_all_branches)
         self.router.get("/{id_chi_nhanh}")(controller.get_branch_details)
+        self.router.patch("/{id_chi_nhanh}", dependencies=[Depends(get_current_admin)])(controller.update_branch)
+

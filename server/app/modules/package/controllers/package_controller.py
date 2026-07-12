@@ -14,3 +14,7 @@ class PackageController:
 
     async def get_package_details(self, id_goi: str):
         return await self.service.get_package_by_id(id_goi)
+
+    async def update_package(self, id_goi: str, body: PackageCreateRequest):
+        return await self.service.update_package(id_goi, body)
+

@@ -35,7 +35,8 @@ const TableComponent = ({
   searchPlaceholder = "Tìm kiếm thông tin...",
   searchFields = [],
   filterConfigs = [],
-  defaultItemsPerPage = 10
+  defaultItemsPerPage = 10,
+  onRowClick = null
 }) => {
   // State quản lý tìm kiếm, lọc, sắp xếp, phân trang
   const [searchTerm, setSearchTerm] = useState("");
@@ -261,7 +262,19 @@ const TableComponent = ({
               paginatedData.map((row, rowIndex) => (
                 <tr
                   key={rowIndex}
-                  className="hover:bg-red-50/10 transition-colors duration-150 group"
+                  onClick={(e) => {
+                    const tagName = e.target.tagName.toLowerCase();
+                    if (
+                      ["select", "input", "button", "a", "option"].includes(tagName) ||
+                      e.target.closest("select, input, button, a")
+                    ) {
+                      return;
+                    }
+                    if (onRowClick) onRowClick(row);
+                  }}
+                  className={`transition-colors duration-150 group ${
+                    onRowClick ? "cursor-pointer hover:bg-red-50/20" : "hover:bg-red-50/10"
+                  }`}
                 >
                   {columns.map((col, colIndex) => (
                     <td key={colIndex} className="p-4 text-sm text-gray-800 font-medium">

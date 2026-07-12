@@ -14,3 +14,5 @@ class PackageRoutes:
         self.router.post("", dependencies=[Depends(get_current_admin)])(controller.create_package)
         self.router.get("")(controller.get_all_packages)
         self.router.get("/{id_goi}")(controller.get_package_details)
+        self.router.patch("/{id_goi}", dependencies=[Depends(get_current_admin)])(controller.update_package)
+

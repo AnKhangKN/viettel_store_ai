@@ -111,6 +111,52 @@ class BranchService:
             }
         }
 
+    async def update_branch(self, id_chi_nhanh: str, body: BranchCreateRequest):
+        # 1. Kiểm tra tồn tại
+        existing = await self.repository.get_by_id(id_chi_nhanh)
+        if not existing:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Chi nhánh không tồn tại hoặc đã bị xóa"
+            )
+
+        # 2. Kiểm tra trùng hotline (nếu thay đổi hotline)
+        hotline = body.so_hotline or existing["so_hotline"]
+        if hotline != existing["so_hotline"]:
+            hotline_check = await self.repository.get_by_hotline(hotline)
+            if hotline_check:
+                raise AppException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    message=f"Số hotline {hotline} đã được sử dụng bởi chi nhánh khác"
+                )
+
+        # 3. Xác định các giá trị cập nhật
+        name = body.ten_chi_nhanh or existing["ten_chi_nhanh"]
+        trang_thai_val = body.trang_thai or existing["trang_thai"]
+
+        # 4. Thực thi cập nhật
+        res = await self.repository.update(
+            id_chi_nhanh=id_chi_nhanh,
+            ten_chi_nhanh=name,
+            dia_chi=body.dia_chi,
+            so_hotline=hotline,
+            gio_lam_viec=body.gio_lam_viec or "08:00 - 22:00",
+            trang_thai=trang_thai_val
+        )
+
+        return {
+            "success": True,
+            "data": {
+                "id_chi_nhanh": str(res["id_chi_nhanh"]),
+                "ten_chi_nhanh": res["ten_chi_nhanh"],
+                "dia_chi": res["dia_chi"],
+                "so_hotline": res["so_hotline"],
+                "gio_lam_viec": res["gio_lam_viec"],
+                "trang_thai": res["trang_thai"]
+            }
+        }
+
+
     def _slugify(self, text: str) -> str:
         import unicodedata
         import re

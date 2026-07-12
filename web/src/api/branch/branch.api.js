@@ -33,3 +33,15 @@ export const createBranch = async (branchData) => {
         throw error;
     }
 };
+
+// API admin - cập nhật chi nhánh
+export const updateBranch = async (idChiNhanh, branchData) => {
+    try {
+        const response = await axiosJWT.patch(`/api/branch/${idChiNhanh}`, branchData);
+        return response.data;
+    } catch (error) {
+        console.error("Lỗi cập nhật chi nhánh:", error);
+        throw error;
+    }
+};
+

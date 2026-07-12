@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   LayoutDashboard,
   Smartphone,
+  Tag,
   CalendarRange,
   Users,
   MapPin,
@@ -28,10 +29,16 @@ const SidebarComponentAdmin = () => {
       icon: <Smartphone className="w-5 h-5" />,
     },
     {
+      label: "Quản lý loại SIM",
+      path: "/admin/sim-types",
+      icon: <Tag className="w-5 h-5" />,
+    },
+    {
       label: "Quản lý gói cước",
       path: "/admin/packages",
       icon: <FileText className="w-5 h-5" />,
     },
+
     {
       label: "Quản lý người dùng",
       path: "/admin/users",

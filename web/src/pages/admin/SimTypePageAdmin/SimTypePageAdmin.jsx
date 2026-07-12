@@ -1,103 +1,93 @@
 import React, { useState, useEffect } from "react";
 import {
-  getAllBranches,
-  createBranch,
-  updateBranch
-} from "../../../api/branch/branch.api";
+  getSimTypes,
+  createSimType,
+  updateSimType
+} from "../../../api/sim/sim.api";
 import TableComponent from "../../../components/shared/TableComponent/TableComponent";
 import {
   Plus,
   X,
   Loader2,
-  MapPin,
+  Tag,
   AlertCircle,
   CheckCircle2,
   Edit,
-  Phone,
-  Clock,
-  Mail,
-  Lock,
-  Building
+  Info
 } from "lucide-react";
 
-const BranchPageAdmin = () => {
-  const [branches, setBranches] = useState([]);
+const SimTypePageAdmin = () => {
+  const [types, setTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [statusMessage, setStatusMessage] = useState(null);
 
   // Modals & Drawers state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [selectedBranch, setSelectedBranch] = useState(null); // Used for Edit Drawer
+  const [selectedType, setSelectedType] = useState(null); // Used for Edit Drawer
 
   // Form states
   const initialFormState = {
-    ten_chi_nhanh: "",
-    dia_chi: "",
-    so_hotline: "",
-    gio_lam_viec: "08:00 - 22:00",
-    trang_thai: "HoatDong"
+    ten_loai_sim: "",
+    mo_ta: "",
+    trang_thai: "DangBan"
   };
 
   const [createFormData, setCreateFormData] = useState(initialFormState);
   const [editFormData, setEditFormData] = useState(initialFormState);
   const [formSubmitLoading, setFormSubmitLoading] = useState(false);
 
-  // Fetch branches list
-  const fetchBranches = async () => {
+  // Fetch all SIM types
+  const fetchTypes = async () => {
     setLoading(true);
     try {
-      const res = await getAllBranches();
+      const res = await getSimTypes();
       if (res?.success && res?.data) {
-        setBranches(res.data);
+        setTypes(res.data);
       } else {
-        setError("Không thể tải danh sách chi nhánh.");
+        setError("Không thể tải danh sách loại SIM.");
       }
     } catch (err) {
       console.error(err);
-      setError("Đã xảy ra lỗi khi tải dữ liệu cửa hàng.");
+      setError("Đã xảy ra lỗi khi kết nối với máy chủ.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchBranches();
+    fetchTypes();
   }, []);
 
-  // Handle opening Edit Drawer
-  const handleRowClick = (branch) => {
-    setSelectedBranch(branch);
-    // Since get_all_branches might not return all fields directly, or some defaults,
-    // we use what's returned in table row
+  // Handle row click to edit
+  const handleRowClick = (type) => {
+    setSelectedType(type);
     setEditFormData({
-      ten_chi_nhanh: branch.ten_chi_nhanh || "",
-      dia_chi: branch.dia_chi || "",
-      so_hotline: branch.so_hotline || "",
-      gio_lam_viec: branch.gio_lam_viec || "08:00 - 22:00",
-      trang_thai: branch.trang_thai || "HoatDong"
+      ten_loai_sim: type.ten_loai_sim || "",
+      mo_ta: type.mo_ta || "",
+      trang_thai: type.trang_thai || "DangBan"
     });
   };
 
-  // Submit Create Branch Form
+  // Submit Create SIM Type
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
     setFormSubmitLoading(true);
     setStatusMessage(null);
     try {
-      const res = await createBranch(createFormData);
+      const res = await createSimType(createFormData);
       if (res?.success) {
         setStatusMessage({
           type: "success",
-          text: `Đã thêm thành công cửa hàng mới "${createFormData.ten_chi_nhanh || "Viettel Store"}"!`
+          text: `Đã thêm thành công loại SIM mới "${createFormData.ten_loai_sim}"!`
         });
         setIsCreateModalOpen(false);
         setCreateFormData(initialFormState);
-        fetchBranches(); // Reload branches
+        fetchTypes(); // Reload types list
       }
     } catch (err) {
       console.error(err);
-      const errMsg = err?.response?.data?.message || "Lỗi khi thêm chi nhánh. Vui lòng kiểm tra lại.";
+      const errMsg = err?.response?.data?.message || "Lỗi khi thêm loại SIM. Vui lòng thử lại.";
       setStatusMessage({
         type: "error",
         text: errMsg
@@ -107,25 +97,25 @@ const BranchPageAdmin = () => {
     }
   };
 
-  // Submit Edit Branch Form
+  // Submit Edit SIM Type
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedBranch) return;
+    if (!selectedType) return;
     setFormSubmitLoading(true);
     setStatusMessage(null);
     try {
-      const res = await updateBranch(selectedBranch.id_chi_nhanh, editFormData);
+      const res = await updateSimType(selectedType.id_loai_sim, editFormData);
       if (res?.success) {
         setStatusMessage({
           type: "success",
-          text: `Cập nhật thành công thông tin cửa hàng "${editFormData.ten_chi_nhanh}"!`
+          text: `Cập nhật thành công loại SIM "${editFormData.ten_loai_sim}"!`
         });
-        setSelectedBranch(null);
-        fetchBranches(); // Reload branches
+        setSelectedType(null);
+        fetchTypes(); // Reload types list
       }
     } catch (err) {
       console.error(err);
-      const errMsg = err?.response?.data?.message || "Lỗi khi cập nhật thông tin chi nhánh. Vui lòng thử lại.";
+      const errMsg = err?.response?.data?.message || "Lỗi khi cập nhật loại SIM. Vui lòng thử lại.";
       setStatusMessage({
         type: "error",
         text: errMsg
@@ -138,43 +128,35 @@ const BranchPageAdmin = () => {
   // Columns definition for TableComponent
   const columns = [
     {
-      header: "Tên chi nhánh",
-      accessor: "ten_chi_nhanh",
+      header: "Tên loại SIM",
+      accessor: "ten_loai_sim",
       sortable: true,
       render: (row) => (
-        <div className="font-bold text-gray-800 hover:text-[#EE0033] transition-colors">{row.ten_chi_nhanh}</div>
+        <div className="font-bold text-gray-800 hover:text-[#EE0033] transition-colors">{row.ten_loai_sim}</div>
       )
     },
     {
-      header: "Địa chỉ cửa hàng",
-      accessor: "dia_chi",
+      header: "Mô tả hình thức",
+      accessor: "mo_ta",
       sortable: true,
       render: (row) => (
-        <span className="text-gray-600 font-medium">{row.dia_chi}</span>
+        <span className="text-gray-500 font-normal">{row.mo_ta || "Không có mô tả"}</span>
       )
     },
     {
-      header: "Số Hotline",
-      accessor: "so_hotline",
-      sortable: true,
-      render: (row) => (
-        <span className="font-mono text-gray-700 font-bold">{row.so_hotline}</span>
-      )
-    },
-    {
-      header: "Trạng thái hoạt động",
+      header: "Trạng thái kinh doanh",
       accessor: "trang_thai",
       sortable: true,
       render: (row) => {
         let badgeStyle = "bg-gray-100 text-gray-600";
-        let label = "Ngừng hoạt động";
+        let label = "Ngừng kinh doanh";
 
-        if (row.trang_thai === "HoatDong") {
+        if (row.trang_thai === "DangBan") {
           badgeStyle = "bg-green-100 text-green-700";
-          label = "Đang hoạt động";
-        } else if (row.trang_thai === "TamDongCua") {
+          label = "Đang bán";
+        } else if (row.trang_thai === "TamNgung") {
           badgeStyle = "bg-yellow-100 text-yellow-700";
-          label = "Tạm đóng cửa";
+          label = "Tạm ngưng";
         }
 
         return (
@@ -192,9 +174,9 @@ const BranchPageAdmin = () => {
       field: "trang_thai",
       label: "Trạng thái",
       options: [
-        { label: "Đang hoạt động", value: "HoatDong" },
-        { label: "Tạm đóng cửa", value: "TamDongCua" },
-        { label: "Ngừng hoạt động", value: "NgungHoatDong" }
+        { label: "Đang bán", value: "DangBan" },
+        { label: "Tạm ngưng", value: "TamNgung" },
+        { label: "Ngừng kinh doanh", value: "NgungKinhDoanh" }
       ]
     }
   ];
@@ -205,10 +187,10 @@ const BranchPageAdmin = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-800 uppercase tracking-tight">
-            Quản lý Chi nhánh
+            Quản lý Loại SIM
           </h1>
           <p className="text-gray-500 text-sm mt-1">
-            Thiết lập mạng lưới cửa hàng Viettel Store toàn quốc để người dùng đặt số và lựa chọn giao dịch. Nhấp vào dòng để chỉnh sửa.
+            Thiết lập các loại SIM (Trả trước, Trả sau) hệ thống hỗ trợ để phân loại kho hàng. Nhấp vào dòng để chỉnh sửa.
           </p>
         </div>
         <button
@@ -219,7 +201,7 @@ const BranchPageAdmin = () => {
           className="bg-[#EE0033] hover:bg-[#CC002D] text-white font-bold px-5 py-3 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-red-500/25 transition-all flex items-center gap-2 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          Thêm cửa hàng mới
+          Thêm loại SIM mới
         </button>
       </div>
 
@@ -246,14 +228,14 @@ const BranchPageAdmin = () => {
         {loading ? (
           <div className="bg-white rounded-2xl border border-gray-150 p-20 flex flex-col items-center justify-center gap-4 text-center">
             <Loader2 className="w-10 h-10 text-[#EE0033] animate-spin" />
-            <p className="font-bold text-gray-500">Đang tải danh sách cửa hàng...</p>
+            <p className="font-bold text-gray-500">Đang tải danh sách loại SIM...</p>
           </div>
         ) : error ? (
           <div className="bg-white rounded-2xl border border-gray-150 p-20 flex flex-col items-center justify-center gap-4 text-center">
             <AlertCircle className="w-10 h-10 text-[#EE0033]" />
             <p className="font-bold text-[#EE0033]">{error}</p>
             <button
-              onClick={fetchBranches}
+              onClick={fetchTypes}
               className="bg-neutral-900 hover:bg-black text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-all"
             >
               Thử lại
@@ -261,10 +243,10 @@ const BranchPageAdmin = () => {
           </div>
         ) : (
           <TableComponent
-            data={branches}
+            data={types}
             columns={columns}
-            searchPlaceholder="Tìm cửa hàng theo tên, địa chỉ..."
-            searchFields={["ten_chi_nhanh", "dia_chi"]}
+            searchPlaceholder="Tìm kiếm theo tên loại SIM..."
+            searchFields={["ten_loai_sim"]}
             filterConfigs={filterConfigs}
             defaultItemsPerPage={10}
             onRowClick={handleRowClick}
@@ -272,7 +254,7 @@ const BranchPageAdmin = () => {
         )}
       </div>
 
-      {/* 1. Modal: Thêm Cửa hàng Mới */}
+      {/* 1. Modal: Thêm Loại SIM Mới */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -283,9 +265,9 @@ const BranchPageAdmin = () => {
             {/* Modal Header */}
             <div className="p-6 border-b border-gray-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Building className="w-5 h-5 text-[#EE0033]" />
+                <Tag className="w-5 h-5 text-[#EE0033]" />
                 <h3 className="text-lg font-black text-gray-800 uppercase tracking-tight">
-                  Tạo cửa hàng mới
+                  Tạo loại SIM mới
                 </h3>
               </div>
               <button
@@ -299,70 +281,21 @@ const BranchPageAdmin = () => {
             {/* Modal Form Body */}
             <form onSubmit={handleCreateSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
               <div className="space-y-4">
-                {/* Tên cửa hàng */}
+                {/* Tên loại SIM */}
                 <div>
                   <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                    Tên cửa hàng / Chi nhánh (Không bắt buộc)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Ví dụ: Viettel Store Quận 1"
-                    value={createFormData.ten_chi_nhanh}
-                    onChange={(e) =>
-                      setCreateFormData({ ...createFormData, ten_chi_nhanh: e.target.value })
-                    }
-                    className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] focus:border-[#EE0033]"
-                  />
-                </div>
-
-                {/* Địa chỉ */}
-                <div>
-                  <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                    Địa chỉ cửa hàng *
+                    Tên loại SIM *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="Ví dụ: Số 20 đường 3/2, Quận 10, TP.HCM"
-                    value={createFormData.dia_chi}
+                    placeholder="Ví dụ: Sim trả trước, Sim trả sau..."
+                    value={createFormData.ten_loai_sim}
                     onChange={(e) =>
-                      setCreateFormData({ ...createFormData, dia_chi: e.target.value })
+                      setCreateFormData({ ...createFormData, ten_loai_sim: e.target.value })
                     }
-                    className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
+                    className="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] focus:border-[#EE0033]"
                   />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Hotline */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                      Số Hotline (Không bắt buộc)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Tự động sinh hoặc nhập số"
-                      value={createFormData.so_hotline}
-                      onChange={(e) =>
-                        setCreateFormData({ ...createFormData, so_hotline: e.target.value })
-                      }
-                      className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
-                    />
-                  </div>
-
-                  {/* Giờ làm việc */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                      Giờ làm việc
-                    </label>
-                    <input
-                      type="text"
-                      value={createFormData.gio_lam_viec}
-                      onChange={(e) =>
-                        setCreateFormData({ ...createFormData, gio_lam_viec: e.target.value })
-                      }
-                      className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
-                    />
-                  </div>
                 </div>
 
                 {/* Trạng thái */}
@@ -375,12 +308,28 @@ const BranchPageAdmin = () => {
                     onChange={(e) =>
                       setCreateFormData({ ...createFormData, trang_thai: e.target.value })
                     }
-                    className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] cursor-pointer"
+                    className="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] cursor-pointer"
                   >
-                    <option value="HoatDong">Đang hoạt động</option>
-                    <option value="TamDongCua">Tạm đóng cửa</option>
-                    <option value="NgungHoatDong">Ngừng hoạt động</option>
+                    <option value="DangBan">Đang bán</option>
+                    <option value="TamNgung">Tạm ngưng</option>
+                    <option value="NgungKinhDoanh">Ngừng kinh doanh</option>
                   </select>
+                </div>
+
+                {/* Mô tả */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
+                    Mô tả loại hình dịch vụ
+                  </label>
+                  <textarea
+                    rows="3"
+                    placeholder="Mô tả quyền lợi, đặc thù thuê bao..."
+                    value={createFormData.mo_ta}
+                    onChange={(e) =>
+                      setCreateFormData({ ...createFormData, mo_ta: e.target.value })
+                    }
+                    className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
+                  ></textarea>
                 </div>
               </div>
 
@@ -401,7 +350,7 @@ const BranchPageAdmin = () => {
                   {formSubmitLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    "Đăng ký tạo cửa hàng"
+                    "Đăng ký tạo loại SIM"
                   )}
                 </button>
               </div>
@@ -410,11 +359,11 @@ const BranchPageAdmin = () => {
         </div>
       )}
 
-      {/* 2. Slide-over Drawer: Chỉnh sửa thông tin Cửa hàng */}
-      {selectedBranch && (
+      {/* 2. Slide-over Drawer: Chỉnh sửa thông tin Loại SIM */}
+      {selectedType && (
         <>
           <div
-            onClick={() => setSelectedBranch(null)}
+            onClick={() => setSelectedType(null)}
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300"
           ></div>
 
@@ -425,11 +374,11 @@ const BranchPageAdmin = () => {
               <div className="flex items-center gap-2">
                 <Edit className="w-5 h-5 text-[#EE0033]" />
                 <h3 className="text-lg font-black text-gray-800 uppercase tracking-tight">
-                  Chỉnh sửa cửa hàng
+                  Chỉnh sửa loại SIM
                 </h3>
               </div>
               <button
-                onClick={() => setSelectedBranch(null)}
+                onClick={() => setSelectedType(null)}
                 className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all cursor-pointer"
               >
                 <X className="w-5 h-5" />
@@ -439,77 +388,28 @@ const BranchPageAdmin = () => {
             {/* Drawer Body (Form) */}
             <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
               <div className="flex items-center gap-3 bg-red-50/50 border border-red-100 p-4 rounded-xl mb-2">
-                <Building className="w-8 h-8 text-[#EE0033] flex-shrink-0" />
+                <Tag className="w-8 h-8 text-[#EE0033] flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-gray-800 truncate">{selectedBranch.ten_chi_nhanh}</h4>
-                  <p className="text-[10px] text-gray-400 font-mono select-all truncate">ID: {selectedBranch.id_chi_nhanh}</p>
+                  <h4 className="font-bold text-gray-800 truncate">{selectedType.ten_loai_sim}</h4>
+                  <p className="text-[10px] text-gray-400 font-mono select-all truncate">ID: {selectedType.id_loai_sim}</p>
                 </div>
               </div>
 
               <div className="space-y-4">
-                {/* Tên cửa hàng */}
+                {/* Tên loại SIM */}
                 <div>
                   <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                    Tên cửa hàng / Chi nhánh *
+                    Tên loại SIM *
                   </label>
                   <input
                     type="text"
                     required
-                    value={editFormData.ten_chi_nhanh}
+                    value={editFormData.ten_loai_sim}
                     onChange={(e) =>
-                      setEditFormData({ ...editFormData, ten_chi_nhanh: e.target.value })
+                      setEditFormData({ ...editFormData, ten_loai_sim: e.target.value })
                     }
                     className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
                   />
-                </div>
-
-                {/* Địa chỉ */}
-                <div>
-                  <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                    Địa chỉ cửa hàng *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={editFormData.dia_chi}
-                    onChange={(e) =>
-                      setEditFormData({ ...editFormData, dia_chi: e.target.value })
-                    }
-                    className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Hotline */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                      Số Hotline *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={editFormData.so_hotline}
-                      onChange={(e) =>
-                        setEditFormData({ ...editFormData, so_hotline: e.target.value })
-                      }
-                      className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
-                    />
-                  </div>
-
-                  {/* Giờ làm việc */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                      Giờ làm việc
-                    </label>
-                    <input
-                      type="text"
-                      value={editFormData.gio_lam_viec}
-                      onChange={(e) =>
-                        setEditFormData({ ...editFormData, gio_lam_viec: e.target.value })
-                      }
-                      className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
-                    />
-                  </div>
                 </div>
 
                 {/* Trạng thái */}
@@ -522,12 +422,27 @@ const BranchPageAdmin = () => {
                     onChange={(e) =>
                       setEditFormData({ ...editFormData, trang_thai: e.target.value })
                     }
-                    className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] cursor-pointer"
+                    className="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] cursor-pointer"
                   >
-                    <option value="HoatDong">Đang hoạt động</option>
-                    <option value="TamDongCua">Tạm đóng cửa</option>
-                    <option value="NgungHoatDong">Ngừng hoạt động</option>
+                    <option value="DangBan">Đang bán</option>
+                    <option value="TamNgung">Tạm ngưng</option>
+                    <option value="NgungKinhDoanh">Ngừng kinh doanh</option>
                   </select>
+                </div>
+
+                {/* Mô tả */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
+                    Mô tả loại hình dịch vụ
+                  </label>
+                  <textarea
+                    rows="4"
+                    value={editFormData.mo_ta}
+                    onChange={(e) =>
+                      setEditFormData({ ...editFormData, mo_ta: e.target.value })
+                    }
+                    className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
+                  ></textarea>
                 </div>
               </div>
 
@@ -535,7 +450,7 @@ const BranchPageAdmin = () => {
               <div className="pt-6 border-t border-gray-100 flex gap-3 mt-4">
                 <button
                   type="button"
-                  onClick={() => setSelectedBranch(null)}
+                  onClick={() => setSelectedType(null)}
                   className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl text-sm transition-all cursor-pointer text-center"
                 >
                   Đóng
@@ -560,4 +475,4 @@ const BranchPageAdmin = () => {
   );
 };
 
-export default BranchPageAdmin;
+export default SimTypePageAdmin;

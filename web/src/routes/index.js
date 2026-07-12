@@ -143,6 +143,13 @@ export const routes = [
     isShowAdminLayout: true,
   },
   {
+    path: "/admin/sim-types",
+    name: "SimType",
+    page: React.lazy(() => import("../pages/admin/SimTypePageAdmin/SimTypePageAdmin")),
+    isShowAdminLayout: true,
+  },
+
+  {
     path: "/admin/users",
     name: "User",
     page: React.lazy(() => import("../pages/admin/UserPageAdmin/UserPageAdmin")),

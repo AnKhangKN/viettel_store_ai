@@ -85,3 +85,50 @@ class PackageService:
                 "trang_thai": record["trang_thai"]
             }
         }
+
+    async def update_package(self, id_goi: str, body: PackageCreateRequest):
+        # 1. Kiểm tra tồn tại
+        existing = await self.repository.get_package_by_id(id_goi)
+        if not existing:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Gói cước không tồn tại hoặc đã bị xóa"
+            )
+
+        # 2. Kiểm tra trùng tên (nếu thay đổi tên)
+        if existing["ten_goi"] != body.ten_goi:
+            name_check = await self.repository.find_by_name(body.ten_goi)
+            if name_check:
+                raise AppException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    message=f"Tên gói cước '{body.ten_goi}' đã tồn tại ở một gói cước khác"
+                )
+
+        # 3. Cập nhật dữ liệu
+        res = await self.repository.update_package(
+            id_goi=id_goi,
+            ten_goi=body.ten_goi,
+            mo_ta=body.mo_ta,
+            gia_cuoc=body.gia_cuoc,
+            dung_luong_gb=body.dung_luong_gb,
+            thoi_han_ngay=body.thoi_han_ngay,
+            so_phut_goi=body.so_phut_goi,
+            so_sms=body.so_sms,
+            trang_thai=body.trang_thai or "DangApDung"
+        )
+
+        return {
+            "success": True,
+            "data": {
+                "id_goi": str(res["id_goi"]),
+                "ten_goi": res["ten_goi"],
+                "mo_ta": res["mo_ta"],
+                "gia_cuoc": float(res["gia_cuoc"]),
+                "dung_luong_gb": float(res["dung_luong_gb"]),
+                "thoi_han_ngay": res["thoi_han_ngay"],
+                "so_phut_goi": res["so_phut_goi"],
+                "so_sms": res["so_sms"],
+                "trang_thai": res["trang_thai"]
+            }
+        }
+

@@ -87,3 +87,45 @@ class PackageRepository:
         """
         goi_uuid = uuid.UUID(id_goi) if isinstance(id_goi, str) else id_goi
         return await get_pool().fetchrow(sql, goi_uuid)
+
+    async def update_package(
+        self,
+        id_goi: str,
+        ten_goi: str,
+        mo_ta: Optional[str],
+        gia_cuoc: Optional[float],
+        dung_luong_gb: float,
+        thoi_han_ngay: Optional[int],
+        so_phut_goi: Optional[int],
+        so_sms: Optional[int],
+        trang_thai: Optional[str]
+    ):
+        sql = """
+            UPDATE goicuoc
+            SET 
+                ten_goi = $2,
+                mo_ta = $3,
+                gia_cuoc = $4,
+                dung_luong_gb = $5,
+                thoi_han_ngay = $6,
+                so_phut_goi = $7,
+                so_sms = $8,
+                trang_thai = $9,
+                cap_nhat = CURRENT_TIMESTAMP
+            WHERE id_goi = $1 AND da_xoa = false
+            RETURNING id_goi, ten_goi, mo_ta, gia_cuoc, dung_luong_gb, thoi_han_ngay, so_phut_goi, so_sms, trang_thai
+        """
+        goi_uuid = uuid.UUID(id_goi) if isinstance(id_goi, str) else id_goi
+        return await get_pool().fetchrow(
+            sql,
+            goi_uuid,
+            ten_goi,
+            mo_ta,
+            gia_cuoc,
+            dung_luong_gb,
+            thoi_han_ngay,
+            so_phut_goi,
+            so_sms,
+            trang_thai
+        )
+

@@ -33,3 +33,15 @@ export const createPackage = async (packageData) => {
         throw error;
     }
 };
+
+// API admin - cập nhật gói cước
+export const updatePackage = async (idGoi, packageData) => {
+    try {
+        const response = await axiosJWT.patch(`/api/package/${idGoi}`, packageData);
+        return response.data;
+    } catch (error) {
+        console.error("Lỗi cập nhật gói cước:", error);
+        throw error;
+    }
+};
+
