@@ -63,11 +63,10 @@ const PackageDetailPage = () => {
               </div>
 
               <button
-                onClick={() => navigate(`/register-package/${pkg.maGoi}`)}
-                className="w-full bg-[#EE0033] hover:bg-[#CC002D] text-white font-bold py-4 rounded-xl text-lg transition-colors shadow-lg shadow-red-500/30 flex items-center justify-center group"
+                onClick={() => navigate('/package')}
+                className="w-full bg-gray-900 hover:bg-black text-white font-bold py-4 rounded-xl text-lg transition-colors shadow-lg flex items-center justify-center group"
               >
-                Đăng ký ngay
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                Quay lại danh sách gói cước
               </button>
             </div>
 

@@ -99,3 +99,12 @@ Repository (Tương tác Cơ sở dữ liệu qua raw SQL)
 - Sử dụng 2 khóa bảo mật (Secret Key) riêng biệt để nâng cao tính an toàn:
   - `JWT_SECRET`: Dùng để ký và xác thực Access Token.
   - `JWT_REFRESH_SECRET`: Dùng để ký và xác thực Refresh Token.
+
+---
+
+## 5. Quy định Ngôn ngữ & Tương tác của AI
+
+### 5.1 Ngôn ngữ Phản hồi và Kế hoạch
+- AI bắt buộc phải trả lời và viết tất cả các tài liệu (kế hoạch triển khai `implementation_plan.md`, danh sách công việc `task.md`, báo cáo `walkthrough.md`, các đề xuất xác nhận hoặc proceed, v.v.) bằng **tiếng Việt**.
+- Không sử dụng tiếng Anh hoặc ngôn ngữ khác để phản hồi trực tiếp cho người dùng, trừ các đoạn mã nguồn, tên biến, hoặc thuật ngữ chuyên ngành không thể dịch nghĩa.
+

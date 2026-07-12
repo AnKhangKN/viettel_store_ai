@@ -130,18 +130,13 @@ export default function PackagePage() {
                   </div>
                 </div>
 
-                {/* Các nút Chức năng: Xem chi tiết & Đăng ký gói cước */}
-                <div className="p-4 md:p-6 pt-0 flex flex-col xl:flex-row gap-3 md:gap-4 bg-gray-50/50 border-t border-gray-100">
+                {/* Các nút Chức năng: Xem chi tiết */}
+                <div className="p-4 md:p-6 pt-0 bg-gray-50/50 border-t border-gray-100">
                   <button 
                     translate="no"
                     onClick={() => navigate(`/package/${pkg.maGoi}`)}
-                    className="w-full bg-white border border-gray-300 text-gray-600 font-bold py-2.5 md:py-3 rounded-xl text-sm md:text-base hover:bg-gray-100 transition shadow-sm flex items-center justify-center whitespace-nowrap">
+                    className="w-full bg-white border border-gray-300 hover:border-gray-400 text-gray-700 font-bold py-2.5 md:py-3 rounded-xl text-sm md:text-base hover:bg-gray-50 transition shadow-sm flex items-center justify-center whitespace-nowrap">
                     Xem chi tiết
-                  </button>
-                  <button 
-                    onClick={() => navigate(`/register-package/${pkg.maGoi}`)}
-                    className="w-full bg-[#EE0033] text-white font-bold py-2.5 md:py-3 rounded-xl text-sm md:text-base hover:bg-[#CC002D] transition shadow-md shadow-red-600/10 flex items-center justify-center whitespace-nowrap">
-                    Đăng ký gói cước
                   </button>
                 </div>
               </div>

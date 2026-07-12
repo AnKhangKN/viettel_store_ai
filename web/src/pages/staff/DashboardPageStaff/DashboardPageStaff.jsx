@@ -6,7 +6,7 @@ import {
   FaClock,
 } from "react-icons/fa";
 
-const DashboardPage = () => {
+const DashboardPageStaff = () => {
   const counters = [
     {
       title: "Khách đang chờ",
@@ -151,11 +151,10 @@ const DashboardPage = () => {
 
                 <td className="p-4">
                   <span
-                    className={`px-4 py-2 rounded-full text-sm font-medium ${
-                      item.status === "Đang phục vụ"
+                    className={`px-4 py-2 rounded-full text-sm font-medium ${item.status === "Đang phục vụ"
                         ? "bg-green-100 text-green-700"
                         : "bg-gray-100 text-gray-600"
-                    }`}
+                      }`}
                   >
                     {item.status}
                   </span>
@@ -228,4 +227,4 @@ const DashboardPage = () => {
   );
 };
 
-export default DashboardPage;
+export default DashboardPageStaff;

@@ -8,7 +8,7 @@ import {
 } from "react-icons/fa";
 
 
-const WaitingListPage = () => {
+const WaitingListStaffPage = () => {
 
 
   const [customers, setCustomers] = useState([
@@ -67,7 +67,7 @@ const WaitingListPage = () => {
 
     // hoàn thành giao dịch
 
-    if(status === "Hoàn thành"){
+    if (status === "Hoàn thành") {
 
 
       setServedCustomers([
@@ -98,13 +98,13 @@ const WaitingListPage = () => {
     setCustomers(
       customers.map(item =>
         item.id === id
-        ?
-        {
-          ...item,
-          status
-        }
-        :
-        item
+          ?
+          {
+            ...item,
+            status
+          }
+          :
+          item
       )
     );
 
@@ -129,7 +129,7 @@ const WaitingListPage = () => {
   const today = new Date();
 
 
-  const servedToday = servedCustomers.filter(item=>{
+  const servedToday = servedCustomers.filter(item => {
 
 
     const date = new Date(
@@ -248,7 +248,7 @@ const WaitingListPage = () => {
             items-center
           ">
 
-            <FaUsers size={25}/>
+            <FaUsers size={25} />
 
           </div>
 
@@ -307,7 +307,7 @@ const WaitingListPage = () => {
             items-center
           ">
 
-            <FaChartLine size={25}/>
+            <FaChartLine size={25} />
 
           </div>
 
@@ -367,7 +367,7 @@ const WaitingListPage = () => {
             items-center
           ">
 
-            <FaClock size={25}/>
+            <FaClock size={25} />
 
           </div>
 
@@ -434,35 +434,35 @@ const WaitingListPage = () => {
         {
           customers.length === 0
 
-          ?
+            ?
 
-          (
+            (
 
-            <div className="
+              <div className="
               text-center
               py-10
               text-gray-400
             ">
-              Không còn khách hàng đang chờ
-            </div>
+                Không còn khách hàng đang chờ
+              </div>
 
-          )
-
-
-          :
-
-          (
-
-          <div className="space-y-4">
+            )
 
 
-          {
-            customers.map(item=>(
+            :
+
+            (
+
+              <div className="space-y-4">
 
 
-              <div
-                key={item.id}
-                className="
+                {
+                  customers.map(item => (
+
+
+                    <div
+                      key={item.id}
+                      className="
                   border
                   rounded-2xl
                   p-5
@@ -472,11 +472,11 @@ const WaitingListPage = () => {
                   hover:shadow-md
                   transition
                 "
-              >
+                    >
 
 
 
-                <div className="
+                      <div className="
                   flex
                   items-center
                   gap-5
@@ -484,7 +484,7 @@ const WaitingListPage = () => {
 
 
 
-                  <div className="
+                        <div className="
                     w-16
                     h-16
                     bg-red-600
@@ -496,97 +496,96 @@ const WaitingListPage = () => {
                     font-bold
                     text-lg
                   ">
-                    {item.number}
-                  </div>
+                          {item.number}
+                        </div>
 
 
 
 
 
-                  <div>
+                        <div>
 
 
-                    <h3 className="
+                          <h3 className="
                       font-semibold
                     ">
-                      {item.name}
-                    </h3>
+                            {item.name}
+                          </h3>
 
 
 
-                    <p className="
+                          <p className="
                       text-sm
                       text-gray-500
                     ">
-                      {item.service}
-                    </p>
+                            {item.service}
+                          </p>
 
 
-                    <p className="
+                          <p className="
                       text-sm
                       text-gray-400
                       mt-1
                     ">
-                      {item.time}
-                    </p>
+                            {item.time}
+                          </p>
 
 
-                  </div>
+                        </div>
 
 
-                </div>
-
-
-
+                      </div>
 
 
 
 
 
-                <div className="
+
+
+
+                      <div className="
                   flex
                   items-center
                   gap-4
                 ">
 
 
-                  <span className={`
+                        <span className={`
                     px-4
                     py-2
                     rounded-full
                     text-sm
 
-                    ${
-                      item.status === "Đang chờ"
-                      ?
-                      "bg-yellow-100 text-yellow-700"
-                      :
-                      "bg-blue-100 text-blue-700"
-                    }
+                    ${item.status === "Đang chờ"
+                            ?
+                            "bg-yellow-100 text-yellow-700"
+                            :
+                            "bg-blue-100 text-blue-700"
+                          }
 
                   `}>
-                    {item.status}
-                  </span>
+                          {item.status}
+                        </span>
 
 
 
 
 
-                  {
-                    item.status === "Đang chờ"
+                        {
+                          item.status === "Đang chờ"
 
-                    &&
+                          &&
 
-                    <button
+                          <button
 
-                      onClick={() =>
-                        updateStatus(
-                          item.id,
-                          "Đang xử lý"
-                        )
-                      }
+                            onClick={() =>
+                              updateStatus(
+                                item.id,
+                                "Đang xử lý"
+                              )
+                            }
 
-                      className="
+                            className="
                         bg-red-600
                         text-white
                         px-5
@@ -596,35 +595,35 @@ const WaitingListPage = () => {
                         items-center
                         gap-2
                       "
-                    >
+                          >
 
-                      <FaPhoneAlt/>
+                            <FaPhoneAlt />
 
-                      Gọi khách
+                            Gọi khách
 
-                    </button>
+                          </button>
 
-                  }
-
-
+                        }
 
 
 
-                  {
-                    item.status === "Đang xử lý"
 
-                    &&
 
-                    <button
+                        {
+                          item.status === "Đang xử lý"
 
-                      onClick={() =>
-                        updateStatus(
-                          item.id,
-                          "Hoàn thành"
-                        )
-                      }
+                          &&
 
-                      className="
+                          <button
+
+                            onClick={() =>
+                              updateStatus(
+                                item.id,
+                                "Hoàn thành"
+                              )
+                            }
+
+                            className="
                         bg-green-600
                         text-white
                         px-5
@@ -634,32 +633,32 @@ const WaitingListPage = () => {
                         items-center
                         gap-2
                       "
-                    >
+                          >
 
-                      <FaCheck/>
+                            <FaCheck />
 
-                      Hoàn thành
+                            Hoàn thành
 
-                    </button>
+                          </button>
 
-                  }
+                        }
 
 
 
-                </div>
+                      </div>
 
+
+
+                    </div>
+
+
+                  ))
+                }
 
 
               </div>
 
-
-            ))
-          }
-
-
-          </div>
-
-          )
+            )
 
         }
 
@@ -675,4 +674,4 @@ const WaitingListPage = () => {
 };
 
 
-export default WaitingListPage;
+export default WaitingListStaffPage;

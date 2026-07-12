@@ -59,6 +59,8 @@ function App() {
 
           // Lấy thông tin user (lúc này Authorization header đã có token)
           const userRes = await getUserInfo();
+          console.log('🚀 ~ App ~ userRes:', userRes)
+
 
           if (userRes?.success && userRes?.data) {
             store.dispatch(

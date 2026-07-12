@@ -214,8 +214,8 @@ export default function HomePage() {
 
               {/* Footer Card Action */}
               <div className="p-6 pt-0 border-t border-gray-50 bg-gray-50/50 group-hover:bg-white transition-colors">
-                <Link to={`/register-package/${pkg.maGoi}`} className="w-full bg-white border-2 border-gray-200 text-gray-700 font-bold py-2.5 rounded-xl shadow-[0_4px_0_#e5e7eb] hover:shadow-[0_6px_0_#d1d5db] hover:-translate-y-1 active:shadow-[0_0px_0_#d1d5db] active:translate-y-1 hover:border-gray-300 transition-all flex items-center justify-center">
-                  Đăng ký gói
+                <Link to={`/package/${pkg.maGoi}`} className="w-full bg-white border-2 border-gray-200 text-gray-700 font-bold py-2.5 rounded-xl shadow-[0_4px_0_#e5e7eb] hover:shadow-[0_6px_0_#d1d5db] hover:-translate-y-1 active:shadow-[0_0px_0_#d1d5db] active:translate-y-1 hover:border-gray-300 transition-all flex items-center justify-center">
+                  Xem chi tiết
                 </Link>
               </div>
             </div>

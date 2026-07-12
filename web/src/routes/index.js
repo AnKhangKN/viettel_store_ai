@@ -51,12 +51,6 @@ export const routes = [
     isShowUserLayout: true,
   },
   {
-    path: "/register-package/:id",
-    name: "Register Package",
-    page: React.lazy(() => import("../pages/user/RegisterPackagePage/RegisterPackagePage")),
-    isShowUserLayout: true,
-  },
-  {
     path: "/chatbot",
     name: "Chatbot",
     page: React.lazy(() => import("../pages/user/ChatbotPage/ChatbotPage")),
@@ -128,38 +122,56 @@ export const routes = [
     page: React.lazy(() => import("../pages/user/StoreLocatorPage/StoreLocatorPage")),
     isShowUserLayout: true,
   },
-    
+
   //   Admin
   {
-    path: "/admin",
-    name: "Admin",
-    page: React.lazy(() => import("../pages/admin/DashboardPage/DashboardPage")),
+    path: "/admin/dashboard",
+    name: "Dashboard",
+    page: React.lazy(() => import("../pages/admin/DashboardPageAdmin/DashboardPageAdmin")),
     isShowAdminLayout: true,
   },
   {
-    path: "/admin/new",
-    name: "New Page",
-    page: React.lazy(() => import("../pages/admin/NewPage/NewPage")),
+    path: "/admin/packages",
+    name: "Package",
+    page: React.lazy(() => import("../pages/admin/PackagePageAdmin/PackagePageAdmin")),
     isShowAdminLayout: true,
   },
-  
+  {
+    path: "/admin/sims",
+    name: "Sim",
+    page: React.lazy(() => import("../pages/admin/SimPageAdmin/SimPageAdmin")),
+    isShowAdminLayout: true,
+  },
+  {
+    path: "/admin/users",
+    name: "User",
+    page: React.lazy(() => import("../pages/admin/UserPageAdmin/UserPageAdmin")),
+    isShowAdminLayout: true,
+  },
+  {
+    path: "/admin/stores",
+    name: "Branch",
+    page: React.lazy(() => import("../pages/admin/BranchPageAdmin/BranchPageAdmin")),
+    isShowAdminLayout: true,
+  },
+  {
+    path: "/admin/settings",
+    name: "Setting",
+    page: React.lazy(() => import("../pages/admin/SettingPageAdmin/SettingPageAdmin")),
+    isShowAdminLayout: true,
+  },
+
   //  Staff
-   {
-    path: "/staff",
-    name: "Staff",
-    page: React.lazy(() => import("../pages/staff/DashboardPage/DashboardPage")),
+  {
+    path: "/staff/dashboard",
+    name: "Dashboard",
+    page: React.lazy(() => import("../pages/staff/DashboardPageStaff/DashboardPageStaff")),
     isShowStaffLayout: true,
   },
   {
     path: "/staff/waiting-list",
     name: "Waiting List",
-    page: React.lazy(() => import("../pages/staff/WaitingList/WaitingList")),
-    isShowStaffLayout: true,
-  },
-  {
-    path: "/staff/package",
-    name: "Package",
-    page: React.lazy(() => import("../pages/staff/PackagePageStaff/PackagePageStaff")),
+    page: React.lazy(() => import("../pages/staff/WaitingListStaff/WaitingListStaff")),
     isShowStaffLayout: true,
   }
 

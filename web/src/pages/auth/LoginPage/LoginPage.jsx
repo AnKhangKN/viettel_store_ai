@@ -25,16 +25,16 @@ const LoginPage = () => {
         const { accessToken, user } = res.data;
         const decoded = decodeToken(accessToken);
         const role = decoded?.quyen || 'user';
-        
-        dispatch(setCredentials({ 
-          accessToken, 
-          user: { ...user, role } 
+
+        dispatch(setCredentials({
+          accessToken,
+          user: { ...user, role }
         }));
 
         if (role === 'admin') {
-          navigate('/admin');
+          navigate('/admin/dashboard');
         } else if (role === 'staff') {
-          navigate('/staff');
+          navigate('/staff/dashboard');
         } else {
           navigate('/');
         }
@@ -53,15 +53,15 @@ const LoginPage = () => {
       {/* Decorative background blobs */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-[100px] opacity-50 animate-pulse"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#EE0033] rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
- 
+
       <div className="flex w-full max-w-6xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10 border border-gray-100">
-        
+
         {/* Left Side - Branding */}
         <div className="hidden md:flex md:w-5/12 flex-col justify-center items-start text-left p-16 bg-gradient-to-br from-[#EE0033] to-[#A00022] text-white relative overflow-hidden">
           {/* Glassmorphism decoration */}
           <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-2xl"></div>
           <div className="absolute bottom-[-20%] left-[-10%] w-80 h-80 bg-black/20 rounded-full blur-3xl"></div>
-          
+
           <div className="relative z-10">
             <div className="flex items-center mb-10 opacity-90">
               <svg viewBox="0 0 100 100" className="w-10 h-10 text-white mr-2" fill="none" stroke="currentColor" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round">
@@ -69,7 +69,7 @@ const LoginPage = () => {
               </svg>
               <h1 className="text-4xl font-black tracking-tighter drop-shadow-md">viettel</h1>
             </div>
-            <h2 className="text-4xl lg:text-5xl font-black mb-6 leading-tight drop-shadow-lg">Đăng Nhập <br/>Hệ Thống</h2>
+            <h2 className="text-4xl lg:text-5xl font-black mb-6 leading-tight drop-shadow-lg">Đăng Nhập <br />Hệ Thống</h2>
             <p className="text-lg text-white/90 max-w-sm leading-relaxed mb-12">
               Quản lý gói cước, mua SIM và trải nghiệm hệ sinh thái dịch vụ số thông minh nhất.
             </p>
@@ -89,14 +89,14 @@ const LoginPage = () => {
             </div>
           </div>
         </div>
- 
+
         {/* Right Side - Login Form */}
         <div className="w-full md:w-7/12 p-8 md:p-16 lg:px-24 flex flex-col justify-center bg-white">
           <div className="mb-10">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Chào mừng trở lại! 👋</h2>
             <p className="text-gray-500 text-base">Vui lòng đăng nhập để tiếp tục quản lý tài khoản</p>
           </div>
- 
+
           <form onSubmit={handleLoginSubmit} className="space-y-6">
             {error && (
               <div className="bg-red-50 text-[#EE0033] border border-red-200 px-5 py-4 rounded-2xl text-sm font-bold animate-fade-in-up">
@@ -118,7 +118,7 @@ const LoginPage = () => {
                 required
               />
             </div>
- 
+
             {/* Password Input */}
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -142,7 +142,7 @@ const LoginPage = () => {
                 </button>
               </div>
             </div>
- 
+
             {/* Forgot Password Link */}
             <div className="flex justify-end pt-2">
               <a
@@ -152,7 +152,7 @@ const LoginPage = () => {
                 Quên mật khẩu?
               </a>
             </div>
- 
+
             {/* Login Button */}
             <button
               type="submit"

@@ -1,24 +1,14 @@
 import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import {
-  FaBell,
-  FaUserTie,
-  FaSignOutAlt,
-  FaTachometerAlt,
-  FaClock,
-  FaBoxOpen,
-  FaSimCard,
-  FaUsers,
-  FaMoneyCheckAlt,
-} from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import { Bell, ArrowLeft, LogOut, User, Menu, MapPin } from "lucide-react";
 
 const HeaderComponentStaff = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const user = useSelector((state) => state.auth.user);
 
-  const isDashboard = location.pathname === "/staff";
-
+  const isDashboard = location.pathname === "/staff/dashboard";
   const [showNotification, setShowNotification] = useState(false);
 
   const notifications = [
@@ -39,177 +29,100 @@ const HeaderComponentStaff = () => {
     },
   ];
 
-  const menus = [
-    {
-      name: "Dashboard",
-      path: "/staff",
-      icon: <FaTachometerAlt />,
-    },
-    {
-      name: "Hàng chờ",
-      path: "/staff/waiting-list",
-      icon: <FaClock />,
-    },
-    {
-      name: "Gói cước",
-      path: "/staff/package",
-      icon: <FaBoxOpen />,
-    },
-    {
-      name: "Đơn mua SIM",
-      path: "/staff/sim",
-      icon: <FaSimCard />,
-    },
-    {
-      name: "Khách hàng",
-      path: "/staff/customer",
-      icon: <FaUsers />,
-    },
-    {
-      name: "Thanh toán",
-      path: "/staff/payment",
-      icon: <FaMoneyCheckAlt />,
-    },
-  ];
-
   return (
-    <header className="bg-gradient-to-r from-red-600 to-red-700 shadow-md sticky top-0 z-50">
-      <div className="flex items-center justify-between px-6 py-4">
-
-        {/* Left */}
-        <div className="flex items-center gap-8">
-
-          {!isDashboard && (
-            <button
-              onClick={() => navigate(-1)}
-              className="w-9 h-9 rounded-full bg-red-800/40 hover:bg-red-800 flex items-center justify-center text-white transition"
-            >
-              <ArrowLeft size={18} />
-            </button>
-          )}
-
-          <Link
-            to="/staff"
-            className="flex items-center gap-3 hover:opacity-90"
+    <header className="px-6 py-4 flex items-center justify-between relative bg-white">
+      {/* Left: Brand name / Portal title & Back Button */}
+      <div className="flex items-center gap-3">
+        {!isDashboard && (
+          <button
+            onClick={() => navigate(-1)}
+            className="w-9 h-9 rounded-xl bg-gray-50 border border-gray-200 hover:bg-red-50 hover:text-[#EE0033] flex items-center justify-center text-gray-500 transition-all cursor-pointer mr-2"
+            title="Quay lại"
           >
-            <span className="text-3xl">⚡</span>
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+        )}
+        <button className="lg:hidden text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-2 rounded-lg transition-colors">
+          <Menu className="w-5 h-5" />
+        </button>
+        <Link to="/staff/dashboard" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+          <div className="text-xl font-bold text-[#EE0033]">⚡</div>
+          <span className="text-lg font-black tracking-tight text-gray-900 uppercase">
+            Viettel Store <span className="text-[#EE0033] font-black">Staff</span>
+          </span>
+        </Link>
 
-            <h1 className="text-xl font-bold text-white whitespace-nowrap">
-              Viettel Staff
-            </h1>
-          </Link>
-
-          <div className="hidden xl:flex items-center px-4 py-2 rounded-lg bg-red-700/50 border border-red-500">
-            <span className="text-white text-sm font-medium">
-              📍 Viettel Cần Thơ
-            </span>
-          </div>
-
+        {/* Branch location tag */}
+        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-50/50 border border-red-100/50 ml-4">
+          <MapPin className="w-4 h-4 text-[#EE0033]" />
+          <span className="text-[#EE0033] text-xs font-bold">
+            Viettel Cần Thơ
+          </span>
         </div>
+      </div>
 
-        {/* Center Menu */}
-        <nav className="hidden lg:flex items-center gap-2">
+      {/* Right: Notifications & User profile & Logout */}
+      <div className="flex items-center gap-5">
+        {/* Notifications Button */}
+        <div className="relative">
+          <button
+            onClick={() => setShowNotification(!showNotification)}
+            className="relative p-2.5 text-gray-500 hover:text-[#EE0033] hover:bg-red-50 rounded-xl transition-all cursor-pointer"
+          >
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-2 right-2 flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#EE0033]"></span>
+            </span>
+          </button>
 
-          {menus.map((item) => {
-
-            const active = location.pathname === item.path;
-
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200
-                ${
-                  active
-                    ? "bg-white text-red-600 shadow-md font-semibold"
-                    : "text-white hover:bg-red-500"
-                }`}
-              >
-                <span className="text-lg">{item.icon}</span>
-
-                <span className="text-sm whitespace-nowrap">
-                  {item.name}
-                </span>
-              </Link>
-            );
-          })}
-
-        </nav>
-
-        {/* Right */}
-        <div className="flex items-center gap-5">
-
-          {/* Notification */}
-          <div className="relative">
-
-            <button
-              onClick={() => setShowNotification(!showNotification)}
-              className="relative p-2 rounded-lg hover:bg-red-500 text-white transition"
-            >
-              <FaBell size={20} />
-
-              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-yellow-400 text-red-700 text-xs font-bold flex items-center justify-center">
-                {notifications.length}
-              </span>
-
-            </button>
-
-            {showNotification && (
-              <div className="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl overflow-hidden">
-
-                <div className="px-4 py-3 bg-gray-100 font-semibold">
-                  Thông báo
-                </div>
-
+          {/* Notifications Dropdown Popup */}
+          {showNotification && (
+            <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 animate-fade-in-up">
+              <div className="px-4 py-3.5 bg-gray-50 border-b border-gray-100 font-bold text-gray-800 text-sm">
+                Thông báo mới
+              </div>
+              <div className="divide-y divide-gray-50 max-h-64 overflow-y-auto">
                 {notifications.map((item) => (
                   <div
                     key={item.id}
-                    className="px-4 py-3 border-b hover:bg-gray-50 cursor-pointer"
+                    className="px-4 py-3 hover:bg-gray-50/80 cursor-pointer transition-colors"
                   >
-                    <p className="font-semibold text-sm text-gray-800">
+                    <p className="font-bold text-xs text-gray-800">
                       {item.title}
                     </p>
-
-                    <p className="text-xs text-gray-600 mt-1">
+                    <p className="text-xs text-gray-500 mt-1 leading-normal">
                       {item.message}
                     </p>
                   </div>
                 ))}
-
               </div>
-            )}
-
-          </div>
-
-          {/* Staff */}
-          <div className="flex items-center gap-3 pl-5 border-l border-red-400">
-
-            <div className="text-right">
-              <p className="text-sm font-semibold text-white">
-                Phạm Khánh Ngọc
-              </p>
-
-              <p className="text-xs text-red-100">
-                Nhân viên giao dịch quầy 1
-              </p>
             </div>
-
-            <button className="w-10 h-10 rounded-full bg-red-500 hover:bg-red-400 flex items-center justify-center text-white transition">
-              <FaUserTie />
-            </button>
-
-          </div>
-
-          {/* Logout */}
-          <Link
-            to="/logout"
-            className="w-10 h-10 rounded-lg hover:bg-red-500 flex items-center justify-center text-white transition"
-          >
-            <FaSignOutAlt />
-          </Link>
-
+          )}
         </div>
 
+        {/* Vertical divider */}
+        <div className="h-6 w-px bg-gray-200"></div>
+
+        {/* User profile details */}
+        <div className="flex items-center gap-3">
+          <div className="text-right hidden sm:block">
+            <p className="text-xs text-gray-400 font-medium">Nhân viên quầy 1</p>
+            <p className="text-sm font-bold text-gray-800">{user?.name || "Phạm Khánh Ngọc"}</p>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center text-[#EE0033] font-bold shadow-sm">
+            {user?.name ? user.name.charAt(0).toUpperCase() : "N"}
+          </div>
+        </div>
+
+        {/* Logout Button */}
+        <button
+          onClick={() => navigate("/logout")}
+          className="p-2.5 text-gray-400 hover:text-[#EE0033] hover:bg-red-50 rounded-xl transition-all cursor-pointer"
+          title="Đăng xuất"
+        >
+          <LogOut className="w-5 h-5" />
+        </button>
       </div>
     </header>
   );

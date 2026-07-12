@@ -1,16 +1,26 @@
 import React from "react";
 import HeaderComponentStaff from "../../components/staff/HeaderComponentStaff/HeaderComponentStaff";
+import SidebarComponentStaff from "../../components/staff/SidebarComponentStaff/SidebarComponentStaff";
 
 const StaffLayout = ({ children }) => {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
+    <div className="flex flex-col h-screen bg-gray-100">
       {/* Header */}
-      <HeaderComponentStaff />
+      <div className="bg-white shadow-sm border-b">
+        <HeaderComponentStaff />
+      </div>
 
-      {/* Nội dung */}
-      <main className="flex-1 overflow-y-auto p-6">
-        {children}
-      </main>
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <div className="w-64 bg-white border-r shadow-md">
+          <SidebarComponentStaff />
+        </div>
+
+        {/* Nội dung chính */}
+        <main className="flex-1 overflow-y-auto p-6">
+          {children}
+        </main>
+      </div>
     </div>
   );
 };
