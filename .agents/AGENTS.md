@@ -32,7 +32,7 @@ Repository (Tương tác Cơ sở dữ liệu qua raw SQL)
   return await get_pool().fetchrow(sql, email)
   ```
 - Tránh viết SQL trực tiếp ngoài tầng Repository.
-- **Tham khảo Schema gốc**: Khi viết các Pydantic Schema, DTO hoặc câu truy vấn SQL, bắt buộc tham chiếu và đối chiếu chính xác với cấu trúc bảng định nghĩa trong file [db-script.sql](file:///d:/workspace/viettel_store_ai/db-script.sql) ở thư mục gốc để đảm bảo đúng kiểu dữ liệu, tên cột và các ràng buộc.
+- **Tham khảo Schema gốc**: Khi viết các Pydantic Schema, DTO hoặc câu truy vấn SQL, bắt buộc tham chiếu và đối chiếu chính xác với cấu trúc bảng định nghĩa trong file [db-script.sql](../db-script.sql) ở thư mục gốc để đảm bảo đúng kiểu dữ liệu, tên cột và các ràng buộc.
 
 ### 1.3 Schema & Validate dữ liệu
 - Luôn sử dụng **Pydantic** để định nghĩa cấu trúc Request và Response.
