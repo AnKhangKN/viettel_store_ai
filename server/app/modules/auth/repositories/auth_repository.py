@@ -68,7 +68,9 @@ class AuthRepository:
                 email,
                 so_dien_thoai,
                 vai_tro,
-                trang_thai
+                trang_thai,
+                cccd,
+                dia_chi
             FROM khachhang
             WHERE id_khach_hang = $1 AND da_xoa = false
         """

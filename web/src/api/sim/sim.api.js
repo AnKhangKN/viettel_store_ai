@@ -37,7 +37,7 @@ export const createSim = async (simData) => {
 // API admin - lấy toàn bộ SIM trong hệ thống
 export const getAllSims = async () => {
     try {
-        const response = await axiosJWT.get(`/api/sim`);
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/sim`);
         return response.data;
     } catch (error) {
         console.error("Lỗi lấy danh sách tất cả SIM:", error);

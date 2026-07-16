@@ -7,4 +7,5 @@ class BranchCreateRequest(BaseModel):
     so_hotline: Optional[str] = Field(None, description="Số hotline (tự động sinh nếu trống)")
     gio_lam_viec: Optional[str] = Field("08:00 - 22:00", description="Giờ làm việc")
     trang_thai: Optional[str] = Field("HoatDong", description="Trạng thái chi nhánh (HoatDong, TamDongCua, NgungHoatDong)")
+    map_url: Optional[str] = Field(None, description="Đường dẫn nhúng bản đồ chi nhánh")
 

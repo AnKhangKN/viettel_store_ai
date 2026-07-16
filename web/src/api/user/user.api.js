@@ -80,14 +80,27 @@ export const getAllAccounts = async () => {
 };
 
 // API admin - cập nhật vai trò (role) của tài khoản
-export const updateAccountRole = async (idKhachHang, vaiTro) => {
+export const updateAccountRole = async (idKhachHang, vaiTro, idChiNhanh = null) => {
     try {
-        const response = await axiosJWT.patch(`/api/user/account/${idKhachHang}/role`, {
-            vai_tro: vaiTro
-        });
+        const payload = { vai_tro: vaiTro };
+        if (idChiNhanh) {
+            payload.id_chi_nhanh = idChiNhanh;
+        }
+        const response = await axiosJWT.patch(`/api/user/account/${idKhachHang}/role`, payload);
         return response.data;
     } catch (error) {
         console.error("Lỗi cập nhật vai trò tài khoản:", error);
+        throw error;
+    }
+};
+
+// API user - cập nhật thông tin cá nhân (họ tên, SĐT, CCCD, địa chỉ)
+export const updateProfile = async (profileData) => {
+    try {
+        const response = await axiosJWT.patch(`/api/user/profile`, profileData);
+        return response.data;
+    } catch (error) {
+        console.error("Lỗi cập nhật hồ sơ:", error);
         throw error;
     }
 };

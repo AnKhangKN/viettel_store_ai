@@ -20,6 +20,14 @@ class SimService:
                 message=f"Số SIM '{body.so_sim}' đã tồn tại trong hệ thống"
             )
 
+        # 1.1 Kiểm tra trùng với số điện thoại của khách hàng đã đăng ký
+        existing_customer = await self.repository.find_customer_by_phone(body.so_sim)
+        if existing_customer:
+            raise AppException(
+                status_code=status.HTTP_409_CONFLICT,
+                message=f"Số SIM '{body.so_sim}' trùng với số điện thoại của một khách hàng đã đăng ký trên hệ thống"
+            )
+
         # 2. Kiểm tra loại SIM có tồn tại không
         loai_sim = await self.repository.check_loaisim_exists(body.id_loai_sim)
         if not loai_sim:
@@ -159,6 +167,14 @@ class SimService:
                 raise AppException(
                     status_code=status.HTTP_409_CONFLICT,
                     message=f"Số SIM '{body.so_sim}' đã tồn tại ở một SIM khác"
+                )
+
+            # Kiểm tra trùng với số điện thoại của khách hàng đã đăng ký
+            existing_customer = await self.repository.find_customer_by_phone(body.so_sim)
+            if existing_customer:
+                raise AppException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    message=f"Số SIM '{body.so_sim}' trùng với số điện thoại của một khách hàng đã đăng ký trên hệ thống"
                 )
 
         # 3. Kiểm tra loại SIM có tồn tại không

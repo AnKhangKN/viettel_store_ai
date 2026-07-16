@@ -1,64 +1,72 @@
-import React, { useState } from "react";
-import { Search, ShoppingCart, Eye } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, ShoppingCart, Eye, Loader2, Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { getAllSims, getSimTypes } from "../../../api/sim/sim.api";
+import { getAllBranches } from "../../../api/branch/branch.api";
 
 const BuySim = () => {
-  const simList = [
-    {
-      maSim: "SIM001",
-      soSim: "0988xxxx88",
-      loaiSim: "Số đẹp",
-      giaBan: "500.000đ",
-      trangThai: "Còn hàng",
-    },
-    {
-      maSim: "SIM002",
-      soSim: "0977xxxx77",
-      loaiSim: "Tam hoa",
-      giaBan: "800.000đ",
-      trangThai: "Còn hàng",
-    },
-    {
-      maSim: "SIM003",
-      soSim: "0868xxxx68",
-      loaiSim: "Lộc phát",
-      giaBan: "1.200.000đ",
-      trangThai: "Còn hàng",
-    },
-    {
-      maSim: "SIM004",
-      soSim: "0909xxxx99",
-      loaiSim: "VIP",
-      giaBan: "2.500.000đ",
-      trangThai: "Còn hàng",
-    },
-    {
-      maSim: "SIM005",
-      soSim: "0399xxxx39",
-      loaiSim: "Thần tài",
-      giaBan: "950.000đ",
-      trangThai: "Còn hàng",
-    },
-    {
-      maSim: "SIM006",
-      soSim: "0888xxxx68",
-      loaiSim: "Số đẹp",
-      giaBan: "650.000đ",
-      trangThai: "Còn hàng",
-    },
-  ];
-
+  const [simList, setSimList] = useState([]);
+  const [types, setTypes] = useState(["Tất cả"]);
+  const [branches, setBranches] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [selectedType, setSelectedType] = useState("Tất cả");
+  const [selectedBranch, setSelectedBranch] = useState("Tất cả");
+  const [loading, setLoading] = useState(true);
 
-  const types = ["Tất cả", "Số đẹp", "Tam hoa", "Lộc phát", "Thần tài", "VIP"];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // 1. Tải danh sách chi nhánh
+        const branchesRes = await getAllBranches();
+        if (branchesRes?.success && branchesRes?.data) {
+          setBranches(branchesRes.data);
+        }
+
+        // 2. Tải danh sách Loại SIM
+        const typesRes = await getSimTypes();
+        if (typesRes?.success && typesRes?.data) {
+          const typeNames = ["Tất cả", ...typesRes.data.map(t => t.ten_loai_sim)];
+          setTypes(typeNames);
+        }
+        
+        // 3. Tải danh sách SIM
+        const simsRes = await getAllSims();
+        if (simsRes?.success && simsRes?.data) {
+          const formattedSims = simsRes.data.map(sim => ({
+            maSim: sim.id_sim,
+            soSim: sim.so_sim,
+            loaiSim: sim.loai_sim?.ten_loai_sim || "Chưa phân loại",
+            giaBan: sim.gia_ban.toLocaleString("vi-VN") + "đ",
+            trangThai: sim.trang_thai === "ConHang" ? "Còn hàng" : sim.trang_thai === "GiuSo" ? "Đang giữ số" : "Đã bán",
+            rawStatus: sim.trang_thai,
+            idChiNhanh: sim.chi_nhanh?.id_chi_nhanh || "",
+            tenChiNhanh: sim.chi_nhanh?.ten_chi_nhanh || "Hệ thống"
+          }));
+          setSimList(formattedSims);
+        }
+      } catch (err) {
+        console.error("Lỗi tải dữ liệu SIM:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const filteredSim = simList.filter((sim) => {
-    const search = sim.soSim.toLowerCase().includes(keyword.toLowerCase());
+    // Chuẩn hóa chuỗi số điện thoại để tìm kiếm thông minh hơn (lược bỏ khoảng trắng hoặc ký tự đặc biệt)
+    const cleanSimNumber = sim.soSim.replace(/[^0-9]/g, "");
+    const cleanKeyword = keyword.replace(/[^0-9]/g, "");
+    const search = cleanSimNumber.includes(cleanKeyword) || sim.soSim.includes(keyword);
 
     const type = selectedType === "Tất cả" || sim.loaiSim === selectedType;
+    
+    // Lọc theo chi nhánh
+    const branch = selectedBranch === "Tất cả" || sim.idChiNhanh === selectedBranch;
 
-    return search && type;
+    return search && type && branch;
   });
 
   return (
@@ -73,17 +81,34 @@ const BuySim = () => {
         </p>
 
         <div className="bg-white rounded-2xl shadow p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-5 justify-between">
-            <div className="relative w-full lg:w-96">
-              <Search className="absolute left-4 top-3.5 text-gray-400 w-5 h-5" />
+          <div className="flex flex-col lg:flex-row gap-5 justify-between items-start lg:items-center">
+            <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto flex-1">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-3.5 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Tìm số SIM..."
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  className="w-full border rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-red-500 outline-none text-sm"
+                />
+              </div>
 
-              <input
-                type="text"
-                placeholder="Tìm số SIM..."
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                className="w-full border rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-red-500 outline-none"
-              />
+              {/* Lọc Chi nhánh */}
+              <div className="relative w-full sm:w-64">
+                <select
+                  value={selectedBranch}
+                  onChange={(e) => setSelectedBranch(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] bg-gray-50 cursor-pointer font-bold text-gray-700"
+                >
+                  <option value="Tất cả">Tất cả chi nhánh</option>
+                  {branches.map((b) => (
+                    <option key={b.id_chi_nhanh} value={b.id_chi_nhanh}>
+                      {b.ten_chi_nhanh}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="flex flex-wrap gap-3">
@@ -103,68 +128,82 @@ const BuySim = () => {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredSim.map((sim) => (
-            <div
-              key={sim.maSim}
-              className="bg-white rounded-2xl shadow-md hover:shadow-xl transition duration-300 p-6"
-            >
-              {/* Số SIM */}
-              <div className="text-center mb-6">
-                <h2 className="text-3xl font-bold text-[#EE0033]">
-                  {sim.soSim}
-                </h2>
-              </div>
-
-              {/* Thông tin */}
-              <div className="space-y-4 mb-7">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Loại SIM</span>
-
-                  <span className="font-semibold text-[#EE0033]">
-                    {sim.loaiSim}
-                  </span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Giá</span>
-
-                  <span className="font-bold text-green-600">{sim.giaBan}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Trạng thái</span>
-
-                  <span className="font-semibold text-green-600">
-                    {sim.trangThai}
-                  </span>
-                </div>
-              </div>
-
-              {/* Nút */}
-              <div className="flex gap-3">
-                <Link to={`/buysim/${sim.maSim}`} className="flex-1 flex items-center justify-center gap-2 border border-gray-300 rounded-xl py-3 hover:bg-gray-100 transition text-gray-700">
-                  <Eye size={18} />
-                  Chi tiết
-                </Link>
-
-                <Link to={`/buysim/${sim.maSim}`} className="flex-1 flex items-center justify-center gap-2 bg-[#EE0033] text-white rounded-xl py-3 hover:bg-red-700 transition">
-                  <ShoppingCart size={18} />
-                  Đặt mua
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {filteredSim.length === 0 && (
-          <div className="bg-white rounded-2xl shadow-md p-10 text-center">
-            <h2 className="text-2xl font-semibold text-gray-500">
-              Không tìm thấy số SIM
-            </h2>
-
-            <p className="text-gray-400 mt-2">Vui lòng thử từ khóa khác.</p>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
+            <Loader2 className="w-10 h-10 text-[#EE0033] animate-spin mb-4" />
+            <p className="text-gray-500 font-medium text-sm">Đang tải danh sách SIM số đẹp...</p>
           </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredSim.map((sim) => (
+                <div
+                  key={sim.maSim}
+                  className="bg-white rounded-2xl shadow-md hover:shadow-xl transition duration-300 p-6 border border-gray-100 flex flex-col justify-between"
+                >
+                  <div>
+                    {/* Số SIM */}
+                    <div className="text-center mb-6">
+                      <h2 className="text-3xl font-black text-[#EE0033] tracking-wide">
+                        {sim.soSim}
+                      </h2>
+                    </div>
+
+                    {/* Thông tin */}
+                    <div className="space-y-3.5 mb-7 text-sm">
+                      <div className="flex justify-between items-center border-b border-gray-50 pb-2">
+                        <span className="text-gray-400 font-medium">Loại SIM</span>
+                        <span className="font-bold text-[#EE0033]">
+                          {sim.loaiSim}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center border-b border-gray-50 pb-2">
+                        <span className="text-gray-400 font-medium">Chi nhánh</span>
+                        <span className="font-semibold text-gray-700 max-w-[180px] truncate" title={sim.tenChiNhanh}>
+                          {sim.tenChiNhanh}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center border-b border-gray-50 pb-2">
+                        <span className="text-gray-400 font-medium">Giá bán</span>
+                        <span className="font-extrabold text-green-600 text-base">{sim.giaBan}</span>
+                      </div>
+
+                      <div className="flex justify-between items-center pb-1">
+                        <span className="text-gray-400 font-medium">Trạng thái</span>
+                        <span className={`font-bold ${sim.rawStatus === "ConHang" ? "text-green-600" : "text-amber-500"}`}>
+                          {sim.trangThai}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Nút */}
+                  <div className="flex gap-3">
+                    <Link to={`/buysim/${sim.maSim}`} className="flex-1 flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 text-xs font-bold hover:bg-gray-50 transition text-gray-700 shadow-sm cursor-pointer">
+                      <Eye size={16} />
+                      Chi tiết
+                    </Link>
+
+                    <Link to={`/buysim/${sim.maSim}`} className="flex-1 flex items-center justify-center gap-2 bg-[#EE0033] text-white rounded-xl py-3 text-xs font-bold hover:bg-[#A00022] transition shadow-md cursor-pointer">
+                      <ShoppingCart size={16} />
+                      Đặt mua
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {filteredSim.length === 0 && (
+              <div className="bg-white rounded-2xl shadow p-16 text-center border border-gray-100">
+                <h2 className="text-xl font-bold text-gray-500">
+                  Không tìm thấy số SIM phù hợp
+                </h2>
+                <p className="text-gray-400 text-sm mt-2">Vui lòng thử tìm kiếm bằng một từ khóa khác.</p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

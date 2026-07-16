@@ -50,7 +50,8 @@ class BranchService:
             ten_chi_nhanh=name,
             dia_chi=body.dia_chi,
             so_hotline=hotline,
-            gio_lam_viec=body.gio_lam_viec or "08:00 - 22:00"
+            gio_lam_viec=body.gio_lam_viec or "08:00 - 22:00",
+            map_url=body.map_url
         )
 
         return {
@@ -61,6 +62,7 @@ class BranchService:
                 "dia_chi": res["dia_chi"],
                 "so_hotline": res["so_hotline"],
                 "gio_lam_viec": res["gio_lam_viec"],
+                "map_url": res["map_url"],
                 "trang_thai": res["trang_thai"]
             }
         }
@@ -80,6 +82,7 @@ class BranchService:
                 "dia_chi": r["dia_chi"],
                 "so_hotline": r["so_hotline"],
                 "email": email,
+                "map_url": r["map_url"],
                 "trang_thai": r["trang_thai"]
             })
 
@@ -107,6 +110,7 @@ class BranchService:
                 "dia_chi": r["dia_chi"],
                 "so_hotline": r["so_hotline"],
                 "email": email,
+                "map_url": r["map_url"],
                 "trang_thai": r["trang_thai"]
             }
         }
@@ -133,6 +137,7 @@ class BranchService:
         # 3. Xác định các giá trị cập nhật
         name = body.ten_chi_nhanh or existing["ten_chi_nhanh"]
         trang_thai_val = body.trang_thai or existing["trang_thai"]
+        map_url_val = body.map_url if body.map_url is not None else existing["map_url"]
 
         # 4. Thực thi cập nhật
         res = await self.repository.update(
@@ -141,7 +146,8 @@ class BranchService:
             dia_chi=body.dia_chi,
             so_hotline=hotline,
             gio_lam_viec=body.gio_lam_viec or "08:00 - 22:00",
-            trang_thai=trang_thai_val
+            trang_thai=trang_thai_val,
+            map_url=map_url_val
         )
 
         return {
@@ -152,6 +158,7 @@ class BranchService:
                 "dia_chi": res["dia_chi"],
                 "so_hotline": res["so_hotline"],
                 "gio_lam_viec": res["gio_lam_viec"],
+                "map_url": res["map_url"],
                 "trang_thai": res["trang_thai"]
             }
         }

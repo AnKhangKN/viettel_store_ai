@@ -131,7 +131,9 @@ class AuthService:
                 "name": user["ho_ten"],
                 "email": user["email"],
                 "phone": user["so_dien_thoai"],
-                "role": user["vai_tro"]
+                "role": user["vai_tro"],
+                "cccd": user["cccd"],
+                "dia_chi": user["dia_chi"]
             }
         }
 

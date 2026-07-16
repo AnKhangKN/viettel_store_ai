@@ -1,5 +1,7 @@
+from fastapi import Depends
 from app.modules.user.services.user_service import UserService
-from app.modules.user.schemas.user_schema import EmployeeCreateRequest, EmployeeApproveRequest, AccountRoleUpdateRequest
+from app.modules.user.schemas.user_schema import EmployeeCreateRequest, EmployeeApproveRequest, AccountRoleUpdateRequest, UserProfileUpdateRequest
+from app.common.dependencies.user_dependency import get_current_user
 
 class UserController:
 
@@ -29,3 +31,6 @@ class UserController:
 
     async def update_account_role(self, id_khach_hang: str, body: AccountRoleUpdateRequest):
         return await self.service.update_account_role(id_khach_hang, body)
+
+    async def update_profile(self, body: UserProfileUpdateRequest, current_user: dict = Depends(get_current_user)):
+        return await self.service.update_profile(current_user, body)

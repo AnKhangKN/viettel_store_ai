@@ -162,6 +162,13 @@ export const routes = [
     isShowAdminLayout: true,
   },
   {
+    path: "/admin/counter-services",
+    name: "CounterServices",
+    page: React.lazy(() => import("../pages/admin/CounterServicesPageAdmin/CounterServicesPageAdmin")),
+    isShowAdminLayout: true,
+  },
+
+  {
     path: "/admin/settings",
     name: "Setting",
     page: React.lazy(() => import("../pages/admin/SettingPageAdmin/SettingPageAdmin")),

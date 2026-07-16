@@ -184,12 +184,14 @@ class UserService:
                 "ho_ten": r["ho_ten"],
                 "email": r["email"],
                 "vai_tro": r["vai_tro"],
-                "trang_thai": r["trang_thai"]
+                "trang_thai": r["trang_thai"],
+                "id_chi_nhanh": str(r["id_chi_nhanh"]) if r["id_chi_nhanh"] else None
             })
         return {
             "success": True,
             "data": accounts
         }
+
 
     async def update_account_role(self, id_khach_hang: str, body: AccountRoleUpdateRequest):
         valid_roles = {role.value for role in RoleEnum}
@@ -200,7 +202,13 @@ class UserService:
                 message=f"Vai trò '{body.vai_tro}' không hợp lệ. Phải thuộc: {', '.join(valid_roles)}"
             )
 
-        res = await self.repository.update_account_role(id_khach_hang, role_lower)
+        if role_lower == "staff" and not body.id_chi_nhanh:
+            raise AppException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message="Bắt buộc phải chọn chi nhánh làm việc khi đổi sang vai trò Nhân viên"
+            )
+
+        res = await self.repository.update_account_role(id_khach_hang, role_lower, body.id_chi_nhanh)
         if not res:
             raise AppException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -218,3 +226,43 @@ class UserService:
                 "trang_thai": res["trang_thai"]
             }
         }
+
+
+    async def get_user_role(self, id_khach_hang: str) -> str | None:
+        return await self.repository.get_user_role(id_khach_hang)
+
+    async def update_profile(self, payload: dict, body):
+        id_khach_hang = payload.get("id_khach_hang")
+        if not id_khach_hang:
+            raise AppException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                message="Không xác định được người dùng"
+            )
+
+        res = await self.repository.update_profile(
+            id_khach_hang=id_khach_hang,
+            ho_ten=body.ho_ten,
+            so_dien_thoai=body.so_dien_thoai,
+            cccd=body.cccd or "",
+            dia_chi=body.dia_chi or ""
+        )
+
+        if not res:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Người dùng không tồn tại"
+            )
+
+        return {
+            "success": True,
+            "message": "Cập nhật thông tin thành công",
+            "data": {
+                "id_khach_hang": str(res["id_khach_hang"]),
+                "ho_ten": res["ho_ten"],
+                "so_dien_thoai": res["so_dien_thoai"],
+                "cccd": res["cccd"],
+                "dia_chi": res["dia_chi"],
+                "email": res["email"]
+            }
+        }
+

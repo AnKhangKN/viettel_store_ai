@@ -339,128 +339,169 @@ const SimPageAdmin = () => {
             </div>
 
             {/* Modal Form Body */}
-            <form onSubmit={handleCreateSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
-              <div className="space-y-4">
-                {/* Số SIM */}
-                <div>
-                  <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                    Số SIM thuê bao *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ví dụ: 0988668668"
-                    value={createFormData.so_sim}
-                    onChange={(e) =>
-                      setCreateFormData({ ...createFormData, so_sim: e.target.value })
-                    }
-                    className="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] focus:border-[#EE0033]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Loại SIM */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                      Loại SIM cát tường *
-                    </label>
-                    <select
-                      value={createFormData.id_loai_sim}
-                      onChange={(e) =>
-                        setCreateFormData({ ...createFormData, id_loai_sim: e.target.value })
-                      }
-                      className="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] cursor-pointer"
+            {simTypes.length === 0 || branches.length === 0 ? (
+              <div className="p-8 flex flex-col items-center justify-center text-center space-y-4">
+                <AlertCircle className="w-12 h-12 text-yellow-500 animate-bounce" />
+                <h4 className="text-base font-bold text-gray-800">
+                  Chưa đủ điều kiện tạo SIM mới
+                </h4>
+                <p className="text-xs text-gray-500 max-w-sm leading-relaxed">
+                  {simTypes.length === 0 && branches.length === 0
+                    ? "Hệ thống hiện chưa có loại SIM và chi nhánh nào. Vui lòng cấu hình cả hai dữ liệu này trước khi đăng ký SIM số."
+                    : simTypes.length === 0
+                    ? "Hệ thống hiện chưa có loại SIM nào. Bạn cần khởi tạo ít nhất một loại SIM trước khi đăng ký SIM số."
+                    : "Hệ thống hiện chưa có chi nhánh cửa hàng nào. Bạn cần thêm chi nhánh làm việc trước khi phân bổ SIM."}
+                </p>
+                <div className="flex gap-3 pt-4 w-full">
+                  {simTypes.length === 0 && (
+                    <a
+                      href="/admin/sim-types"
+                      className="flex-1 bg-[#EE0033] hover:bg-[#A00022] text-white font-bold py-3 rounded-xl text-xs transition-all text-center block shadow-md uppercase tracking-wider"
                     >
-                      {simTypes.map((type) => (
-                        <option key={type.id_loai_sim} value={type.id_loai_sim}>
-                          {type.ten_loai_sim} ({(type.gia_ban || 0).toLocaleString()}đ)
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Giá bán */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                      Giá bán SIM (VNĐ) *
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      min="0"
-                      value={createFormData.gia_ban}
-                      onChange={(e) =>
-                        setCreateFormData({ ...createFormData, gia_ban: e.target.value })
-                      }
-                      className="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Chi nhánh sở hữu */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                      Phân bổ Chi nhánh *
-                    </label>
-                    <select
-                      value={createFormData.id_chi_nhanh}
-                      onChange={(e) =>
-                        setCreateFormData({ ...createFormData, id_chi_nhanh: e.target.value })
-                      }
-                      className="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] cursor-pointer"
+                      Thêm loại SIM
+                    </a>
+                  )}
+                  {branches.length === 0 && (
+                    <a
+                      href="/admin/stores"
+                      className="flex-1 bg-[#EE0033] hover:bg-[#A00022] text-white font-bold py-3 rounded-xl text-xs transition-all text-center block shadow-md uppercase tracking-wider"
                     >
-                      {branches.map((b) => (
-                        <option key={b.id_chi_nhanh} value={b.id_chi_nhanh}>
-                          {b.ten_chi_nhanh} ({b.trang_thai === "HoatDong" ? "Hoạt động" : "Đóng cửa"})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Trạng thái */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                      Trạng thái ban đầu
-                    </label>
-                    <select
-                      value={createFormData.trang_thai}
-                      onChange={(e) =>
-                        setCreateFormData({ ...createFormData, trang_thai: e.target.value })
-                      }
-                      className="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] cursor-pointer"
-                    >
-                      <option value="ConHang">Còn hàng</option>
-                      <option value="DaDat">Đã đặt</option>
-                      <option value="DaBan">Đã bán</option>
-                      <option value="NgungKinhDoanh">Ngừng kinh doanh</option>
-                    </select>
-                  </div>
+                      Thêm chi nhánh
+                    </a>
+                  )}
                 </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="pt-4 border-t border-gray-100 flex gap-3">
                 <button
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
-                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl text-sm transition-all cursor-pointer text-center"
+                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl text-xs transition-all uppercase tracking-wider mt-2 cursor-pointer text-center"
                 >
-                  Hủy bỏ
-                </button>
-                <button
-                  type="submit"
-                  disabled={formSubmitLoading}
-                  className="flex-1 bg-[#EE0033] hover:bg-[#CC002D] text-white font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-                >
-                  {formSubmitLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    "Đăng ký tạo SIM"
-                  )}
+                  Đóng
                 </button>
               </div>
-            </form>
+            ) : (
+              <form onSubmit={handleCreateSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+                <div className="space-y-4">
+                  {/* Số SIM */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
+                      Số SIM thuê bao *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ví dụ: 0988668668"
+                      value={createFormData.so_sim}
+                      onChange={(e) =>
+                        setCreateFormData({ ...createFormData, so_sim: e.target.value })
+                      }
+                      className="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] focus:border-[#EE0033]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Loại SIM */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
+                        Loại SIM cát tường *
+                      </label>
+                      <select
+                        value={createFormData.id_loai_sim}
+                        onChange={(e) =>
+                          setCreateFormData({ ...createFormData, id_loai_sim: e.target.value })
+                        }
+                        className="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] cursor-pointer"
+                      >
+                        {simTypes.map((type) => (
+                          <option key={type.id_loai_sim} value={type.id_loai_sim}>
+                            {type.ten_loai_sim} ({(type.gia_ban || 0).toLocaleString()}đ)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Giá bán */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
+                        Giá bán SIM (VNĐ) *
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        min="0"
+                        value={createFormData.gia_ban}
+                        onChange={(e) =>
+                          setCreateFormData({ ...createFormData, gia_ban: e.target.value })
+                        }
+                        className="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Chi nhánh sở hữu */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
+                        Phân bổ Chi nhánh *
+                      </label>
+                      <select
+                        value={createFormData.id_chi_nhanh}
+                        onChange={(e) =>
+                          setCreateFormData({ ...createFormData, id_chi_nhanh: e.target.value })
+                        }
+                        className="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] cursor-pointer"
+                      >
+                        {branches.map((b) => (
+                          <option key={b.id_chi_nhanh} value={b.id_chi_nhanh}>
+                            {b.ten_chi_nhanh} ({b.trang_thai === "HoatDong" ? "Hoạt động" : "Đóng cửa"})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Trạng thái */}
+                    <div>
+                      <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
+                        Trạng thái ban đầu
+                      </label>
+                      <select
+                        value={createFormData.trang_thai}
+                        onChange={(e) =>
+                          setCreateFormData({ ...createFormData, trang_thai: e.target.value })
+                        }
+                        className="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] cursor-pointer"
+                      >
+                        <option value="ConHang">Còn hàng</option>
+                        <option value="DaDat">Đã đặt</option>
+                        <option value="DaBan">Đã bán</option>
+                        <option value="NgungKinhDoanh">Ngừng kinh doanh</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="pt-4 border-t border-gray-100 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateModalOpen(false)}
+                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl text-sm transition-all cursor-pointer text-center"
+                  >
+                    Hủy bỏ
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={formSubmitLoading}
+                    className="flex-1 bg-[#EE0033] hover:bg-[#CC002D] text-white font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    {formSubmitLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      "Đăng ký tạo SIM"
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}

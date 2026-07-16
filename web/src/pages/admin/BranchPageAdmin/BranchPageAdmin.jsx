@@ -36,6 +36,7 @@ const BranchPageAdmin = () => {
     dia_chi: "",
     so_hotline: "",
     gio_lam_viec: "08:00 - 22:00",
+    map_url: "",
     trang_thai: "HoatDong"
   };
 
@@ -75,8 +76,22 @@ const BranchPageAdmin = () => {
       dia_chi: branch.dia_chi || "",
       so_hotline: branch.so_hotline || "",
       gio_lam_viec: branch.gio_lam_viec || "08:00 - 22:00",
+      map_url: branch.map_url || "",
       trang_thai: branch.trang_thai || "HoatDong"
     });
+  };
+
+  // Hàm phụ trợ trích xuất thuộc tính src nếu người dùng paste nguyên thẻ iframe HTML
+  const extractMapUrl = (input) => {
+    if (!input) return "";
+    const trimmed = input.trim();
+    if (trimmed.startsWith("<iframe")) {
+      const match = trimmed.match(/src="([^"]+)"/);
+      if (match && match[1]) {
+        return match[1];
+      }
+    }
+    return trimmed;
   };
 
   // Submit Create Branch Form
@@ -85,7 +100,11 @@ const BranchPageAdmin = () => {
     setFormSubmitLoading(true);
     setStatusMessage(null);
     try {
-      const res = await createBranch(createFormData);
+      const cleanedData = {
+        ...createFormData,
+        map_url: extractMapUrl(createFormData.map_url)
+      };
+      const res = await createBranch(cleanedData);
       if (res?.success) {
         setStatusMessage({
           type: "success",
@@ -114,7 +133,11 @@ const BranchPageAdmin = () => {
     setFormSubmitLoading(true);
     setStatusMessage(null);
     try {
-      const res = await updateBranch(selectedBranch.id_chi_nhanh, editFormData);
+      const cleanedData = {
+        ...editFormData,
+        map_url: extractMapUrl(editFormData.map_url)
+      };
+      const res = await updateBranch(selectedBranch.id_chi_nhanh, cleanedData);
       if (res?.success) {
         setStatusMessage({
           type: "success",
@@ -365,6 +388,22 @@ const BranchPageAdmin = () => {
                   </div>
                 </div>
 
+                {/* Đường dẫn nhúng bản đồ (Map URL) */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
+                    Đường dẫn nhúng bản đồ (Google Map Embed URL)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Nhập iframe src của bản đồ Google Maps..."
+                    value={createFormData.map_url}
+                    onChange={(e) =>
+                      setCreateFormData({ ...createFormData, map_url: e.target.value })
+                    }
+                    className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
+                  />
+                </div>
+
                 {/* Trạng thái */}
                 <div>
                   <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
@@ -510,6 +549,22 @@ const BranchPageAdmin = () => {
                       className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
                     />
                   </div>
+                </div>
+
+                {/* Đường dẫn nhúng bản đồ (Map URL) */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
+                    Đường dẫn nhúng bản đồ (Google Map Embed URL)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Nhập iframe src của bản đồ Google Maps..."
+                    value={editFormData.map_url}
+                    onChange={(e) =>
+                      setEditFormData({ ...editFormData, map_url: e.target.value })
+                    }
+                    className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
+                  />
                 </div>
 
                 {/* Trạng thái */}

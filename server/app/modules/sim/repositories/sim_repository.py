@@ -49,6 +49,14 @@ class SimRepository:
         """
         return await get_pool().fetchrow(sql, so_sim)
 
+    async def find_customer_by_phone(self, phone: str):
+        sql = """
+            SELECT id_khach_hang, so_dien_thoai
+            FROM khachhang
+            WHERE so_dien_thoai = $1 AND da_xoa = false
+        """
+        return await get_pool().fetchrow(sql, phone)
+
     async def check_loaisim_exists(self, id_loai_sim: str):
         sql = """
             SELECT id_loai_sim

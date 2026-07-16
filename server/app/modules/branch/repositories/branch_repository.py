@@ -1,4 +1,5 @@
 import uuid
+from typing import Optional
 from app.core.database import get_pool
 
 class BranchRepository:
@@ -9,7 +10,8 @@ class BranchRepository:
         ten_chi_nhanh: str,
         dia_chi: str,
         so_hotline: str,
-        gio_lam_viec: str
+        gio_lam_viec: str,
+        map_url: Optional[str] = None
     ):
         sql = """
             INSERT INTO chinhanh (
@@ -18,10 +20,11 @@ class BranchRepository:
                 dia_chi,
                 so_hotline,
                 gio_lam_viec,
+                map_url,
                 trang_thai
             )
-            VALUES ($1, $2, $3, $4, $5, 'HoatDong')
-            RETURNING id_chi_nhanh, ten_chi_nhanh, dia_chi, so_hotline, gio_lam_viec, trang_thai
+            VALUES ($1, $2, $3, $4, $5, $6, 'HoatDong')
+            RETURNING id_chi_nhanh, ten_chi_nhanh, dia_chi, so_hotline, gio_lam_viec, map_url, trang_thai
         """
 
         db_uuid = uuid.UUID(id_chi_nhanh) if isinstance(id_chi_nhanh, str) else id_chi_nhanh
@@ -32,12 +35,13 @@ class BranchRepository:
             ten_chi_nhanh,
             dia_chi,
             so_hotline,
-            gio_lam_viec
+            gio_lam_viec,
+            map_url
         )
 
     async def get_by_hotline(self, hotline: str):
         sql = """
-            SELECT id_chi_nhanh, ten_chi_nhanh, dia_chi, so_hotline, gio_lam_viec, trang_thai
+            SELECT id_chi_nhanh, ten_chi_nhanh, dia_chi, so_hotline, gio_lam_viec, map_url, trang_thai
             FROM chinhanh
             WHERE so_hotline = $1 AND da_xoa = false
         """
@@ -51,6 +55,7 @@ class BranchRepository:
                 dia_chi,
                 so_hotline,
                 gio_lam_viec,
+                map_url,
                 trang_thai,
                 ngay_tao
             FROM chinhanh
@@ -67,6 +72,7 @@ class BranchRepository:
                 dia_chi,
                 so_hotline,
                 gio_lam_viec,
+                map_url,
                 trang_thai
             FROM chinhanh
             WHERE id_chi_nhanh = $1 AND da_xoa = false
@@ -81,7 +87,8 @@ class BranchRepository:
         dia_chi: str,
         so_hotline: str,
         gio_lam_viec: str,
-        trang_thai: str
+        trang_thai: str,
+        map_url: Optional[str] = None
     ):
         sql = """
             UPDATE chinhanh
@@ -91,9 +98,10 @@ class BranchRepository:
                 so_hotline = $4,
                 gio_lam_viec = $5,
                 trang_thai = $6,
+                map_url = $7,
                 cap_nhat = CURRENT_TIMESTAMP
             WHERE id_chi_nhanh = $1 AND da_xoa = false
-            RETURNING id_chi_nhanh, ten_chi_nhanh, dia_chi, so_hotline, gio_lam_viec, trang_thai
+            RETURNING id_chi_nhanh, ten_chi_nhanh, dia_chi, so_hotline, gio_lam_viec, map_url, trang_thai
         """
         db_uuid = uuid.UUID(id_chi_nhanh) if isinstance(id_chi_nhanh, str) else id_chi_nhanh
         return await get_pool().fetchrow(
@@ -103,6 +111,6 @@ class BranchRepository:
             dia_chi,
             so_hotline,
             gio_lam_viec,
-            trang_thai
+            trang_thai,
+            map_url
         )
-

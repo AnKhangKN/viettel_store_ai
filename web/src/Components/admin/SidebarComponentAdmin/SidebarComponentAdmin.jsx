@@ -50,11 +50,17 @@ const SidebarComponentAdmin = () => {
       icon: <MapPin className="w-5 h-5" />,
     },
     {
+      label: "Quản lý dịch vụ quầy",
+      path: "/admin/counter-services",
+      icon: <CalendarRange className="w-5 h-5" />,
+    },
+    {
       label: "Cấu hình hệ thống",
       path: "/admin/settings",
       icon: <Settings className="w-5 h-5" />,
     },
   ];
+
 
   return (
     <div className="flex flex-col h-full justify-between py-6">

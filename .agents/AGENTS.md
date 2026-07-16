@@ -73,6 +73,11 @@ Repository (Tương tác Cơ sở dữ liệu qua raw SQL)
 - **Phong cách**: Premium, Glassmorphism nhẹ, Bo góc lớn (`rounded-2xl` hoặc `rounded-3xl`), Bóng mờ tinh tế (`shadow-xl`).
 - **3D & Spacing Scripts**: Dự án có hai script cjs chạy tự động là `apply3d.cjs` và `applySpacing.cjs`. Khi sửa đổi cấu trúc CSS, hãy lưu ý cấu trúc class của các card/button để không phá vỡ tính năng tự động áp dụng hiệu ứng của hai file này.
 
+### 2.4 Phân rã Component (Component Decomposition)
+- **Quy định độ dài**: Tránh viết các file Page/Component chính quá dài (vượt quá 500 dòng).
+- **Thư mục components nội bộ**: Khi phát triển các trang có nhiều phần giao diện phức tạp (như `HomePage`, `Dashboard`), bắt buộc phải bóc tách các Section lớn (ví dụ: Hệ thống chi nhánh & bản đồ, Banner trình chiếu, Kho gói cước...) thành các component độc lập đặt tại thư mục con `components/` của trang đó (Ví dụ: `pages/user/HomePage/components/BranchMapSection.jsx`).
+- **Quản lý State cục bộ**: Các component con này nên tự quản lý các state cục bộ đặc thù của mình (như state tìm kiếm, bộ lọc cục bộ) thay vì đẩy hết lên trang chính, nhằm giảm thiểu việc render lại (re-render) không cần thiết và tối ưu hiệu năng.
+
 ---
 
 ## 3. Quy trình làm việc và Git
@@ -107,4 +112,36 @@ Repository (Tương tác Cơ sở dữ liệu qua raw SQL)
 ### 5.1 Ngôn ngữ Phản hồi và Kế hoạch
 - AI bắt buộc phải trả lời và viết tất cả các tài liệu (kế hoạch triển khai `implementation_plan.md`, danh sách công việc `task.md`, báo cáo `walkthrough.md`, các đề xuất xác nhận hoặc proceed, v.v.) bằng **tiếng Việt**.
 - Không sử dụng tiếng Anh hoặc ngôn ngữ khác để phản hồi trực tiếp cho người dùng, trừ các đoạn mã nguồn, tên biến, hoặc thuật ngữ chuyên ngành không thể dịch nghĩa.
+
+---
+
+## 6. Quy định kiến trúc WebSocket thời gian thực
+
+### 6.1 WebSocket Manager toàn cục
+- Mọi kết nối WebSocket phải được quản lý tập trung thông qua `websocket_manager` định nghĩa tại [websocket.py](file:///d:/workspace/viettel_store_ai/server/app/core/websocket.py).
+- Không tự ý viết class quản lý kết nối WebSocket riêng lẻ ở từng module.
+
+### 6.2 Định dạng Phòng (Room Name)
+- Quản lý phòng kết nối theo định dạng chuỗi có tiền tố rõ ràng để phân loại mục đích sử dụng.
+- Ví dụ:
+  - `"queue:{id_chi_nhanh}"` đối với hàng chờ giao dịch tại quầy.
+  - `"chat:{id_phien}"` đối với tin nhắn chatbot/hỗ trợ.
+
+### 6.3 Cơ chế truyền phát (Broadcast)
+- Khi có thay đổi dữ liệu từ API RESTful (ví dụ: tạo phiếu, đổi trạng thái), service tương ứng chịu trách nhiệm kích hoạt broadcast tín hiệu thay đổi đến room tương ứng thông qua:
+  ```python
+  import asyncio
+  asyncio.create_task(websocket_manager.broadcast("room_name", {"event": "event_name"}))
+  ```
+- Phía Client khi nhận sự kiện qua WebSocket sẽ tự động gọi lại các API GET HTTP để lấy dữ liệu mới nhất (đảm bảo đồng bộ dữ liệu, giảm thiểu rủi ro và giữ tính đồng bộ tốt nhất).
+
+---
+
+## 7. Ràng buộc về kiểu dữ liệu ở Controllers (FastAPI)
+
+### 7.1 Sử dụng Pydantic thay vì Dict cho Request Body
+- Tuyệt đối không dùng kiểu `dict` chung chung cho dữ liệu nhận vào ở Controller để tránh giá trị mang kiểu `Unknown | None` khi gọi `.get()`.
+- Luôn định nghĩa Request Schema kế thừa từ Pydantic `BaseModel` và chỉ định rõ kiểu dữ liệu mong đợi (ví dụ: `str` thay vì `Optional[str]`/`None` nếu trường đó là bắt buộc). Điều này giúp sửa lỗi kiểm tra kiểu tĩnh (Pyrefly `bad-argument-type`) và tự động hóa validate dữ liệu.
+
+
 

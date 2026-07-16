@@ -15,3 +15,10 @@ class EmployeeApproveRequest(BaseModel):
 
 class AccountRoleUpdateRequest(BaseModel):
     vai_tro: str = Field(..., description="Vai trò mới ('admin', 'staff', 'user')")
+    id_chi_nhanh: Optional[str] = Field(None, description="Mã chi nhánh (bắt buộc nếu vai_tro là 'staff')")
+
+class UserProfileUpdateRequest(BaseModel):
+    ho_ten: str = Field(..., description="Họ và tên")
+    so_dien_thoai: str = Field(..., description="Số điện thoại")
+    cccd: Optional[str] = Field(None, description="Số CCCD/CMND")
+    dia_chi: Optional[str] = Field(None, description="Địa chỉ giao hàng")
