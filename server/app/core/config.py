@@ -26,8 +26,10 @@ class Config:
     JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
     JWT_EXPIRE_HOURS = int(os.getenv("JWT_EXPIRE_HOURS"))  # type: ignore
 
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-    AI_MODEL = os.getenv("AI_MODEL")
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    GEMINI_PROJECT_ID= os.getenv("GEMINI_PROJECT_ID")
+    GEMINI_LOCATION = os.getenv("GEMINI_LOCATION")
+    GEMINI_AI_MODEL = os.getenv("GEMINI_AI_MODEL")
 
     HOTLINE = os.getenv("HOTLINE")
 

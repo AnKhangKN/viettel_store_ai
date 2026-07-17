@@ -11,20 +11,13 @@ import {
   CheckCircle,
   HelpCircle
 } from 'lucide-react';
+import { sendChatbotMessage } from '../../../api/chatbot/chatbot.api';
+import { getAllBranches } from '../../../api/branch/branch.api';
 
 export default function ChatbotPage() {
-  // Dữ liệu mock Bảng GoiCuoc phục vụ AI tra cứu
-  const dataGoiCuoc = [
-    { maGoi: 'ST90', tenGoi: 'ST90', giaTien: '90.000đ', dungLuong: '30GB', thoiHan: '30 ngày', moTa: 'Gói cước quốc dân cực kỳ phù hợp cho học sinh, sinh viên.', loai: 'Data' },
-    { maGoi: 'V200C', tenGoi: 'COMBO V200C', giaTien: '200.000đ', dungLuong: '120GB', thoiHan: '30 ngày', moTa: 'Miễn phí gọi nội mạng dưới 20 phút + 100 phút ngoại mạng.', loai: 'Combo' },
-    { maGoi: '5GFAST', tenGoi: '5GFAST', giaTien: '300.000đ', dungLuong: '200GB', thoiHan: '30 ngày', moTa: 'Data 5G siêu tốc độ cao, trải nghiệm không giới hạn.', loai: '5G' }
-  ];
-
-  // Dữ liệu giả định về hệ thống hàng đợi tại quầy giao dịch gần nhất
-  const queueData = {
-    soKhachDangCho: 8,
-    thoiGianUocTinhMoiNguoi: 4, // 4 phút/khách
-  };
+  // State quản lý chi nhánh thật
+  const [branches, setBranches] = useState([]);
+  const [loadingBranches, setLoadingBranches] = useState(true);
 
   // Các câu hỏi gợi ý có sẵn theo yêu cầu thiết kế
   const sampleQuestions = [
@@ -45,70 +38,79 @@ export default function ChatbotPage() {
     }
   ]);
   const [inputValue, setInputValue] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // Lấy danh sách chi nhánh thật khi component mount
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const res = await getAllBranches();
+        if (res?.success && Array.isArray(res.data)) {
+          setBranches(res.data);
+        }
+      } catch (err) {
+        console.error("Lỗi khi tải chi nhánh:", err);
+      } finally {
+        setLoadingBranches(false);
+      }
+    };
+    fetchBranches();
+  }, []);
 
   // Tự động cuộn xuống tin nhắn mới nhất
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, isTyping]);
 
-  // Hàm xử lý khi sinh câu trả lời tự động từ AI theo kịch bản yêu cầu
-  const getAIResponse = (type, text) => {
-    switch (type) {
-      case 'sinh_vien':
-        const studentPkg = dataGoiCuoc.find(p => p.maGoi === 'ST90');
-        return {
-          text: `Dựa trên bảng dữ liệu gói cước, Viettel đề xuất gói cước tối ưu nhất dành cho sinh viên hiện tại là **${studentPkg.tenGoi}**:`,
-          customCard: studentPkg
-        };
-      case 'dang_ky_st90':
-        return {
-          text: 'Để đăng ký gói cước **ST90**, quý khách có thể soạn tin nhắn theo cú pháp: \n\n`ST90` gửi `191` \n\nHoặc bấm trực tiếp vào nút **[Đăng ký gói cước]** hiển thị ngay tại trang sản phẩm.',
-          hasAction: true
-        };
-      case 'tong_dai':
-        return {
-          text: 'Tổng đài Chăm sóc khách hàng chính thức và miễn phí của Viettel Telecom là:\n\n* **1800 8098**: Hỗ trợ các dịch vụ di động, khóa chiều, tra cứu gói cước.\n* **1800 8168**: Hỗ trợ dịch vụ Internet Cáp quang cố định và Truyền hình.'
-        };
-      case 'thoi_gian_cho':
-        const waitTime = queueData.soKhachDangCho * queueData.thoiGianUocTinhMoiNguoi;
-        return {
-          text: `Hệ thống ghi nhận hiện tại đang có **${queueData.soKhachDangCho} khách hàng** đang xếp hàng chờ tại quầy. Dự kiến còn khoảng **${waitTime} phút** nữa sẽ tới lượt giao dịch của bạn.`
-        };
-      case 'khuyen_nghi_cua_hang':
-        const busyTime = queueData.soKhachDangCho > 5 ? "khá đông" : "thông thoáng";
-        return {
-          text: `Tình trạng phòng giao dịch hiện tại đang **${busyTime}** (${queueData.soKhachDangCho} người đang chờ). Khuyên nghị bạn nên đặt lịch hẹn trực tuyến trước qua ứng dụng hoặc chọn khung giờ thấp điểm như **14:00 - 15:30** chiều để không phải mất thời gian chờ đợi.`
-        };
-      default:
-        return {
-          text: `Cảm ơn bạn đã nhắn tin. Yêu cầu "${text}" đang được hệ thống phân tích và phản hồi trong giây lát.`
-        };
-    }
-  };
+  // Thao tác gửi tin nhắn thật lên API
+  const handleSend = async (text) => {
+    if (!text.trim() || isTyping) return;
 
-  // Thao tác gửi tin nhắn
-  const handleSend = (text, type = 'custom') => {
-    if (!text.trim()) return;
-
-    // 1. Thêm tin nhắn của User
+    // 1. Thêm tin nhắn của User vào giao diện
     const userMsg = { id: Date.now(), sender: 'user', text, time: 'Vừa xong' };
     setMessages(prev => [...prev, userMsg]);
     setInputValue('');
+    setIsTyping(true);
 
-    // 2. Phản hồi giả lập từ AI sau 600ms
-    setTimeout(() => {
-      const aiReplyData = getAIResponse(type, text);
-      const aiMsg = {
+    try {
+      // 2. Định dạng lịch sử trò chuyện gửi lên API (bỏ tin nhắn chào mặc định ở đầu để Gemini ko lỗi)
+      const formattedHistory = [];
+      const historyMessages = messages.filter(m => m.id !== 1);
+      
+      for (const m of historyMessages) {
+        formattedHistory.push({
+          role: m.sender === 'user' ? 'user' : 'model',
+          parts: m.text
+        });
+      }
+
+      // 3. Gọi API lấy phản hồi từ chatbot
+      const res = await sendChatbotMessage(text, formattedHistory);
+
+      if (res?.success && res?.data?.response) {
+        const aiMsg = {
+          id: Date.now() + 1,
+          sender: 'ai',
+          text: res.data.response,
+          time: 'Vừa xong'
+        };
+        setMessages(prev => [...prev, aiMsg]);
+      } else {
+        throw new Error("Không nhận được phản hồi hợp lệ.");
+      }
+    } catch (err) {
+      console.error(err);
+      const errorMsg = {
         id: Date.now() + 1,
         sender: 'ai',
-        text: aiReplyData.text,
-        customCard: aiReplyData.customCard,
-        hasAction: aiReplyData.hasAction,
+        text: 'Rất tiếc, hệ thống chatbot đang bận hoặc gặp sự cố kết nối. Quý khách vui lòng thử lại sau ít phút hoặc liên hệ tổng đài miễn phí 1800 8098 nhé. ⚡',
         time: 'Vừa xong'
       };
-      setMessages(prev => [...prev, aiMsg]);
-    }, 600);
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   return (
@@ -129,7 +131,7 @@ export default function ChatbotPage() {
               {sampleQuestions.map((q, idx) => (
                 <button
                   key={idx}
-                  onClick={() => handleSend(q.label, q.type)}
+                  onClick={() => handleSend(q.label)}
                   className="w-full text-left text-xs bg-gray-50 border border-gray-200 hover:border-purple-300 hover:bg-purple-50/50 p-3 rounded-xl transition-all font-medium text-gray-700 hover:text-purple-700 flex items-start gap-2 group"
                 >
                   <span className="bg-gray-200 group-hover:bg-purple-200 text-gray-500 group-hover:text-purple-700 w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-[10px]">{idx + 1}</span>
@@ -139,21 +141,30 @@ export default function ChatbotPage() {
             </div>
           </div>
 
-          {/* TRẠNG THÁI HÀNG ĐỢI THỜI GIAN THỰC */}
-          <div className="bg-gradient-to-br from-gray-900 to-slate-800 rounded-2xl p-5 text-white shadow-md">
+          {/* CHI NHÁNH CỬA HÀNG THỰC TẾ */}
+          <div className="bg-gradient-to-br from-gray-900 to-slate-800 rounded-2xl p-5 text-white shadow-md flex-1 min-h-[220px] flex flex-col">
             <h3 className="text-xs font-bold tracking-widest text-gray-400 uppercase flex items-center mb-3">
-              <Store className="w-4 h-4 mr-2 text-red-400" /> Giám sát quầy dịch vụ
+              <Store className="w-4 h-4 mr-2 text-red-400" /> Hệ thống cửa hàng
             </h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center bg-white/5 p-2.5 rounded-xl border border-white/10">
-                <span className="text-xs text-gray-300">Khách đang đợi:</span>
-                <span className="font-black text-red-400 text-sm">{queueData.soKhachDangCho} người</span>
+            {loadingBranches ? (
+              <div className="flex-1 flex items-center justify-center text-xs text-gray-400">
+                Đang tải danh sách chi nhánh...
               </div>
-              <div className="flex justify-between items-center bg-white/5 p-2.5 rounded-xl border border-white/10">
-                <span className="text-xs text-gray-300">Thời gian xử lý TB:</span>
-                <span className="font-semibold text-gray-200 text-xs">{queueData.thoiGianUocTinhMoiNguoi} phút / lượt</span>
+            ) : branches.length > 0 ? (
+              <div className="space-y-2.5 overflow-y-auto max-h-[280px] pr-1">
+                {branches.map((b) => (
+                  <div key={b.id_chi_nhanh} className="bg-white/5 p-3 rounded-xl border border-white/10 text-[11px] leading-relaxed">
+                    <p className="font-bold text-gray-200 text-xs">{b.ten_chi_nhanh}</p>
+                    <p className="text-gray-400 mt-1">📍 {b.dia_chi}</p>
+                    <p className="text-red-300 font-semibold mt-1">📞 Hotline: {b.so_hotline}</p>
+                  </div>
+                ))}
               </div>
-            </div>
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-xs text-gray-400">
+                Không có dữ liệu chi nhánh.
+              </div>
+            )}
           </div>
         </aside>
 
@@ -230,6 +241,21 @@ export default function ChatbotPage() {
                 </div>
               </div>
             ))}
+            {isTyping && (
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-xl flex-shrink-0 shadow-sm bg-gradient-to-br from-purple-600 to-indigo-600 text-white">
+                  <Bot className="w-4 h-4" />
+                </div>
+                <div className="max-w-[85%] sm:max-w-[70%] bg-white text-gray-800 border border-purple-100 p-4 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-2">
+                  <span className="text-xs text-gray-400">Trợ lý ảo đang trả lời...</span>
+                  <div className="flex gap-1.5 items-center">
+                    <span className="w-1.5 h-1.5 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                    <span className="w-1.5 h-1.5 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                    <span className="w-1.5 h-1.5 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                  </div>
+                </div>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
 

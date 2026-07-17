@@ -45,3 +45,4 @@ urllib3==2.7.0
 uvicorn==0.51.0
 watchfiles==1.2.0
 websockets==16.0
+google-genai==2.12.1
