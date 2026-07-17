@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import UserLayout from "./layout/UserLayout/UserLayout";
 import AdminLayout from "./layout/AdminLayout/AdminLayout";
 import StaffLayout from "./layout/StaffLayout/StaffLayout";
+import ProtectedRoute from "./components/common/ProtectedRoute/ProtectedRoute";
 
 import { store } from "./app/store";
 import { setCredentials } from "./features/auth/authSlice";
@@ -62,12 +63,21 @@ function App() {
 
 
           if (userRes?.success && userRes?.data) {
+            const userData = userRes.data;
             store.dispatch(
               setCredentials({
                 accessToken,
-                user: userRes.data,
+                user: userData,
               })
             );
+
+            // Redirect theo role sau khi đăng nhập tự động
+            const currentPath = window.location.pathname;
+            if (userData.role === 'admin' && !currentPath.startsWith('/admin')) {
+              navigate('/admin/dashboard', { replace: true });
+            } else if (userData.role === 'staff' && !currentPath.startsWith('/staff')) {
+              navigate('/staff/dashboard', { replace: true });
+            }
           } else {
             throw new Error("Không lấy được thông tin người dùng");
           }
@@ -108,11 +118,13 @@ function App() {
             key={index}
             path={route.path}
             element={
-              <Layout>
-                <React.Suspense fallback={<div>Loading...</div>}>
-                  <Page />
-                </React.Suspense>
-              </Layout>
+              <ProtectedRoute requiredRole={route.requiredRole}>
+                <Layout>
+                  <React.Suspense fallback={<div>Loading...</div>}>
+                    <Page />
+                  </React.Suspense>
+                </Layout>
+              </ProtectedRoute>
             }
           />
         );

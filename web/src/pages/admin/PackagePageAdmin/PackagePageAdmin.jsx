@@ -92,6 +92,20 @@ const PackagePageAdmin = () => {
     e.preventDefault();
     setFormSubmitLoading(true);
     setStatusMessage(null);
+
+    // Kiểm tra trùng tên gói cước ở client-side
+    const nameExists = packages.some(
+      (pkg) => pkg.ten_goi?.trim().toLowerCase() === createFormData.ten_goi?.trim().toLowerCase()
+    );
+    if (nameExists) {
+      setStatusMessage({
+        type: "error",
+        text: `Tên gói cước "${createFormData.ten_goi}" đã tồn tại. Vui lòng nhập tên khác.`
+      });
+      setFormSubmitLoading(false);
+      return;
+    }
+
     try {
       const res = await createPackage({
         ...createFormData,
@@ -128,6 +142,22 @@ const PackagePageAdmin = () => {
     if (!selectedPackage) return;
     setFormSubmitLoading(true);
     setStatusMessage(null);
+
+    // Kiểm tra trùng tên gói cước ở client-side (trừ chính nó)
+    const nameExists = packages.some(
+      (pkg) =>
+        pkg.id_goi !== selectedPackage.id_goi &&
+        pkg.ten_goi?.trim().toLowerCase() === editFormData.ten_goi?.trim().toLowerCase()
+    );
+    if (nameExists) {
+      setStatusMessage({
+        type: "error",
+        text: `Tên gói cước "${editFormData.ten_goi}" đã tồn tại ở một gói cước khác. Vui lòng nhập tên khác.`
+      });
+      setFormSubmitLoading(false);
+      return;
+    }
+
     try {
       const res = await updatePackage(selectedPackage.id_goi, {
         ...editFormData,

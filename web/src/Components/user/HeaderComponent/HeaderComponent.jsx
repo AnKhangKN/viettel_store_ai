@@ -56,14 +56,22 @@ const HeaderComponent = () => {
               <p className="text-xs text-red-100 font-bold">{user?.name || 'Khách'}</p>
             </div>
             <button
-              onClick={() => !user && navigate('/login')}
+              onClick={() => {
+                if (!user) {
+                  navigate('/login')
+                } else if (user.role === 'admin') {
+                  navigate('/admin/dashboard')
+                } else if (user.role === 'staff') {
+                  navigate('/staff/dashboard')
+                }
+              }}
               className="p-2 text-white hover:text-red-100 hover:bg-red-500 rounded-lg transition-colors"
               title={user ? `Vai trò: ${user.role || 'user'}` : 'Đăng nhập'}
             >
               <FaUser size={20} />
             </button>
           </div>
- 
+
           {/* Logout */}
           {user && (
             <Link

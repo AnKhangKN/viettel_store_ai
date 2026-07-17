@@ -43,84 +43,98 @@ export const routes = [
     name: "Package",
     page: React.lazy(() => import("../pages/user/PackagePage/PackagePage")),
     isShowUserLayout: true,
+    requiredRole: "user",
   },
   {
     path: "/package/:id",
     name: "Package Detail",
     page: React.lazy(() => import("../pages/user/PackageDetailPage/PackageDetailPage")),
     isShowUserLayout: true,
+    requiredRole: "user",
   },
   {
     path: "/chatbot",
     name: "Chatbot",
     page: React.lazy(() => import("../pages/user/ChatbotPage/ChatbotPage")),
     isShowUserLayout: true,
+    requiredRole: "user",
   },
   {
     path: "/appointment",
     name: "Appointment",
     page: React.lazy(() => import("../pages/user/Appointment/Appointment")),
     isShowUserLayout: true,
+    requiredRole: "user",
   },
   {
     path: "/buysim",
     name: "Buy Sim",
     page: React.lazy(() => import("../pages/user/BuySim/BuySim")),
     isShowUserLayout: true,
+    requiredRole: "user",
   },
   {
     path: "/buysim/:id",
     name: "Buy Sim Checkout",
     page: React.lazy(() => import("../pages/user/SimCheckoutPage/SimCheckoutPage")),
     isShowUserLayout: true,
+    requiredRole: "user",
   },
   {
     path: "/lookup",
     name: "Lookup",
     page: React.lazy(() => import("../pages/user/Lookup/Lookup")),
     isShowUserLayout: true,
+    requiredRole: "user",
   },
   {
     path: "/mobile-services",
     name: "Mobile Services",
     page: React.lazy(() => import("../pages/user/MobileServicesPage/MobileServicesPage")),
     isShowUserLayout: true,
+    requiredRole: "user",
   },
   {
     path: "/mobile-services/:id",
     name: "Mobile Services Detail",
     page: React.lazy(() => import("../pages/user/MobileServiceDetailPage/MobileServiceDetailPage")),
     isShowUserLayout: true,
+    requiredRole: "user",
   },
   {
     path: "/payment",
     name: "Payment",
     page: React.lazy(() => import("../pages/user/PaymentPage/PaymentPage")),
     isShowUserLayout: true,
+    requiredRole: "user",
   },
   {
     path: "/support",
     name: "Support",
     page: React.lazy(() => import("../pages/user/SupportPage/SupportPage")),
     isShowUserLayout: true,
+    requiredRole: "user",
   },
   {
     path: "/news",
     name: "News",
     page: React.lazy(() => import("../pages/user/NewsPage/NewsPage")),
     isShowUserLayout: true,
+    requiredRole: "user",
   },
   {
     path: "/news/:id",
     name: "News Detail",
     page: React.lazy(() => import("../pages/user/NewsDetailPage/NewsDetailPage")),
     isShowUserLayout: true,
+    requiredRole: "user",
   },
   {
     path: "/store-locator",
     name: "Store Locator",
     page: React.lazy(() => import("../pages/user/StoreLocatorPage/StoreLocatorPage")),
     isShowUserLayout: true,
+    requiredRole: "user",
   },
 
   //   Admin
@@ -129,24 +143,28 @@ export const routes = [
     name: "Dashboard",
     page: React.lazy(() => import("../pages/admin/DashboardPageAdmin/DashboardPageAdmin")),
     isShowAdminLayout: true,
+    requiredRole: "admin",
   },
   {
     path: "/admin/packages",
     name: "Package",
     page: React.lazy(() => import("../pages/admin/PackagePageAdmin/PackagePageAdmin")),
     isShowAdminLayout: true,
+    requiredRole: "admin",
   },
   {
     path: "/admin/sims",
     name: "Sim",
     page: React.lazy(() => import("../pages/admin/SimPageAdmin/SimPageAdmin")),
     isShowAdminLayout: true,
+    requiredRole: "admin",
   },
   {
     path: "/admin/sim-types",
     name: "SimType",
     page: React.lazy(() => import("../pages/admin/SimTypePageAdmin/SimTypePageAdmin")),
     isShowAdminLayout: true,
+    requiredRole: "admin",
   },
 
   {
@@ -154,18 +172,21 @@ export const routes = [
     name: "User",
     page: React.lazy(() => import("../pages/admin/UserPageAdmin/UserPageAdmin")),
     isShowAdminLayout: true,
+    requiredRole: "admin",
   },
   {
     path: "/admin/stores",
     name: "Branch",
     page: React.lazy(() => import("../pages/admin/BranchPageAdmin/BranchPageAdmin")),
     isShowAdminLayout: true,
+    requiredRole: "admin",
   },
   {
     path: "/admin/counter-services",
     name: "CounterServices",
     page: React.lazy(() => import("../pages/admin/CounterServicesPageAdmin/CounterServicesPageAdmin")),
     isShowAdminLayout: true,
+    requiredRole: "admin",
   },
 
   {
@@ -173,6 +194,7 @@ export const routes = [
     name: "Setting",
     page: React.lazy(() => import("../pages/admin/SettingPageAdmin/SettingPageAdmin")),
     isShowAdminLayout: true,
+    requiredRole: "admin",
   },
 
   //  Staff
@@ -181,12 +203,14 @@ export const routes = [
     name: "Dashboard",
     page: React.lazy(() => import("../pages/staff/DashboardPageStaff/DashboardPageStaff")),
     isShowStaffLayout: true,
+    requiredRole: "staff",
   },
   {
     path: "/staff/waiting-list",
     name: "Waiting List",
     page: React.lazy(() => import("../pages/staff/WaitingListStaff/WaitingListStaff")),
     isShowStaffLayout: true,
+    requiredRole: "staff",
   }
 
 ];
