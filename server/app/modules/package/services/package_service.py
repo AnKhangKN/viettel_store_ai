@@ -29,13 +29,15 @@ class PackageService:
             thoi_han_ngay=body.thoi_han_ngay,
             so_phut_goi=body.so_phut_goi,
             so_sms=body.so_sms,
-            trang_thai=body.trang_thai or "DangApDung"
+            trang_thai=body.trang_thai or "DangApDung",
+            id_nguoi_tao=body.id_nguoi_tao
         )
 
         return {
             "success": True,
             "data": {
                 "id_goi": str(res["id_goi"]),
+                "id_nguoi_tao": str(res["id_nguoi_tao"]) if res.get("id_nguoi_tao") else None,
                 "ten_goi": res["ten_goi"],
                 "mo_ta": res["mo_ta"],
                 "gia_cuoc": float(res["gia_cuoc"]),
@@ -53,10 +55,15 @@ class PackageService:
         for record in records:
             data.append({
                 "id_goi": str(record["id_goi"]),
+                "id_nguoi_tao": str(record["id_nguoi_tao"]) if record.get("id_nguoi_tao") else None,
+                "ten_nguoi_tao": record.get("ten_nguoi_tao"),
                 "ten_goi": record["ten_goi"],
                 "gia_cuoc": float(record["gia_cuoc"]),
                 "thoi_han_ngay": record["thoi_han_ngay"],
                 "dung_luong_gb": float(record["dung_luong_gb"]),
+                "so_phut_goi": record.get("so_phut_goi", 0),
+                "so_sms": record.get("so_sms", 0),
+                "mo_ta": record.get("mo_ta"),
                 "trang_thai": record["trang_thai"]
             })
         return {
@@ -75,6 +82,8 @@ class PackageService:
             "success": True,
             "data": {
                 "id_goi": str(record["id_goi"]),
+                "id_nguoi_tao": str(record["id_nguoi_tao"]) if record.get("id_nguoi_tao") else None,
+                "ten_nguoi_tao": record.get("ten_nguoi_tao"),
                 "ten_goi": record["ten_goi"],
                 "gia_cuoc": float(record["gia_cuoc"]),
                 "thoi_han_ngay": record["thoi_han_ngay"],
@@ -114,13 +123,15 @@ class PackageService:
             thoi_han_ngay=body.thoi_han_ngay,
             so_phut_goi=body.so_phut_goi,
             so_sms=body.so_sms,
-            trang_thai=body.trang_thai or "DangApDung"
+            trang_thai=body.trang_thai or "DangApDung",
+            id_nguoi_tao=body.id_nguoi_tao
         )
 
         return {
             "success": True,
             "data": {
                 "id_goi": str(res["id_goi"]),
+                "id_nguoi_tao": str(res["id_nguoi_tao"]) if res.get("id_nguoi_tao") else None,
                 "ten_goi": res["ten_goi"],
                 "mo_ta": res["mo_ta"],
                 "gia_cuoc": float(res["gia_cuoc"]),

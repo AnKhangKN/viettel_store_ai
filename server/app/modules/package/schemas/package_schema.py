@@ -10,3 +10,17 @@ class PackageCreateRequest(BaseModel):
     so_phut_goi: Optional[int] = Field(0, description="Số phút gọi nội mạng/ngoại mạng miễn phí", ge=0)
     so_sms: Optional[int] = Field(0, description="Số tin nhắn SMS miễn phí", ge=0)
     trang_thai: Optional[str] = Field("DangApDung", description="Trạng thái áp dụng (DangApDung, NgungApDung)")
+    id_nguoi_tao: Optional[str] = Field(None, description="ID tài khoản tạo gói cước (UUID)")
+
+class PackageResponse(BaseModel):
+    id_goi: str
+    ten_goi: str
+    mo_ta: Optional[str] = None
+    gia_cuoc: float
+    dung_luong_gb: float
+    thoi_han_ngay: int
+    so_phut_goi: int = 0
+    so_sms: int = 0
+    trang_thai: str
+    id_nguoi_tao: Optional[str] = None
+    ten_nguoi_tao: Optional[str] = None

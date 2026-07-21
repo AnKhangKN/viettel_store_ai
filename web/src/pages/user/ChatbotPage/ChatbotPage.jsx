@@ -21,11 +21,11 @@ export default function ChatbotPage() {
 
   // Các câu hỏi gợi ý có sẵn theo yêu cầu thiết kế
   const sampleQuestions = [
-    { label: 'Gói cước nào phù hợp sinh viên?', type: 'sinh_vien' },
-    { label: 'Đăng ký ST90 như thế nào?', type: 'dang_ky_st90' },
-    { label: 'Tổng đài Viettel là bao nhiêu?', type: 'tong_dai' },
-    { label: 'Còn bao lâu tới lượt tôi?', type: 'thoi_gian_cho' },
-    { label: 'Khi nào nên đến cửa hàng?', type: 'khuyen_nghi_cua_hang' }
+    { label: 'Gói cước Data Viettel nào ưu đãi nhất?', type: 'goi_cuoc' },
+    { label: 'Cách đặt mua SIM số đẹp online & nhận tại cửa hàng?', type: 'mua_sim' },
+    { label: 'Cách đăng ký lấy số thứ tự giao dịch tại quầy?', type: 'so_thu_tu' },
+    { label: 'Thanh toán đơn hàng qua VNPay Sandbox như thế nào?', type: 'vnpay' },
+    { label: 'Tra cứu hotline & cửa hàng Viettel Store gần nhất?', type: 'cua_hang' }
   ];
 
   // State quản lý lịch sử tin nhắn chat
@@ -33,7 +33,7 @@ export default function ChatbotPage() {
     {
       id: 1,
       sender: 'ai',
-      text: 'Xin chào! Tôi là Trợ lý ảo Viettel AI. Bạn đang quan tâm đến gói cước viễn thông hay cần ước tính thời gian chờ giao dịch tại quầy?',
+      text: 'Xin chào! Tôi là Trợ lý ảo Viettel AI. Bạn đang quan tâm đến thông tin gói cước tham khảo, cần đặt mua SIM số đẹp hay muốn lấy số thứ tự giao dịch online trước khi đến quầy?',
       time: 'Vừa xong'
     }
   ]);
@@ -101,10 +101,11 @@ export default function ChatbotPage() {
       }
     } catch (err) {
       console.error(err);
+      const serverMessage = err?.response?.data?.message;
       const errorMsg = {
         id: Date.now() + 1,
         sender: 'ai',
-        text: 'Rất tiếc, hệ thống chatbot đang bận hoặc gặp sự cố kết nối. Quý khách vui lòng thử lại sau ít phút hoặc liên hệ tổng đài miễn phí 1800 8098 nhé. ⚡',
+        text: serverMessage || 'Rất tiếc, hệ thống chatbot đang bận hoặc gặp sự cố kết nối. Quý khách vui lòng thử lại sau ít phút hoặc liên hệ tổng đài miễn phí 1800 8098 nhé. ⚡',
         time: 'Vừa xong'
       };
       setMessages(prev => [...prev, errorMsg]);

@@ -75,7 +75,7 @@ class PaymentService:
         amount = int(float(order["tong_tien"]) * 100)
         order_details = await self.repository.get_sim_order_details(id_don_hang)
         so_sim = order_details.get("so_sim", "") if order_details else ""
-        order_info = f"Thanh toan mua SIM {so_sim} (DH {str(id_don_hang)[:8]})" if so_sim else f"Thanh toan don hang SIM {str(id_don_hang)[:8]}"
+        order_info = f"Thanh toan mua SIM {so_sim} DH {str(id_don_hang)[:8]}" if so_sim else f"Thanh toan don hang SIM DH {str(id_don_hang)[:8]}"
 
         vnp_params = {
             "vnp_Version": "2.1.0",
