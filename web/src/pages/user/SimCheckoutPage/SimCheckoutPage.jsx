@@ -1,9 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { CheckCircle, ShieldCheck, Truck, Loader2, Building2, X, MapPin } from "lucide-react";
+import { CheckCircle, ShieldCheck, Truck, Loader2, Building2, X, MapPin, CreditCard, Store } from "lucide-react";
 import { useSelector } from "react-redux";
 import { getSimDetails } from "../../../api/sim/sim.api";
 import { updateProfile } from "../../../api/user/user.api";
+import { createSimOrder, createVNPaySimPayment } from "../../../api/payment/payment.api";
+
+// Hàm trích xuất link nhúng iframe
+const getMapEmbedUrl = (rawUrl) => {
+  if (!rawUrl) return null;
+  const trimmed = rawUrl.trim();
+  if (trimmed.startsWith("<iframe")) {
+    const match = trimmed.match(/src=["']([^"']+)["']/);
+    return match ? match[1] : null;
+  }
+  if (trimmed.includes("google.com/maps/embed")) {
+    return trimmed;
+  }
+  return null;
+};
+
+// Hàm sinh link tìm kiếm Google Maps ngoài
+const getSearchMapUrl = (address, name) => {
+  const query = address || name || "Viettel Store";
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+};
 
 export default function SimCheckoutPage() {
   const { id } = useParams(); // id_sim
@@ -14,6 +35,7 @@ export default function SimCheckoutPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("vnpay"); // 'vnpay' hoặc 'cod'
 
   // Form states
   const [fullname, setFullname] = useState("");
@@ -26,7 +48,7 @@ export default function SimCheckoutPage() {
     if (loggedInUser) {
       setFullname(loggedInUser.ho_ten || loggedInUser.name || "");
       setPhone(loggedInUser.so_dien_thoai || loggedInUser.phone || "");
-      setCccd(loggedInUser.cccd || "")
+      setCccd(loggedInUser.cccd || "");
       setAddress(loggedInUser.dia_chi || loggedInUser.address || "");
     }
   }, [loggedInUser]);
@@ -54,21 +76,50 @@ export default function SimCheckoutPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      // Cập nhật thông tin cá nhân nếu người dùng đã đăng nhập
+      // 1. Cập nhật thông tin cá nhân nếu người dùng đã đăng nhập
       if (loggedInUser) {
-        await updateProfile({
-          ho_ten: fullname,
-          so_dien_thoai: phone,
-          cccd: cccd || undefined,
-          dia_chi: address || undefined,
-        });
+        try {
+          await updateProfile({
+            ho_ten: fullname,
+            so_dien_thoai: phone,
+            cccd: cccd || undefined,
+            dia_chi: address || undefined,
+          });
+        } catch (err) {
+          console.error("Không cập nhật được hồ sơ:", err);
+        }
       }
+
+      // 2. Khởi tạo đơn hàng SIM trên hệ thống với thông tin người mua chính xác
+      const orderRes = await createSimOrder({
+        id_sim: sim.id_sim,
+        id_khach_hang: loggedInUser?.vai_tro === "user" ? loggedInUser?.id_khach_hang : undefined,
+        ho_ten: fullname,
+        so_dien_thoai: phone,
+        cccd: cccd,
+        email: loggedInUser?.email,
+        dia_chi: address,
+        phuong_thuc: paymentMethod === "cod" ? "TienMat" : "VNPay",
+      });
+
+      const orderId = orderRes?.data?.id_don_hang;
+
+      if (paymentMethod === "vnpay") {
+        // 3a. Thanh toán VNPay Online -> Chuyển hướng VNPay Sandbox Gateway
+        const payRes = await createVNPaySimPayment({ id_don_hang: orderId });
+        if (payRes?.data?.payment_url) {
+          window.location.href = payRes.data.payment_url;
+          return;
+        }
+      }
+
+      // 3b. Thanh toán tại quầy
+      setIsSuccess(true);
     } catch (err) {
-      console.error("Không cập nhật được hồ sơ:", err);
-      // Vẫn hiển thị thành công đặt SIM kể cả khi cập nhật hồ sơ thất bại
+      console.error("Lỗi đặt mua SIM:", err);
+      alert(err.response?.data?.message || "Có lỗi xảy ra khi tạo đơn hàng SIM. Vui lòng thử lại.");
     } finally {
       setSubmitting(false);
-      setIsSuccess(true);
     }
   };
 
@@ -112,11 +163,10 @@ export default function SimCheckoutPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-10">
-      {/* ========= MODAL THÀNH CÔNG (overlay, chỉ tắt khi click Close) ========= */}
+      {/* ========= MODAL THÀNH CÔNG (Dành cho thanh toán tại quầy) ========= */}
       {isSuccess && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-3xl p-8 md:p-10 max-w-lg w-full shadow-2xl border border-gray-100 relative animate-fade-in">
-            {/* Nút đóng */}
             <button
               onClick={handleCloseSuccess}
               className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition cursor-pointer"
@@ -125,7 +175,6 @@ export default function SimCheckoutPage() {
               <X className="w-5 h-5" />
             </button>
 
-            {/* Icon thành công */}
             <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-5">
               <CheckCircle className="w-10 h-10" />
             </div>
@@ -138,29 +187,38 @@ export default function SimCheckoutPage() {
               <span className="font-bold text-[#EE0033]">{sim.so_sim}</span>.
             </p>
 
-            {/* Thông tin chi nhánh cần đến */}
             <div className="bg-red-50 border border-red-100 rounded-2xl p-5 mb-6">
               <p className="text-xs font-bold text-[#EE0033] uppercase tracking-widest mb-2 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5" />
                 Bước tiếp theo — Đến chi nhánh
               </p>
               <p className="text-sm font-black text-gray-900 mb-1">{tenChiNhanh}</p>
-              {diaChiChiNhanh && (
-                <p className="text-xs text-gray-500 mb-2">{diaChiChiNhanh}</p>
-              )}
-              {mapUrl && (
-                <a
-                  href={mapUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline transition mb-2"
-                >
-                  <MapPin className="w-3.5 h-3.5" />
-                  Xem chỉ đường trên Google Maps
-                </a>
-              )}
+              {diaChiChiNhanh && <p className="text-xs text-gray-500 mb-2">{diaChiChiNhanh}</p>}
+              
+              {/* Nếu có link nhúng iframe -> Hiển thị trực tiếp */}
+              {getMapEmbedUrl(mapUrl) ? (
+                <div className="w-full h-40 rounded-xl overflow-hidden border border-gray-200 my-2 shadow-inner">
+                  <iframe
+                    src={getMapEmbedUrl(mapUrl)}
+                    title={tenChiNhanh}
+                    className="w-full h-full border-0"
+                    loading="lazy"
+                    allowFullScreen
+                  />
+                </div>
+              ) : null}
+
+              <a
+                href={getSearchMapUrl(diaChiChiNhanh, tenChiNhanh)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline transition mb-2"
+              >
+                <MapPin className="w-3.5 h-3.5" />
+                Mở vị trí trên Google Maps &rarr;
+              </a>
               <p className="text-sm text-gray-600 mt-2 leading-relaxed">
-                Vui lòng mang theo <span className="font-semibold text-gray-900">CCCD/CMND gốc</span> và đến chi nhánh trên để hoàn tất các thủ tục kích hoạt & đăng ký chính chủ số SIM của bạn.
+                Vui lòng mang theo <span className="font-semibold text-gray-900">CCCD/CMND gốc</span> và đến chi nhánh trên để hoàn tất thủ tục thanh toán & nhận SIM.
               </p>
             </div>
 
@@ -176,76 +234,135 @@ export default function SimCheckoutPage() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
-          <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">Thanh Toán Đơn Hàng</h1>
+          <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">Thanh Toán Đơn Hàng SIM</h1>
           <p className="text-gray-500">Hoàn tất thông tin để sở hữu số thuê bao bạn mong muốn</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Cột trái: Form thông tin */}
+          {/* Cột trái: Form thông tin & Phương thức thanh toán */}
           <div className="flex-1 bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-            <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-4 mb-6 flex items-center">
-              <span className="w-8 h-8 bg-red-100 text-[#EE0033] rounded-full flex items-center justify-center mr-3 text-sm font-bold">1</span>
-              Thông tin cá nhân
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Họ và tên *</label>
-                  <input
-                    required
-                    type="text"
-                    value={fullname}
-                    onChange={(e) => setFullname(e.target.value)}
-                    className="w-full border border-gray-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#EE0033] focus:border-[#EE0033] outline-none transition text-sm"
-                    placeholder="Nhập họ tên đầy đủ..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Số điện thoại liên hệ *</label>
-                  <input
-                    required
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full border border-gray-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#EE0033] focus:border-[#EE0033] outline-none transition text-sm"
-                    placeholder="SĐT để nhân viên gọi xác nhận..."
-                  />
-                </div>
-              </div>
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Bước 1: Thông tin cá nhân */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Số CCCD / CMND *</label>
-                <input
-                  required
-                  type="text"
-                  value={cccd}
-                  onChange={(e) => setCccd(e.target.value)}
-                  className="w-full border border-gray-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#EE0033] focus:border-[#EE0033] outline-none transition text-sm"
-                  placeholder="Nhập số căn cước công dân của bạn..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Địa chỉ giao hàng (Tùy chọn)</label>
-                <input
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="w-full border border-gray-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#EE0033] focus:border-[#EE0033] outline-none transition text-sm"
-                  placeholder="Nhập địa chỉ nhận SIM..."
-                />
+                <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-4 mb-6 flex items-center">
+                  <span className="w-8 h-8 bg-red-100 text-[#EE0033] rounded-full flex items-center justify-center mr-3 text-sm font-bold">1</span>
+                  Thông tin cá nhân
+                </h2>
+
+                <div className="space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Họ và tên *</label>
+                      <input
+                        required
+                        type="text"
+                        value={fullname}
+                        onChange={(e) => setFullname(e.target.value)}
+                        className="w-full border border-gray-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#EE0033] focus:border-[#EE0033] outline-none transition text-sm"
+                        placeholder="Nhập họ tên đầy đủ..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Số điện thoại liên hệ *</label>
+                      <input
+                        required
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full border border-gray-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#EE0033] focus:border-[#EE0033] outline-none transition text-sm"
+                        placeholder="SĐT để nhân viên gọi xác nhận..."
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Số CCCD / CMND *</label>
+                    <input
+                      required
+                      type="text"
+                      value={cccd}
+                      onChange={(e) => setCccd(e.target.value)}
+                      className="w-full border border-gray-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#EE0033] focus:border-[#EE0033] outline-none transition text-sm"
+                      placeholder="Nhập số căn cước công dân của bạn..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Địa chỉ nhận SIM (Tùy chọn)</label>
+                    <input
+                      type="text"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className="w-full border border-gray-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#EE0033] focus:border-[#EE0033] outline-none transition text-sm"
+                      placeholder="Nhập địa chỉ nhận SIM..."
+                    />
+                  </div>
+
+                  <div className="bg-red-50 text-[#EE0033] p-4 rounded-2xl text-xs font-semibold border border-red-100 flex items-start gap-3">
+                    <Building2 className="w-5 h-5 flex-shrink-0" />
+                    <div>
+                      Số SIM này đang thuộc quản lý của chi nhánh: <span className="font-bold underline">{tenChiNhanh}</span>.
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Thông tin chi nhánh quản lý */}
-              <div className="bg-red-50 text-[#EE0033] p-5 rounded-2xl text-xs font-semibold border border-red-100 flex items-start gap-3 mt-4">
-                <Building2 className="w-5 h-5 flex-shrink-0" />
-                <div>
-                  Số SIM này hiện đang thuộc quản lý của chi nhánh:{" "}
-                  <span className="font-bold underline">{tenChiNhanh}</span>.
-                  <br />
-                  Sau khi đặt mua thành công, bạn vui lòng đến chi nhánh trên để nhận SIM & hoàn tất thủ tục đăng ký chính chủ.
+              {/* Bước 2: Chọn phương thức thanh toán */}
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-4 mb-6 flex items-center">
+                  <span className="w-8 h-8 bg-red-100 text-[#EE0033] rounded-full flex items-center justify-center mr-3 text-sm font-bold">2</span>
+                  Phương thức thanh toán
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* VNPay Option */}
+                  <div
+                    onClick={() => setPaymentMethod("vnpay")}
+                    className={`border-2 rounded-2xl p-5 flex items-start gap-4 cursor-pointer transition-all ${
+                      paymentMethod === "vnpay"
+                        ? "border-[#EE0033] bg-red-50/50 shadow-md ring-2 ring-[#EE0033]/20"
+                        : "border-gray-200 hover:border-red-200 bg-white"
+                    }`}
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
+                      <CreditCard className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-bold text-gray-900 text-base">Cổng VNPay</span>
+                        <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Nhanh chóng</span>
+                      </div>
+                      <p className="text-xs text-gray-500 leading-relaxed">
+                        Quét QR Code, Thẻ ATM Nội địa, Visa / Mastercard, VNPay QR...
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* COD / Counter Option */}
+                  <div
+                    onClick={() => setPaymentMethod("cod")}
+                    className={`border-2 rounded-2xl p-5 flex items-start gap-4 cursor-pointer transition-all ${
+                      paymentMethod === "cod"
+                        ? "border-[#EE0033] bg-red-50/50 shadow-md ring-2 ring-[#EE0033]/20"
+                        : "border-gray-200 hover:border-red-200 bg-white"
+                    }`}
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0">
+                      <Store className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-bold text-gray-900 text-base">Thanh toán tại Quầy</span>
+                      </div>
+                      <p className="text-xs text-gray-500 leading-relaxed">
+                        Thanh toán trực tiếp bằng tiền mặt khi nhận SIM tại chi nhánh.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="pt-6">
+              <div className="pt-2">
                 <button
                   type="submit"
                   disabled={submitting}
@@ -254,10 +371,12 @@ export default function SimCheckoutPage() {
                   {submitting ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      Đang xử lý...
+                      Đang kết nối cổng thanh toán...
                     </>
+                  ) : paymentMethod === "vnpay" ? (
+                    "Xác nhận & Thanh toán qua VNPay"
                   ) : (
-                    "Xác nhận & Thanh toán"
+                    "Xác nhận Đặt mua SIM"
                   )}
                 </button>
               </div>
@@ -293,8 +412,10 @@ export default function SimCheckoutPage() {
                   <span className="font-semibold text-gray-900">{phiHoaMang.toLocaleString("vi-VN")}đ</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span>Phí vận chuyển</span>
-                  <span className="font-semibold text-green-600">Miễn phí</span>
+                  <span>Hình thức thanh toán</span>
+                  <span className="font-bold text-[#EE0033]">
+                    {paymentMethod === "vnpay" ? "Cổng VNPay" : "Tại quầy"}
+                  </span>
                 </div>
               </div>
 
@@ -312,7 +433,7 @@ export default function SimCheckoutPage() {
                 </div>
                 <div className="flex items-center text-xs text-gray-500 bg-gray-50 p-3 rounded-xl border border-gray-100">
                   <Truck className="w-5 h-5 text-blue-500 mr-3 flex-shrink-0" />
-                  Giao SIM tận nhà miễn phí toàn quốc
+                  Hỗ trợ đăng ký SIM chính chủ tại chi nhánh
                 </div>
               </div>
             </div>

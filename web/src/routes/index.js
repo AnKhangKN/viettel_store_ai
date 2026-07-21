@@ -109,6 +109,12 @@ export const routes = [
     requiredRole: "user",
   },
   {
+    path: "/payment/vnpay-return",
+    name: "VNPay Return",
+    page: React.lazy(() => import("../pages/user/VNPayReturnPage/VNPayReturnPage")),
+    isShowUserLayout: true,
+  },
+  {
     path: "/support",
     name: "Support",
     page: React.lazy(() => import("../pages/user/SupportPage/SupportPage")),
@@ -209,6 +215,20 @@ export const routes = [
     path: "/staff/waiting-list",
     name: "Waiting List",
     page: React.lazy(() => import("../pages/staff/WaitingListStaff/WaitingListStaff")),
+    isShowStaffLayout: true,
+    requiredRole: "staff",
+  },
+  {
+    path: "/staff/sim-orders",
+    name: "Sim Orders Staff",
+    page: React.lazy(() => import("../pages/staff/SimOrdersStaff/SimOrdersStaff")),
+    isShowStaffLayout: true,
+    requiredRole: "staff",
+  },
+  {
+    path: "/staff/sim",
+    name: "Sim Staff",
+    page: React.lazy(() => import("../pages/staff/SimOrdersStaff/SimOrdersStaff")),
     isShowStaffLayout: true,
     requiredRole: "staff",
   }
