@@ -21,6 +21,33 @@ import {
   Briefcase
 } from "lucide-react";
 
+// Validate Viettel SIM number
+const validateViettelSim = (soSim) => {
+  const cleaned = (soSim || "").trim();
+  if (!cleaned) {
+    return {
+      isValid: false,
+      message: "Số SIM không được để trống."
+    };
+  }
+  const phoneRegex = /^[0-9]{10}$/;
+  if (!phoneRegex.test(cleaned)) {
+    return {
+      isValid: false,
+      message: "Số SIM phải có đúng 10 chữ số và chỉ chứa các ký tự số (0-9)."
+    };
+  }
+  const viettelPrefixes = ["086", "096", "097", "098", "032", "033", "034", "035", "036", "037", "038", "039"];
+  const prefix = cleaned.substring(0, 3);
+  if (!viettelPrefixes.includes(prefix)) {
+    return {
+      isValid: false,
+      message: "Số SIM phải thuộc nhà mạng Viettel (Đầu số hợp lệ: 086, 096, 097, 098, 032, 033, 034, 035, 036, 037, 038, 039)."
+    };
+  }
+  return { isValid: true, cleaned };
+};
+
 const SimPageAdmin = () => {
   const [sims, setSims] = useState([]);
   const [branches, setBranches] = useState([]);
@@ -29,6 +56,8 @@ const SimPageAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [statusMessage, setStatusMessage] = useState(null);
+  const [createError, setCreateError] = useState(null);
+  const [editError, setEditError] = useState(null);
 
   // Modals & Drawers state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -82,6 +111,7 @@ const SimPageAdmin = () => {
   // Handle opening Edit Drawer
   const handleRowClick = (sim) => {
     setSelectedSim(sim);
+    setEditError(null);
     setEditFormData({
       so_sim: sim.so_sim || "",
       id_loai_sim: sim.loai_sim?.id_loai_sim || sim.id_loai_sim || "",
@@ -94,11 +124,21 @@ const SimPageAdmin = () => {
   // Submit Create SIM Form
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
+    setCreateError(null);
+    
+    // Kiểm tra dữ liệu đầu vào số SIM
+    const validation = validateViettelSim(createFormData.so_sim);
+    if (!validation.isValid) {
+      setCreateError(validation.message);
+      return;
+    }
+
     setFormSubmitLoading(true);
     setStatusMessage(null);
     try {
       const res = await createSim({
         ...createFormData,
+        so_sim: validation.cleaned,
         gia_ban: Number(createFormData.gia_ban)
       });
       if (res?.success) {
@@ -108,15 +148,13 @@ const SimPageAdmin = () => {
         });
         setIsCreateModalOpen(false);
         setCreateFormData(initialFormState);
+        setCreateError(null);
         fetchData(); // Reload list
       }
     } catch (err) {
       console.error(err);
       const errMsg = err?.response?.data?.message || "Lỗi khi thêm số SIM. Vui lòng kiểm tra lại.";
-      setStatusMessage({
-        type: "error",
-        text: errMsg
-      });
+      setCreateError(errMsg);
     } finally {
       setFormSubmitLoading(false);
     }
@@ -126,11 +164,21 @@ const SimPageAdmin = () => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!selectedSim) return;
+    setEditError(null);
+
+    // Kiểm tra dữ liệu đầu vào số SIM
+    const validation = validateViettelSim(editFormData.so_sim);
+    if (!validation.isValid) {
+      setEditError(validation.message);
+      return;
+    }
+
     setFormSubmitLoading(true);
     setStatusMessage(null);
     try {
       const res = await updateSim(selectedSim.id_sim, {
         ...editFormData,
+        so_sim: validation.cleaned,
         gia_ban: Number(editFormData.gia_ban)
       });
       if (res?.success) {
@@ -139,15 +187,13 @@ const SimPageAdmin = () => {
           text: `Cập nhật thành công thông tin số SIM "${editFormData.so_sim}"!`
         });
         setSelectedSim(null);
+        setEditError(null);
         fetchData(); // Reload list
       }
     } catch (err) {
       console.error(err);
       const errMsg = err?.response?.data?.message || "Lỗi khi cập nhật SIM. Vui lòng thử lại.";
-      setStatusMessage({
-        type: "error",
-        text: errMsg
-      });
+      setEditError(errMsg);
     } finally {
       setFormSubmitLoading(false);
     }
@@ -256,6 +302,7 @@ const SimPageAdmin = () => {
               id_loai_sim: simTypes[0]?.id_loai_sim || "",
               id_chi_nhanh: branches[0]?.id_chi_nhanh || ""
             });
+            setCreateError(null);
             setIsCreateModalOpen(true);
           }}
           className="bg-[#EE0033] hover:bg-[#CC002D] text-white font-bold px-5 py-3 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-red-500/25 transition-all flex items-center gap-2 cursor-pointer"
@@ -318,7 +365,10 @@ const SimPageAdmin = () => {
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            onClick={() => setIsCreateModalOpen(false)}
+            onClick={() => {
+              setIsCreateModalOpen(false);
+              setCreateError(null);
+            }}
             className="fixed inset-0 bg-black/40 backdrop-blur-sm"
           ></div>
           <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl z-50 flex flex-col max-h-[90vh] border border-gray-150 animate-fade-in">
@@ -331,7 +381,10 @@ const SimPageAdmin = () => {
                 </h3>
               </div>
               <button
-                onClick={() => setIsCreateModalOpen(false)}
+                onClick={() => {
+                  setIsCreateModalOpen(false);
+                  setCreateError(null);
+                }}
                 className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all cursor-pointer"
               >
                 <X className="w-5 h-5" />
@@ -372,7 +425,10 @@ const SimPageAdmin = () => {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
+                  onClick={() => {
+                    setIsCreateModalOpen(false);
+                    setCreateError(null);
+                  }}
                   className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl text-xs transition-all uppercase tracking-wider mt-2 cursor-pointer text-center"
                 >
                   Đóng
@@ -380,6 +436,12 @@ const SimPageAdmin = () => {
               </div>
             ) : (
               <form onSubmit={handleCreateSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+                {createError && (
+                  <div className="px-4 py-3 bg-red-50 text-[#EE0033] border border-red-200 rounded-xl text-xs font-bold flex items-center gap-2 animate-fade-in">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>{createError}</span>
+                  </div>
+                )}
                 <div className="space-y-4">
                   {/* Số SIM */}
                   <div>
@@ -483,7 +545,10 @@ const SimPageAdmin = () => {
                 <div className="pt-4 border-t border-gray-100 flex gap-3">
                   <button
                     type="button"
-                    onClick={() => setIsCreateModalOpen(false)}
+                    onClick={() => {
+                      setIsCreateModalOpen(false);
+                      setCreateError(null);
+                    }}
                     className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl text-sm transition-all cursor-pointer text-center"
                   >
                     Hủy bỏ
@@ -510,10 +575,13 @@ const SimPageAdmin = () => {
       {selectedSim && (
         <>
           <div
-            onClick={() => setSelectedSim(null)}
+            onClick={() => {
+              setSelectedSim(null);
+              setEditError(null);
+            }}
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300"
           ></div>
-
+ 
           {/* Drawer Container */}
           <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-[0_0_50px_rgba(0,0,0,0.15)] z-50 flex flex-col animate-slide-in-right border-l border-gray-150">
             {/* Drawer Header */}
@@ -525,7 +593,10 @@ const SimPageAdmin = () => {
                 </h3>
               </div>
               <button
-                onClick={() => setSelectedSim(null)}
+                onClick={() => {
+                  setSelectedSim(null);
+                  setEditError(null);
+                }}
                 className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all cursor-pointer"
               >
                 <X className="w-5 h-5" />
@@ -534,6 +605,12 @@ const SimPageAdmin = () => {
 
             {/* Drawer Body (Form) */}
             <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+              {editError && (
+                <div className="px-4 py-3 bg-red-50 text-[#EE0033] border border-red-200 rounded-xl text-xs font-bold flex items-center gap-2 animate-fade-in">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{editError}</span>
+                </div>
+              )}
               <div className="flex items-center gap-3 bg-red-50/50 border border-red-100 p-4 rounded-xl mb-2">
                 <Smartphone className="w-8 h-8 text-[#EE0033] flex-shrink-0" />
                 <div className="flex-1 min-w-0">
@@ -657,7 +734,10 @@ const SimPageAdmin = () => {
               <div className="pt-6 border-t border-gray-100 flex gap-3 mt-4">
                 <button
                   type="button"
-                  onClick={() => setSelectedSim(null)}
+                  onClick={() => {
+                    setSelectedSim(null);
+                    setEditError(null);
+                  }}
                   className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl text-sm transition-all cursor-pointer text-center"
                 >
                   Đóng
