@@ -1,6 +1,6 @@
 from fastapi import Depends
 from app.modules.user.services.user_service import UserService
-from app.modules.user.schemas.user_schema import EmployeeCreateRequest, EmployeeApproveRequest, AccountRoleUpdateRequest, UserProfileUpdateRequest, StaffProfileUpdateRequest
+from app.modules.user.schemas.user_schema import EmployeeCreateRequest, EmployeeApproveRequest, AccountRoleUpdateRequest, UserProfileUpdateRequest, StaffProfileUpdateRequest, ChangePasswordRequest
 from app.common.dependencies.user_dependency import get_current_user
 from app.common.dependencies.staff_dependency import get_current_staff
 
@@ -35,6 +35,9 @@ class UserController:
 
     async def update_profile(self, body: UserProfileUpdateRequest, current_user: dict = Depends(get_current_user)):
         return await self.service.update_profile(current_user, body)
+
+    async def change_password(self, body: ChangePasswordRequest, current_user: dict = Depends(get_current_user)):
+        return await self.service.change_password(current_user, body)
 
     async def get_staff_profile(self, current_staff: dict = Depends(get_current_staff)):
         return await self.service.get_staff_profile(current_staff)

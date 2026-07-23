@@ -1,9 +1,9 @@
 from fastapi import status
 from app.core.exceptions import AppException
 from app.common.utils.uuid import generate_uuid7
-from app.core.security import hash_password
+from app.core.security import hash_password, verify_password
 from app.modules.user.repositories.user_repository import UserRepository
-from app.modules.user.schemas.user_schema import EmployeeCreateRequest, EmployeeApproveRequest, AccountRoleUpdateRequest, StaffProfileUpdateRequest
+from app.modules.user.schemas.user_schema import EmployeeCreateRequest, EmployeeApproveRequest, AccountRoleUpdateRequest, StaffProfileUpdateRequest, ChangePasswordRequest
 from app.common.enums.role_enum import RoleEnum
 from app.modules.branch.repositories.branch_repository import BranchRepository
 
@@ -245,12 +245,21 @@ class UserService:
                 message="Không xác định được người dùng"
             )
 
+        if body.email:
+            existing = await self.repository.find_by_email_or_phone(body.email, "")
+            if existing and str(existing["id_khach_hang"]) != str(id_khach_hang):
+                raise AppException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    message="Email này đã được sử dụng bởi tài khoản khác"
+                )
+
         res = await self.repository.update_profile(
             id_khach_hang=id_khach_hang,
             ho_ten=body.ho_ten,
             so_dien_thoai=body.so_dien_thoai,
             cccd=body.cccd or "",
-            dia_chi=body.dia_chi or ""
+            dia_chi=body.dia_chi or "",
+            email=body.email
         )
 
         if not res:
@@ -351,6 +360,35 @@ class UserService:
                 "ngay_sinh": str(res["ngay_sinh"]) if res["ngay_sinh"] else None,
                 "email": res["email"]
             }
+        }
+
+    async def change_password(self, payload: dict, body: ChangePasswordRequest):
+        id_khach_hang = payload.get("id_khach_hang")
+        if not id_khach_hang:
+            raise AppException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                message="Không xác định được danh tính người dùng"
+            )
+
+        current_hash = await self.repository.get_password_hash_by_id(id_khach_hang)
+        if not current_hash:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Người dùng không tồn tại"
+            )
+
+        if not verify_password(body.mat_khau_cu, current_hash):
+            raise AppException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message="Mật khẩu hiện tại không chính xác"
+            )
+
+        new_hash = hash_password(body.mat_khau_moi)
+        await self.repository.update_password(id_khach_hang, new_hash)
+
+        return {
+            "success": True,
+            "message": "Đổi mật khẩu thành công"
         }
 
 

@@ -127,3 +127,14 @@ export const updateStaffProfile = async (profileData) => {
     }
 };
 
+// API user/staff - đổi mật khẩu
+export const changePassword = async (passwordData) => {
+    try {
+        const response = await axiosJWT.patch(`/api/user/change-password`, passwordData);
+        return response.data;
+    } catch (error) {
+        console.error("Lỗi đổi mật khẩu:", error);
+        throw error;
+    }
+};
+

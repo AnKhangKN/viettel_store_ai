@@ -39,6 +39,12 @@ export const routes = [
     isShowUserLayout: true,
   },
   {
+    path: "/profile",
+    name: "User Profile",
+    page: React.lazy(() => import("../pages/user/UserProfilePage/UserProfilePage")),
+    isShowUserLayout: true,
+  },
+  {
     path: "/package",
     name: "Package",
     page: React.lazy(() => import("../pages/user/PackagePage/PackagePage")),

@@ -20,6 +20,7 @@ class AccountRoleUpdateRequest(BaseModel):
 class UserProfileUpdateRequest(BaseModel):
     ho_ten: str = Field(..., description="Họ và tên")
     so_dien_thoai: str = Field(..., description="Số điện thoại")
+    email: Optional[EmailStr] = Field(None, description="Email mới")
     cccd: Optional[str] = Field(None, description="Số CCCD/CMND")
     dia_chi: Optional[str] = Field(None, description="Địa chỉ giao hàng")
 
@@ -30,4 +31,8 @@ class StaffProfileUpdateRequest(BaseModel):
     dia_chi: Optional[str] = Field(None, description="Địa chỉ thường trú")
     gioi_tinh: Optional[str] = Field(None, description="Giới tính ('Nam', 'Nữ', 'Khác')")
     ngay_sinh: Optional[str] = Field(None, description="Ngày sinh (YYYY-MM-DD)")
+
+class ChangePasswordRequest(BaseModel):
+    mat_khau_cu: str = Field(..., description="Mật khẩu hiện tại")
+    mat_khau_moi: str = Field(..., description="Mật khẩu mới")
 

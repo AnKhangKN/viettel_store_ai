@@ -227,7 +227,7 @@ class UserRepository:
         db_uuid = uuid.UUID(id_khach_hang) if isinstance(id_khach_hang, str) else id_khach_hang
         return await get_pool().fetchval(sql, db_uuid)
 
-    async def update_profile(self, id_khach_hang: str, ho_ten: str, so_dien_thoai: str, cccd: str, dia_chi: str):
+    async def update_profile(self, id_khach_hang: str, ho_ten: str, so_dien_thoai: str, cccd: str, dia_chi: str, email: str | None = None):
         sql = """
             UPDATE khachhang
             SET
@@ -235,12 +235,14 @@ class UserRepository:
                 so_dien_thoai = $3,
                 cccd = CASE WHEN $4 != '' THEN $4 ELSE cccd END,
                 dia_chi = CASE WHEN $5 != '' THEN $5 ELSE dia_chi END,
+                email = COALESCE($6, email),
+                ten_dang_nhap = COALESCE($6, ten_dang_nhap),
                 cap_nhat = CURRENT_TIMESTAMP
             WHERE id_khach_hang = $1 AND da_xoa = false
             RETURNING id_khach_hang, ho_ten, so_dien_thoai, cccd, dia_chi, email
         """
         db_uuid = uuid.UUID(id_khach_hang) if isinstance(id_khach_hang, str) else id_khach_hang
-        return await get_pool().fetchrow(sql, db_uuid, ho_ten, so_dien_thoai, cccd, dia_chi)
+        return await get_pool().fetchrow(sql, db_uuid, ho_ten, so_dien_thoai, cccd, dia_chi, email)
 
     async def get_staff_profile(self, id_khach_hang: str):
         sql = """
@@ -297,5 +299,20 @@ class UserRepository:
         """
         db_uuid = uuid.UUID(id_khach_hang) if isinstance(id_khach_hang, str) else id_khach_hang
         return await get_pool().fetchrow(sql, db_uuid, ho_ten, so_dien_thoai, cccd, dia_chi, gioi_tinh, ngay_sinh)
+
+    async def get_password_hash_by_id(self, id_khach_hang: str):
+        sql = "SELECT mat_khau FROM khachhang WHERE id_khach_hang = $1 AND da_xoa = false"
+        db_uuid = uuid.UUID(id_khach_hang) if isinstance(id_khach_hang, str) else id_khach_hang
+        return await get_pool().fetchval(sql, db_uuid)
+
+    async def update_password(self, id_khach_hang: str, new_hashed_password: str):
+        sql = """
+            UPDATE khachhang
+            SET mat_khau = $2, cap_nhat = CURRENT_TIMESTAMP
+            WHERE id_khach_hang = $1 AND da_xoa = false
+            RETURNING id_khach_hang
+        """
+        db_uuid = uuid.UUID(id_khach_hang) if isinstance(id_khach_hang, str) else id_khach_hang
+        return await get_pool().fetchrow(sql, db_uuid, new_hashed_password)
 
 
