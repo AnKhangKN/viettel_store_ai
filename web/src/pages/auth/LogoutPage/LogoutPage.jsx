@@ -15,6 +15,7 @@ const LogoutPage = () => {
       } catch (err) {
         console.error("Lỗi đăng xuất API:", err);
       } finally {
+        localStorage.removeItem("staff_active_booth");
         dispatch(clearCredentials());
       }
     };

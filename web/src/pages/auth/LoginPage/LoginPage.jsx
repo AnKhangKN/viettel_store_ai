@@ -26,6 +26,7 @@ const LoginPage = () => {
         const decoded = decodeToken(accessToken);
         const role = decoded?.quyen || 'user';
 
+        localStorage.removeItem("staff_active_booth");
         dispatch(setCredentials({
           accessToken,
           user: { ...user, role }

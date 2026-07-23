@@ -30,12 +30,7 @@ const DashboardPageStaff = () => {
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString("vi-VN"));
 
   // Realtime Booth Status from Backend
-  const [boothsList, setBoothsList] = useState([
-    { ten_quay: "Quầy 1", trang_thai: "SanSang", nhan_vien: null, is_my_booth: false },
-    { ten_quay: "Quầy 2", trang_thai: "SanSang", nhan_vien: null, is_my_booth: false },
-    { ten_quay: "Quầy 3", trang_thai: "SanSang", nhan_vien: null, is_my_booth: false },
-    { ten_quay: "Quầy 4", trang_thai: "SanSang", nhan_vien: null, is_my_booth: false },
-  ]);
+  const [boothsList, setBoothsList] = useState([]);
 
   // Realtime Clock Ticker
   useEffect(() => {
@@ -125,7 +120,7 @@ const DashboardPageStaff = () => {
   const completedCount = completedTickets.length;
 
   const totalWaitMinutes = waitingTickets.reduce((acc, curr) => acc + (curr.thoi_gian_xu_ly_trung_binh || 12), 0);
-  const avgWaitTime = waitingCount > 0 ? Math.round(totalWaitMinutes / waitingCount) : 12;
+  const avgWaitTime = tickets.length > 0 ? Math.round(tickets.reduce((acc, curr) => acc + (curr.thoi_gian_xu_ly_trung_binh || 12), 0) / tickets.length) : 0;
 
   // Active booths count
   const activeBoothsCount = boothsList.filter((b) => b.trang_thai === "DangSuDung").length;
@@ -149,7 +144,7 @@ const DashboardPageStaff = () => {
             </div>
 
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
-              Chào Mừng Quay Trở Lại, {user?.name || "Phạm Khánh Ngọc"}! 👋
+              Chào Mừng Quay Trở Lại, {user?.name || user?.ho_ten || "Nhân viên"}! 👋
             </h1>
 
             <p className="text-red-100 text-xs sm:text-sm max-w-2xl font-medium leading-relaxed">
@@ -200,7 +195,7 @@ const DashboardPageStaff = () => {
           </div>
 
           <div className="mt-4 flex items-baseline justify-between">
-            <h2 className="text-3xl font-black text-gray-900">{activeBoothsCount}/4</h2>
+            <h2 className="text-3xl font-black text-gray-900">{activeBoothsCount}/{boothsList.length}</h2>
             <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
               {activeBoothsCount > 0 ? `${activeBoothsCount} Quầy trực` : "Chưa chọn quầy"}
             </span>
@@ -217,9 +212,9 @@ const DashboardPageStaff = () => {
           </div>
 
           <div className="mt-4 flex items-baseline justify-between">
-            <h2 className="text-3xl font-black text-gray-900">{completedCount > 0 ? completedCount : 35}</h2>
+            <h2 className="text-3xl font-black text-gray-900">{completedCount}</h2>
             <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" /> +12%
+              <TrendingUp className="w-3 h-3" /> Hôm nay
             </span>
           </div>
         </div>
@@ -256,7 +251,7 @@ const DashboardPageStaff = () => {
           </div>
 
           <span className="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-xl hidden sm:inline-block">
-            Tổng 4 quầy
+            Tổng {boothsList.length} quầy
           </span>
         </div>
 
@@ -299,7 +294,7 @@ const DashboardPageStaff = () => {
                   <div>
                     <span className="text-[10px] font-bold text-gray-400 uppercase">Nhân viên trực</span>
                     <p className={`text-xs font-bold mt-0.5 ${isMyBooth ? "text-[#EE0033]" : isOccupied ? "text-gray-800" : "text-gray-400 italic"}`}>
-                      {isMyBooth ? `${user?.name || "Phạm Khánh Ngọc"} (Bạn)` : isOccupied ? booth.nhan_vien : "Chưa có nhân viên"}
+                      {isMyBooth ? `${user?.name || user?.ho_ten || "Nhân viên"} (Bạn)` : isOccupied ? booth.nhan_vien : "Chưa có nhân viên"}
                     </p>
                   </div>
                 </div>
@@ -384,32 +379,39 @@ const DashboardPageStaff = () => {
             </div>
           </div>
 
-          <div className="space-y-4">
-            {[
-              { id: "A001", action: "Đăng ký eSIM chính chủ", time: "10 phút trước", staff: "Nguyễn Văn A" },
-              { id: "A002", action: "Thanh toán cước VNPAY", time: "25 phút trước", staff: "Trần Văn B" },
-              { id: "A010", action: "Gia hạn gói cước SD90", time: "40 phút trước", staff: "Phạm Khánh Ngọc" },
-              { id: "A012", action: "Mua SIM 098x xxx xxx", time: "1 giờ trước", staff: "Lê Văn C" },
-            ].map((item, idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-between p-3.5 bg-gray-50/60 rounded-2xl border border-gray-100 text-xs"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-xs flex-shrink-0">
-                    {item.id}
-                  </span>
-                  <div>
-                    <p className="font-bold text-gray-800">{item.action}</p>
-                    <p className="text-[10px] text-gray-400 mt-0.5">Xử lý bởi: {item.staff}</p>
-                  </div>
-                </div>
-
-                <span className="bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full text-[10px] border border-emerald-200">
-                  Hoàn thành ({item.time})
-                </span>
+          <div className="space-y-3">
+            {completedTickets.length === 0 ? (
+              <div className="text-center py-10 text-gray-400 text-xs font-medium">
+                Chưa có giao dịch nào hoàn thành hôm nay.
               </div>
-            ))}
+            ) : (
+              completedTickets.slice(0, 5).map((ticket) => {
+                const formattedTime = new Date(ticket.ngay_tao).toLocaleTimeString("vi-VN", {
+                  hour: "2-digit",
+                  minute: "2-digit"
+                });
+                return (
+                  <div
+                    key={ticket.id_phieu}
+                    className="flex items-center justify-between p-3.5 bg-gray-50/60 rounded-2xl border border-gray-100 text-xs"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 font-black flex items-center justify-center text-xs flex-shrink-0">
+                        {ticket.so_thu_tu}
+                      </span>
+                      <div>
+                        <p className="font-bold text-gray-800">{ticket.ten_giao_dich || "Giao dịch quầy"}</p>
+                        <p className="text-[10px] text-gray-400 mt-0.5">Khách hàng: {ticket.ho_ten}</p>
+                      </div>
+                    </div>
+
+                    <span className="bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full text-[10px] border border-emerald-200">
+                      Hoàn thành ({formattedTime})
+                    </span>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>

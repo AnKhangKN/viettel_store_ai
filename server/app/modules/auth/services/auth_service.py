@@ -81,11 +81,21 @@ class AuthService:
             max_age=7 * 24 * 60 * 60  # 7 ngày
         )
 
+        user_id = str(user["id_khach_hang"])
+
+        # Giải phóng quầy làm việc cũ (nếu có) của nhân viên trên server memory
+        try:
+            from app.modules.queue.services.queue_service import QueueService
+            queue_service = QueueService()
+            await queue_service.release_booth(user_id)
+        except Exception:
+            pass
+
         return {
             "success": True,
             "data": {
                 "user": {
-                    "id": str(user["id_khach_hang"]),
+                    "id": user_id,
                     "name": user["ho_ten"]
                 },
                 "accessToken": access_token,

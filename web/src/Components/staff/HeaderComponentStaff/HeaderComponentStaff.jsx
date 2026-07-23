@@ -40,8 +40,9 @@ const HeaderComponentStaff = () => {
         if (res.my_active_booth) {
           setActiveBooth(res.my_active_booth);
           localStorage.setItem("staff_active_booth", res.my_active_booth);
-          window.dispatchEvent(new Event("staff_booth_changed"));
-        } else if (!localStorage.getItem("staff_active_booth")) {
+        } else {
+          setActiveBooth("Chưa chọn quầy");
+          localStorage.removeItem("staff_active_booth");
           setShowBoothModal(true);
         }
       }
@@ -52,13 +53,6 @@ const HeaderComponentStaff = () => {
 
   useEffect(() => {
     fetchBooths();
-
-    const handleLocalBoothChange = () => {
-      fetchBooths();
-    };
-
-    window.addEventListener("staff_booth_changed", handleLocalBoothChange);
-    return () => window.removeEventListener("staff_booth_changed", handleLocalBoothChange);
   }, []);
 
   // WebSocket listening for real-time booth updates across all staff
@@ -256,11 +250,11 @@ const HeaderComponentStaff = () => {
                   Nhân viên {activeBooth}
                 </p>
                 <p className="text-sm font-bold text-gray-800 mt-1 group-hover:text-[#EE0033] transition-colors">
-                  {user?.name || "Phạm Khánh Ngọc"}
+                  {user?.name || user?.ho_ten || "Nhân viên"}
                 </p>
               </div>
               <div className="w-10 h-10 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center text-[#EE0033] font-black shadow-sm group-hover:scale-105 transition-transform">
-                {user?.name ? user.name.charAt(0).toUpperCase() : "N"}
+                {user?.name ? user.name.charAt(0).toUpperCase() : user?.ho_ten ? user.ho_ten.charAt(0).toUpperCase() : "N"}
               </div>
             </button>
 
@@ -268,7 +262,7 @@ const HeaderComponentStaff = () => {
             {showUserMenu && (
               <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 animate-fade-in-up">
                 <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 border-b border-gray-100">
-                  <p className="font-extrabold text-sm text-gray-900">{user?.name || "Phạm Khánh Ngọc"}</p>
+                  <p className="font-extrabold text-sm text-gray-900">{user?.name || user?.ho_ten || "Nhân viên"}</p>
                   <p className="text-xs text-gray-500 mt-0.5">{user?.email || "staff@viettel.com.vn"}</p>
                   <span className="mt-2 inline-block bg-[#EE0033] text-white text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">
                     Nhân viên {activeBooth}
@@ -304,87 +298,102 @@ const HeaderComponentStaff = () => {
       </header>
 
       {/* MODAL CỐ ĐỊNH QUẦY PHIÊN LÀM VIỆC */}
-      {showBoothModal && (
-        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-white rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl border border-gray-100 space-y-6">
-            <div className="text-center space-y-2">
-              <div className="w-14 h-14 rounded-2xl bg-red-50 text-[#EE0033] flex items-center justify-center font-bold mx-auto border border-red-100">
-                <Monitor className="w-7 h-7" />
-              </div>
-              <h2 className="text-xl font-black text-gray-900">Chọn Quầy Trực Cố Định Phiên Làm Việc</h2>
-              <p className="text-xs text-gray-500 max-w-sm mx-auto">
-                Quầy được chọn sẽ cố định trong suốt phiên làm việc. Để đổi quầy khác, nhân viên cần thực hiện Đăng xuất.
-              </p>
-            </div>
+      {showBoothModal && (() => {
+        const hasActiveBooth = activeBooth && activeBooth !== "Chưa chọn quầy" && boothsList.some((b) => b.is_my_booth);
 
-            {boothsList.length === 0 ? (
-              <div className="p-5 bg-amber-50 border border-amber-200 rounded-2xl text-center space-y-2">
-                <ShieldAlert className="w-8 h-8 text-amber-500 mx-auto animate-pulse" />
-                <p className="text-xs font-bold text-gray-800">
-                  Chi nhánh chưa có quầy giao dịch nào do Admin tạo.
-                </p>
-                <p className="text-[11px] text-gray-500 leading-relaxed">
-                  Vui lòng liên hệ Quản trị viên (Admin) để khởi tạo quầy giao dịch trước khi chọn quầy làm việc.
+        return (
+          <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+            <div className="bg-white rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl border border-gray-100 space-y-6">
+              <div className="text-center space-y-2">
+                <div className="w-14 h-14 rounded-2xl bg-red-50 text-[#EE0033] flex items-center justify-center font-bold mx-auto border border-red-100">
+                  <Monitor className="w-7 h-7" />
+                </div>
+                <h2 className="text-xl font-black text-gray-900">Chọn Quầy Trực Cố Định Phiên Làm Việc</h2>
+                <p className="text-xs text-gray-500 max-w-sm mx-auto">
+                  Quầy được chọn sẽ cố định trong suốt phiên làm việc. Để đổi quầy khác, nhân viên cần thực hiện Đăng xuất.
                 </p>
               </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-4">
-                {boothsList.map((b) => {
-                  const isOccupiedByOther = b.trang_thai === "DangSuDung" && !b.is_my_booth;
-                  const isMyBooth = b.is_my_booth;
 
-                  return (
-                    <button
-                      key={b.ten_quay}
-                      disabled={isOccupiedByOther || boothLoading}
-                      onClick={() => handleSelectBooth(b.ten_quay)}
-                      className={`p-4 rounded-2xl border-2 text-left transition-all duration-200 flex flex-col justify-between space-y-3 cursor-pointer ${
-                        isMyBooth
-                          ? "bg-red-50 border-[#EE0033] shadow-md ring-2 ring-red-500/20"
-                          : isOccupiedByOther
-                          ? "bg-gray-50 border-gray-200 opacity-60 cursor-not-allowed"
-                          : "bg-white border-gray-200 hover:border-red-300 hover:shadow-md"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-black text-base text-gray-900">{b.ten_quay}</span>
-                        {isMyBooth ? (
-                          <CheckCircle2 className="w-5 h-5 text-[#EE0033]" />
-                        ) : isOccupiedByOther ? (
-                          <Lock className="w-4 h-4 text-red-500" />
-                        ) : (
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                        )}
-                      </div>
+              {!hasActiveBooth && (
+                <div className="p-3.5 bg-red-50 border border-red-200 rounded-2xl text-center flex items-center justify-center gap-2 text-xs font-bold text-[#EE0033]">
+                  <ShieldAlert className="w-4 h-4 shrink-0" />
+                  <span>Bắt buộc chọn 1 quầy giao dịch để bắt đầu phiên trực!</span>
+                </div>
+              )}
 
-                      <div>
-                        <span className="text-[10px] font-bold text-gray-400 uppercase">Trạng thái</span>
-                        <p className={`text-xs font-bold mt-0.5 ${isOccupiedByOther ? "text-red-600" : isMyBooth ? "text-[#EE0033]" : "text-emerald-600"}`}>
-                          {isOccupiedByOther
-                            ? `Đang trực bởi ${b.nhan_vien}`
-                            : isMyBooth
-                            ? "Quầy của bạn"
-                            : "🟢 Sẵn sàng chọn"}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
+              {boothsList.length === 0 ? (
+                <div className="p-5 bg-amber-50 border border-amber-200 rounded-2xl text-center space-y-2">
+                  <ShieldAlert className="w-8 h-8 text-amber-500 mx-auto animate-pulse" />
+                  <p className="text-xs font-bold text-gray-800">
+                    Chi nhánh chưa có quầy giao dịch nào do Admin tạo.
+                  </p>
+                  <p className="text-[11px] text-gray-500 leading-relaxed">
+                    Vui lòng liên hệ Quản trị viên (Admin) để khởi tạo quầy giao dịch trước khi chọn quầy làm việc.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  {boothsList.map((b) => {
+                    const isOccupiedByOther = b.trang_thai === "DangSuDung" && !b.is_my_booth;
+                    const isMyBooth = b.is_my_booth;
+
+                    return (
+                      <button
+                        key={b.ten_quay}
+                        disabled={isOccupiedByOther || boothLoading}
+                        onClick={() => handleSelectBooth(b.ten_quay)}
+                        className={`p-4 rounded-2xl border-2 text-left transition-all duration-200 flex flex-col justify-between space-y-3 cursor-pointer ${
+                          isMyBooth
+                            ? "bg-red-50 border-[#EE0033] shadow-md ring-2 ring-red-500/20"
+                            : isOccupiedByOther
+                            ? "bg-gray-50 border-gray-200 opacity-60 cursor-not-allowed"
+                            : "bg-white border-gray-200 hover:border-red-300 hover:shadow-md"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-black text-base text-gray-900">{b.ten_quay}</span>
+                          {isMyBooth ? (
+                            <CheckCircle2 className="w-5 h-5 text-[#EE0033]" />
+                          ) : isOccupiedByOther ? (
+                            <Lock className="w-4 h-4 text-red-500" />
+                          ) : (
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                          )}
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] font-bold text-gray-400 uppercase">Trạng thái</span>
+                          <p className={`text-xs font-bold mt-0.5 ${isOccupiedByOther ? "text-red-600" : isMyBooth ? "text-[#EE0033]" : "text-emerald-600"}`}>
+                            {isOccupiedByOther
+                              ? `Đang trực bởi ${b.nhan_vien}`
+                              : isMyBooth
+                              ? "Quầy của bạn"
+                              : "🟢 Sẵn sàng chọn"}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="pt-2 text-center border-t border-gray-100 flex items-center justify-between">
+                <span className="text-[11px] text-gray-400 font-medium">Chi nhánh: {branchName}</span>
+                {hasActiveBooth ? (
+                  <button
+                    onClick={() => setShowBoothModal(false)}
+                    className="text-xs font-bold text-gray-500 hover:text-gray-800 cursor-pointer"
+                  >
+                    Đóng
+                  </button>
+                ) : (
+                  <span className="text-[11px] font-bold text-[#EE0033] italic">Cần chọn quầy để làm việc</span>
+                )}
               </div>
-            )}
-
-            <div className="pt-2 text-center border-t border-gray-100 flex items-center justify-between">
-              <span className="text-[11px] text-gray-400 font-medium">Chi nhánh: {branchName}</span>
-              <button
-                onClick={() => setShowBoothModal(false)}
-                className="text-xs font-bold text-gray-500 hover:text-gray-800 cursor-pointer"
-              >
-                Đóng
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </>
   );
 };
