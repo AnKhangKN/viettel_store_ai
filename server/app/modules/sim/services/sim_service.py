@@ -36,20 +36,11 @@ class SimService:
                 message=f"Loại SIM có ID '{body.id_loai_sim}' không tồn tại"
             )
 
-        # 3. Kiểm tra chi nhánh có tồn tại không
-        branch = await self.branch_repository.get_by_id(body.id_chi_nhanh)
-        if not branch:
-            raise AppException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                message=f"Chi nhánh có ID '{body.id_chi_nhanh}' không tồn tại"
-            )
-
-        # 4. Sinh ID và tạo
+        # 3. Sinh ID và tạo
         id_sim = generate_uuid7()
         res = await self.repository.create_sim(
             id_sim=id_sim,
             id_loai_sim=body.id_loai_sim,
-            id_chi_nhanh=body.id_chi_nhanh,
             so_sim=body.so_sim,
             gia_ban=body.gia_ban,
             trang_thai=body.trang_thai or "ConHang"
@@ -60,7 +51,6 @@ class SimService:
             "data": {
                 "id_sim": str(res["id_sim"]),
                 "id_loai_sim": str(res["id_loai_sim"]),
-                "id_chi_nhanh": str(res["id_chi_nhanh"]),
                 "so_sim": res["so_sim"],
                 "gia_ban": float(res["gia_ban"]),
                 "trang_thai": res["trang_thai"]
@@ -84,27 +74,13 @@ class SimService:
                     "id_loai_sim": str(r["id_loai_sim"]) if r["id_loai_sim"] else None,
                     "ten_loai_sim": r["ten_loai_sim"] if r["ten_loai_sim"] else None
                 },
-                "chi_nhanh": {
-                    "id_chi_nhanh": str(r["id_chi_nhanh"]) if r["id_chi_nhanh"] else None,
-                    "ten_chi_nhanh": r["ten_chi_nhanh"] if r["ten_chi_nhanh"] else None
-                },
                 "gia_ban": float(r["gia_ban"]),
                 "trang_thai": r["trang_thai"]
             }
         }
 
     async def get_sims_by_branch(self, id_chi_nhanh: str):
-        # 1. Kiểm tra xem chi nhánh có tồn tại không
-        branch = await self.branch_repository.get_by_id(id_chi_nhanh)
-        if not branch:
-            raise AppException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                message=f"Chi nhánh có ID '{id_chi_nhanh}' không tồn tại"
-            )
-
-        # 2. Lấy danh sách SIM
         rows = await self.repository.get_sims_by_branch(id_chi_nhanh)
-
         sims = []
         for r in rows:
             sims.append({
@@ -113,10 +89,6 @@ class SimService:
                 "loai_sim": {
                     "id_loai_sim": str(r["id_loai_sim"]) if r["id_loai_sim"] else None,
                     "ten_loai_sim": r["ten_loai_sim"] if r["ten_loai_sim"] else None
-                },
-                "chi_nhanh": {
-                    "id_chi_nhanh": str(r["id_chi_nhanh"]) if r["id_chi_nhanh"] else None,
-                    "ten_chi_nhanh": r["ten_chi_nhanh"] if r["ten_chi_nhanh"] else None
                 },
                 "gia_ban": float(r["gia_ban"]),
                 "trang_thai": r["trang_thai"]
@@ -137,10 +109,6 @@ class SimService:
                 "loai_sim": {
                     "id_loai_sim": str(r["id_loai_sim"]) if r["id_loai_sim"] else None,
                     "ten_loai_sim": r["ten_loai_sim"] if r["ten_loai_sim"] else None
-                },
-                "chi_nhanh": {
-                    "id_chi_nhanh": str(r["id_chi_nhanh"]) if r["id_chi_nhanh"] else None,
-                    "ten_chi_nhanh": r["ten_chi_nhanh"] if r["ten_chi_nhanh"] else None
                 },
                 "gia_ban": float(r["gia_ban"]),
                 "trang_thai": r["trang_thai"]
@@ -185,19 +153,10 @@ class SimService:
                 message=f"Loại SIM có ID '{body.id_loai_sim}' không tồn tại"
             )
 
-        # 4. Kiểm tra chi nhánh có tồn tại không
-        branch = await self.branch_repository.get_by_id(body.id_chi_nhanh)
-        if not branch:
-            raise AppException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                message=f"Chi nhánh có ID '{body.id_chi_nhanh}' không tồn tại"
-            )
-
-        # 5. Cập nhật dữ liệu
+        # 4. Cập nhật dữ liệu
         res = await self.repository.update_sim(
             id_sim=id_sim,
             id_loai_sim=body.id_loai_sim,
-            id_chi_nhanh=body.id_chi_nhanh,
             so_sim=body.so_sim,
             gia_ban=body.gia_ban,
             trang_thai=body.trang_thai or "ConHang"
@@ -208,7 +167,6 @@ class SimService:
             "data": {
                 "id_sim": str(res["id_sim"]),
                 "id_loai_sim": str(res["id_loai_sim"]),
-                "id_chi_nhanh": str(res["id_chi_nhanh"]),
                 "so_sim": res["so_sim"],
                 "gia_ban": float(res["gia_ban"]),
                 "trang_thai": res["trang_thai"]

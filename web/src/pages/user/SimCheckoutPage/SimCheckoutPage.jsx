@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { CheckCircle, ShieldCheck, Truck, Loader2, Building2, X, MapPin, CreditCard, Store } from "lucide-react";
 import { useSelector } from "react-redux";
 import { getSimDetails } from "../../../api/sim/sim.api";
+import { getAllBranches } from "../../../api/branch/branch.api";
 import { updateProfile } from "../../../api/user/user.api";
 import { createSimOrder, createVNPaySimPayment } from "../../../api/payment/payment.api";
 
@@ -32,6 +33,8 @@ export default function SimCheckoutPage() {
   const loggedInUser = useSelector((state) => state.auth.user);
 
   const [sim, setSim] = useState(null);
+  const [branches, setBranches] = useState([]);
+  const [selectedBranch, setSelectedBranch] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -54,26 +57,51 @@ export default function SimCheckoutPage() {
   }, [loggedInUser]);
 
   useEffect(() => {
-    const fetchSim = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await getSimDetails(id);
-        if (res?.success && res?.data) {
-          setSim(res.data);
+        const [simRes, branchesRes] = await Promise.all([
+          getSimDetails(id),
+          getAllBranches()
+        ]);
+
+        if (simRes?.success && simRes?.data) {
+          setSim(simRes.data);
+        }
+        if (branchesRes?.success && branchesRes?.data) {
+          const activeBranches = branchesRes.data.filter(b => b.trang_thai === "HoatDong");
+          setBranches(activeBranches.length > 0 ? activeBranches : branchesRes.data);
+          if (activeBranches.length > 0) {
+            setSelectedBranch(activeBranches[0].id_chi_nhanh);
+          } else if (branchesRes.data.length > 0) {
+            setSelectedBranch(branchesRes.data[0].id_chi_nhanh);
+          }
         }
       } catch (error) {
-        console.error("Lỗi tải chi tiết SIM:", error);
+        console.error("Lỗi tải chi tiết đơn hàng:", error);
       } finally {
         setLoading(false);
       }
     };
     if (id) {
-      fetchSim();
+      fetchData();
     }
   }, [id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const branchId = selectedBranch || (branches.length > 0 ? branches[0].id_chi_nhanh : "");
+    const simId = sim?.id_sim || id;
+
+    if (!branchId) {
+      alert("Vui lòng chọn chi nhánh Viettel Store bạn muốn đến nhận SIM.");
+      return;
+    }
+    if (!simId) {
+      alert("Không tìm thấy thông tin số SIM.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       // 1. Cập nhật thông tin cá nhân nếu người dùng đã đăng nhập
@@ -90,15 +118,16 @@ export default function SimCheckoutPage() {
         }
       }
 
-      // 2. Khởi tạo đơn hàng SIM trên hệ thống với thông tin người mua chính xác
+      // 2. Khởi tạo đơn hàng SIM trên hệ thống với thông tin người mua và chi nhánh đã chọn
       const orderRes = await createSimOrder({
-        id_sim: sim.id_sim,
-        id_khach_hang: loggedInUser?.vai_tro === "user" ? loggedInUser?.id_khach_hang : undefined,
-        ho_ten: fullname,
-        so_dien_thoai: phone,
-        cccd: cccd,
-        email: loggedInUser?.email,
-        dia_chi: address,
+        id_sim: simId,
+        id_chi_nhanh: branchId,
+        id_khach_hang: (loggedInUser?.vai_tro === "user" && loggedInUser?.id_khach_hang) ? loggedInUser.id_khach_hang : undefined,
+        ho_ten: fullname || undefined,
+        so_dien_thoai: phone || undefined,
+        cccd: cccd || undefined,
+        email: loggedInUser?.email || undefined,
+        dia_chi: address || undefined,
         phuong_thuc: paymentMethod === "cod" ? "TienMat" : "VNPay",
       });
 
@@ -157,9 +186,11 @@ export default function SimCheckoutPage() {
   const giaSim = sim.gia_ban;
   const phiHoaMang = 50000;
   const tongCong = giaSim + phiHoaMang;
-  const tenChiNhanh = sim.chi_nhanh?.ten_chi_nhanh || "Hệ thống Viettel Store";
-  const diaChiChiNhanh = sim.chi_nhanh?.dia_chi || "";
-  const mapUrl = sim.chi_nhanh?.map_url || null;
+
+  const selectedBranchObj = branches.find(b => b.id_chi_nhanh === selectedBranch) || {};
+  const tenChiNhanh = selectedBranchObj.ten_chi_nhanh || "Viettel Store";
+  const diaChiChiNhanh = selectedBranchObj.dia_chi || "";
+  const mapUrl = selectedBranchObj.map_url || null;
 
   return (
     <div className="min-h-screen bg-gray-50 py-10">
@@ -246,7 +277,7 @@ export default function SimCheckoutPage() {
               <div>
                 <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-4 mb-6 flex items-center">
                   <span className="w-8 h-8 bg-red-100 text-[#EE0033] rounded-full flex items-center justify-center mr-3 text-sm font-bold">1</span>
-                  Thông tin cá nhân
+                  Thông tin cá nhân người đăng ký
                 </h2>
 
                 <div className="space-y-5">
@@ -288,29 +319,57 @@ export default function SimCheckoutPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Địa chỉ nhận SIM (Tùy chọn)</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Địa chỉ thường trú (Tùy chọn)</label>
                     <input
                       type="text"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
                       className="w-full border border-gray-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#EE0033] focus:border-[#EE0033] outline-none transition text-sm"
-                      placeholder="Nhập địa chỉ nhận SIM..."
+                      placeholder="Nhập địa chỉ của bạn..."
                     />
-                  </div>
-
-                  <div className="bg-red-50 text-[#EE0033] p-4 rounded-2xl text-xs font-semibold border border-red-100 flex items-start gap-3">
-                    <Building2 className="w-5 h-5 flex-shrink-0" />
-                    <div>
-                      Số SIM này đang thuộc quản lý của chi nhánh: <span className="font-bold underline">{tenChiNhanh}</span>.
-                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Bước 2: Chọn phương thức thanh toán */}
+              {/* Bước 2: Chọn Chi nhánh nhận SIM */}
               <div>
                 <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-4 mb-6 flex items-center">
                   <span className="w-8 h-8 bg-red-100 text-[#EE0033] rounded-full flex items-center justify-center mr-3 text-sm font-bold">2</span>
+                  Chọn cửa hàng / chi nhánh nhận SIM
+                </h2>
+
+                <div className="space-y-4">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    Vui lòng chọn cửa hàng Viettel Store tiện nhất để bạn đến nhận SIM *
+                  </label>
+                  <select
+                    required
+                    value={selectedBranch}
+                    onChange={(e) => setSelectedBranch(e.target.value)}
+                    className="w-full border border-gray-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#EE0033] focus:border-[#EE0033] outline-none transition text-sm font-bold text-gray-800 bg-white cursor-pointer"
+                  >
+                    {branches.map((b) => (
+                      <option key={b.id_chi_nhanh} value={b.id_chi_nhanh}>
+                        {b.ten_chi_nhanh} — {b.dia_chi}
+                      </option>
+                    ))}
+                  </select>
+
+                  {selectedBranchObj && selectedBranchObj.dia_chi && (
+                    <div className="bg-red-50 text-[#EE0033] p-4 rounded-2xl text-xs font-semibold border border-red-100 flex items-start gap-3">
+                      <Building2 className="w-5 h-5 flex-shrink-0" />
+                      <div>
+                        Địa điểm nhận SIM: <span className="font-bold">{tenChiNhanh}</span> ({diaChiChiNhanh}).
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Bước 3: Chọn phương thức thanh toán */}
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-4 mb-6 flex items-center">
+                  <span className="w-8 h-8 bg-red-100 text-[#EE0033] rounded-full flex items-center justify-center mr-3 text-sm font-bold">3</span>
                   Phương thức thanh toán
                 </h2>
 
@@ -402,7 +461,7 @@ export default function SimCheckoutPage() {
                   <span className="font-semibold text-gray-900">{sim.gia_ban.toLocaleString("vi-VN")}đ</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span>Chi nhánh quản lý</span>
+                  <span>Chi nhánh nhận SIM</span>
                   <span className="font-semibold text-gray-900 text-right max-w-[180px] truncate" title={tenChiNhanh}>
                     {tenChiNhanh}
                   </span>

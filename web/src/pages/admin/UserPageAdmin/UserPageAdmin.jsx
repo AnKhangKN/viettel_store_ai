@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getAllAccounts, updateAccountRole, createEmployee } from "../../../api/user/user.api";
 import { getAllBranches } from "../../../api/branch/branch.api";
+import { getAllBoothsAdmin } from "../../../api/queue/booth.api";
 import TableComponent from "../../../components/shared/TableComponent/TableComponent";
 import {
   UserCheck,
@@ -23,6 +24,7 @@ import {
 const UserPageAdmin = () => {
   const [accounts, setAccounts] = useState([]);
   const [branches, setBranches] = useState([]);
+  const [booths, setBooths] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
@@ -65,22 +67,36 @@ const UserPageAdmin = () => {
     }
   };
 
-  // Fetch branches list
-  const fetchBranches = async () => {
+  // Fetch branches & booths list
+  const fetchBranchesAndBooths = async () => {
     try {
-      const res = await getAllBranches();
-      if (res?.success && res?.data) {
-        setBranches(res.data);
+      const [branchRes, boothRes] = await Promise.all([
+        getAllBranches(),
+        getAllBoothsAdmin()
+      ]);
+      if (branchRes?.success && branchRes?.data) {
+        setBranches(branchRes.data);
+      }
+      if (boothRes?.success && boothRes?.data) {
+        setBooths(boothRes.data);
       }
     } catch (err) {
-      console.error("Lỗi tải chi nhánh:", err);
+      console.error("Lỗi tải chi nhánh / quầy:", err);
     }
   };
 
   useEffect(() => {
     fetchAccounts();
-    fetchBranches();
+    fetchBranchesAndBooths();
   }, []);
+
+  // Đếm số lượng quầy đang hoạt động của chi nhánh
+  const getBranchBoothCount = (branchId) => {
+    if (!branchId) return 0;
+    return booths.filter(
+      (b) => b.id_chi_nhanh === branchId && b.trang_thai === "HoatDong"
+    ).length;
+  };
 
   // Xử lý tạo mới nhân viên từ Modal Form
   const handleCreateEmployee = async (e) => {
@@ -557,6 +573,26 @@ const UserPageAdmin = () => {
                           </option>
                         ))}
                       </select>
+
+                      {editBranchId && getBranchBoothCount(editBranchId) === 0 && (
+                        <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex flex-col items-center text-center gap-1.5 animate-fade-in mt-2">
+                          <ShieldAlert className="w-6 h-6 text-amber-500 animate-pulse" />
+                          <p className="text-xs text-amber-900 font-bold">
+                            Chi nhánh này chưa có quầy giao dịch nào do Admin tạo!
+                          </p>
+                          <p className="text-[11px] text-gray-600 leading-normal">
+                            Vui lòng tạo quầy giao dịch trước khi đổi vai trò người dùng thành Nhân viên.
+                          </p>
+                          <a
+                            href="/admin/booths"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-1 bg-[#EE0033] hover:bg-[#A00022] text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all shadow-sm"
+                          >
+                            Tạo quầy giao dịch ngay ↗
+                          </a>
+                        </div>
+                      )}
                     </div>
                   )
                 )}
@@ -573,7 +609,10 @@ const UserPageAdmin = () => {
                 Hủy
               </button>
               <button
-                disabled={editLoading || (editRole === "staff" && !editBranchId)}
+                disabled={
+                  editLoading ||
+                  (editRole === "staff" && (!editBranchId || getBranchBoothCount(editBranchId) === 0))
+                }
                 onClick={handleSaveRoleChange}
                 className="flex-1 bg-[#EE0033] hover:bg-[#A00022] disabled:bg-red-200 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl text-sm transition-all shadow-md cursor-pointer flex items-center justify-center gap-2 text-center"
               >
@@ -721,6 +760,26 @@ const UserPageAdmin = () => {
                         </option>
                       ))}
                     </select>
+
+                    {newEmployee.id_chi_nhanh && getBranchBoothCount(newEmployee.id_chi_nhanh) === 0 && (
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex flex-col items-center text-center gap-1.5 animate-fade-in mt-2">
+                        <ShieldAlert className="w-6 h-6 text-amber-500 animate-pulse" />
+                        <p className="text-xs text-amber-900 font-bold">
+                          Chi nhánh này chưa có quầy giao dịch nào do Admin tạo!
+                        </p>
+                        <p className="text-[11px] text-gray-600 leading-normal">
+                          Vui lòng khởi tạo quầy giao dịch trước khi phân bổ nhân viên mới.
+                        </p>
+                        <a
+                          href="/admin/booths"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1 bg-[#EE0033] hover:bg-[#A00022] text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all shadow-sm"
+                        >
+                          Tạo quầy giao dịch ngay ↗
+                        </a>
+                      </div>
+                    )}
                   </div>
                 )
               )}
@@ -752,7 +811,11 @@ const UserPageAdmin = () => {
               <button
                 type="submit"
                 onClick={handleCreateEmployee}
-                disabled={createLoading || !newEmployee.id_chi_nhanh}
+                disabled={
+                  createLoading ||
+                  !newEmployee.id_chi_nhanh ||
+                  (newEmployee.vai_tro === "staff" && getBranchBoothCount(newEmployee.id_chi_nhanh) === 0)
+                }
                 className="flex-1 bg-[#EE0033] hover:bg-[#A00022] disabled:bg-red-300 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl text-sm transition-all shadow-md cursor-pointer flex items-center justify-center gap-2 text-center"
               >
                 {createLoading ? (

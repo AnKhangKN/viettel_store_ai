@@ -30,6 +30,15 @@ class UserService:
                 message=f"Chi nhánh có ID {body.id_chi_nhanh} không tồn tại"
             )
 
+        # 2.5. Kiểm tra chi nhánh đã có quầy giao dịch do Admin tạo chưa
+        if body.vai_tro == "staff":
+            booth_count = await self.repository.count_active_booths_by_branch(body.id_chi_nhanh)
+            if booth_count == 0:
+                raise AppException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    message=f"Chi nhánh '{branch['ten_chi_nhanh']}' chưa có quầy giao dịch nào do Admin khởi tạo. Vui lòng tạo quầy giao dịch trước khi khởi tạo tài khoản Nhân viên!"
+                )
+
         # 3. Mã hóa mật khẩu và tạo ID
         hashed_password = hash_password(body.mat_khau)
         id_khach_hang = generate_uuid7()
@@ -208,11 +217,18 @@ class UserService:
                 message=f"Vai trò '{body.vai_tro}' không hợp lệ. Phải thuộc: {', '.join(valid_roles)}"
             )
 
-        if role_lower == "staff" and not body.id_chi_nhanh:
-            raise AppException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                message="Bắt buộc phải chọn chi nhánh làm việc khi đổi sang vai trò Nhân viên"
-            )
+        if role_lower == "staff":
+            if not body.id_chi_nhanh:
+                raise AppException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    message="Bắt buộc phải chọn chi nhánh làm việc khi đổi sang vai trò Nhân viên"
+                )
+            booth_count = await self.repository.count_active_booths_by_branch(body.id_chi_nhanh)
+            if booth_count == 0:
+                raise AppException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    message="Chi nhánh này chưa có quầy giao dịch nào do Admin khởi tạo. Vui lòng tạo quầy giao dịch cho chi nhánh trước khi đổi vai trò thành Nhân viên!"
+                )
 
         res = await self.repository.update_account_role(id_khach_hang, role_lower, body.id_chi_nhanh)
         if not res:

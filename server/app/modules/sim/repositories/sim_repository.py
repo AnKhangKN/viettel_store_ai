@@ -9,7 +9,6 @@ class SimRepository:
         self,
         id_sim: str,
         id_loai_sim: str,
-        id_chi_nhanh: str,
         so_sim: str,
         gia_ban: float,
         trang_thai: str
@@ -18,24 +17,21 @@ class SimRepository:
             INSERT INTO sim (
                 id_sim,
                 id_loai_sim,
-                id_chi_nhanh,
                 so_sim,
                 gia_ban,
                 trang_thai
             )
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING id_sim, id_loai_sim, id_chi_nhanh, so_sim, gia_ban, trang_thai
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING id_sim, id_loai_sim, so_sim, gia_ban, trang_thai
         """
 
         sim_uuid = uuid.UUID(id_sim) if isinstance(id_sim, str) else id_sim
         type_uuid = uuid.UUID(id_loai_sim) if isinstance(id_loai_sim, str) else id_loai_sim
-        branch_uuid = uuid.UUID(id_chi_nhanh) if isinstance(id_chi_nhanh, str) else id_chi_nhanh
 
         return await get_pool().fetchrow(
             sql,
             sim_uuid,
             type_uuid,
-            branch_uuid,
             so_sim,
             gia_ban,
             trang_thai
@@ -74,12 +70,9 @@ class SimRepository:
                 s.gia_ban,
                 s.trang_thai,
                 s.id_loai_sim,
-                l.ten_loai_sim,
-                s.id_chi_nhanh,
-                c.ten_chi_nhanh
+                l.ten_loai_sim
             FROM sim s
             LEFT JOIN loaisim l ON s.id_loai_sim = l.id_loai_sim
-            LEFT JOIN chinhanh c ON s.id_chi_nhanh = c.id_chi_nhanh
             WHERE s.id_sim = $1 AND s.da_xoa = false
         """
         db_uuid = uuid.UUID(id_sim) if isinstance(id_sim, str) else id_sim
@@ -93,17 +86,13 @@ class SimRepository:
                 s.gia_ban,
                 s.trang_thai,
                 s.id_loai_sim,
-                l.ten_loai_sim,
-                s.id_chi_nhanh,
-                c.ten_chi_nhanh
+                l.ten_loai_sim
             FROM sim s
             LEFT JOIN loaisim l ON s.id_loai_sim = l.id_loai_sim
-            LEFT JOIN chinhanh c ON s.id_chi_nhanh = c.id_chi_nhanh
-            WHERE s.id_chi_nhanh = $1 AND s.da_xoa = false
+            WHERE s.da_xoa = false
             ORDER BY s.ngay_tao DESC
         """
-        db_uuid = uuid.UUID(id_chi_nhanh) if isinstance(id_chi_nhanh, str) else id_chi_nhanh
-        return await get_pool().fetch(sql, db_uuid)
+        return await get_pool().fetch(sql)
 
     async def get_all_sims(self):
         sql = """
@@ -113,12 +102,9 @@ class SimRepository:
                 s.gia_ban,
                 s.trang_thai,
                 s.id_loai_sim,
-                l.ten_loai_sim,
-                s.id_chi_nhanh,
-                c.ten_chi_nhanh
+                l.ten_loai_sim
             FROM sim s
             LEFT JOIN loaisim l ON s.id_loai_sim = l.id_loai_sim
-            LEFT JOIN chinhanh c ON s.id_chi_nhanh = c.id_chi_nhanh
             WHERE s.da_xoa = false
             ORDER BY s.ngay_tao DESC
         """
@@ -128,7 +114,6 @@ class SimRepository:
         self,
         id_sim: str,
         id_loai_sim: str,
-        id_chi_nhanh: str,
         so_sim: str,
         gia_ban: float,
         trang_thai: str
@@ -137,18 +122,16 @@ class SimRepository:
             UPDATE sim
             SET
                 id_loai_sim = $2,
-                id_chi_nhanh = $3,
-                so_sim = $4,
-                gia_ban = $5,
-                trang_thai = $6,
+                so_sim = $3,
+                gia_ban = $4,
+                trang_thai = $5,
                 cap_nhat = CURRENT_TIMESTAMP
             WHERE id_sim = $1 AND da_xoa = false
-            RETURNING id_sim, id_loai_sim, id_chi_nhanh, so_sim, gia_ban, trang_thai
+            RETURNING id_sim, id_loai_sim, so_sim, gia_ban, trang_thai
         """
         sim_uuid = uuid.UUID(id_sim) if isinstance(id_sim, str) else id_sim
         type_uuid = uuid.UUID(id_loai_sim) if isinstance(id_loai_sim, str) else id_loai_sim
-        branch_uuid = uuid.UUID(id_chi_nhanh) if isinstance(id_chi_nhanh, str) else id_chi_nhanh
-        return await get_pool().fetchrow(sql, sim_uuid, type_uuid, branch_uuid, so_sim, gia_ban, trang_thai)
+        return await get_pool().fetchrow(sql, sim_uuid, type_uuid, so_sim, gia_ban, trang_thai)
 
     async def get_all_loai_sim(self):
         sql = """

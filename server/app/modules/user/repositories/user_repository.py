@@ -3,6 +3,16 @@ from app.core.database import get_pool
 
 class UserRepository:
 
+    async def count_active_booths_by_branch(self, id_chi_nhanh: str) -> int:
+        sql = """
+            SELECT COUNT(*) 
+            FROM quaygiaodich 
+            WHERE id_chi_nhanh = $1 AND da_xoa = false AND trang_thai = 'HoatDong'
+        """
+        branch_uuid = uuid.UUID(id_chi_nhanh) if isinstance(id_chi_nhanh, str) else id_chi_nhanh
+        return await get_pool().fetchval(sql, branch_uuid)
+
+
     async def create_employee(
         self,
         id_khach_hang: str,

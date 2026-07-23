@@ -4,10 +4,11 @@ import { axiosJWT } from "../shared/aixos.api";
 const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 // Tạo đơn hàng mua SIM
-export const createSimOrder = async ({ id_sim, id_khach_hang, ho_ten, so_dien_thoai, cccd, email, dia_chi, phuong_thuc }) => {
+export const createSimOrder = async ({ id_sim, id_chi_nhanh, id_khach_hang, ho_ten, so_dien_thoai, cccd, email, dia_chi, phuong_thuc }) => {
   try {
     const response = await axios.post(`${API_URL}/api/payment/sim-order`, {
       id_sim,
+      id_chi_nhanh,
       id_khach_hang: id_khach_hang || undefined,
       ho_ten: ho_ten || undefined,
       so_dien_thoai: so_dien_thoai || undefined,

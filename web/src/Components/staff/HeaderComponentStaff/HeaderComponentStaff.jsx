@@ -15,16 +15,12 @@ const HeaderComponentStaff = () => {
   const [showBoothModal, setShowBoothModal] = useState(false);
   const [boothLoading, setBoothLoading] = useState(false);
 
-  // Live booths list from server
-  const [boothsList, setBoothsList] = useState([
-    { ten_quay: "Quầy 1", trang_thai: "SanSang", nhan_vien: null, is_my_booth: false },
-    { ten_quay: "Quầy 2", trang_thai: "SanSang", nhan_vien: null, is_my_booth: false },
-    { ten_quay: "Quầy 3", trang_thai: "SanSang", nhan_vien: null, is_my_booth: false },
-    { ten_quay: "Quầy 4", trang_thai: "SanSang", nhan_vien: null, is_my_booth: false },
-  ]);
+  // Live booths list from server (Quầy thực tế do Admin tạo)
+  const [boothsList, setBoothsList] = useState([]);
+  const [branchName, setBranchName] = useState("Viettel Store");
 
   const [activeBooth, setActiveBooth] = useState(() => {
-    return localStorage.getItem("staff_active_booth") || "Quầy 1";
+    return localStorage.getItem("staff_active_booth") || "Chưa chọn quầy";
   });
 
   const [isServingCustomer, setIsServingCustomer] = useState(false);
@@ -34,8 +30,11 @@ const HeaderComponentStaff = () => {
   const fetchBooths = async () => {
     try {
       const res = await getBoothsStatus();
-      if (res?.success && Array.isArray(res?.data)) {
-        setBoothsList(res.data);
+      if (res?.success) {
+        setBoothsList(res.data || []);
+        if (res.ten_chi_nhanh) {
+          setBranchName(res.ten_chi_nhanh);
+        }
         setIsServingCustomer(!!res.is_serving_customer);
         setServingTicketNo(res.serving_ticket_no || null);
         if (res.my_active_booth) {
@@ -167,7 +166,7 @@ const HeaderComponentStaff = () => {
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-50/50 border border-red-100/50 ml-4">
             <MapPin className="w-4 h-4 text-[#EE0033]" />
             <span className="text-[#EE0033] text-xs font-bold">
-              Viettel Cần Thơ
+              {branchName}
             </span>
           </div>
 
@@ -318,52 +317,64 @@ const HeaderComponentStaff = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              {boothsList.map((b) => {
-                const isOccupiedByOther = b.trang_thai === "DangSuDung" && !b.is_my_booth;
-                const isMyBooth = b.is_my_booth;
+            {boothsList.length === 0 ? (
+              <div className="p-5 bg-amber-50 border border-amber-200 rounded-2xl text-center space-y-2">
+                <ShieldAlert className="w-8 h-8 text-amber-500 mx-auto animate-pulse" />
+                <p className="text-xs font-bold text-gray-800">
+                  Chi nhánh chưa có quầy giao dịch nào do Admin tạo.
+                </p>
+                <p className="text-[11px] text-gray-500 leading-relaxed">
+                  Vui lòng liên hệ Quản trị viên (Admin) để khởi tạo quầy giao dịch trước khi chọn quầy làm việc.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                {boothsList.map((b) => {
+                  const isOccupiedByOther = b.trang_thai === "DangSuDung" && !b.is_my_booth;
+                  const isMyBooth = b.is_my_booth;
 
-                return (
-                  <button
-                    key={b.ten_quay}
-                    disabled={isOccupiedByOther || boothLoading}
-                    onClick={() => handleSelectBooth(b.ten_quay)}
-                    className={`p-4 rounded-2xl border-2 text-left transition-all duration-200 flex flex-col justify-between space-y-3 cursor-pointer ${
-                      isMyBooth
-                        ? "bg-red-50 border-[#EE0033] shadow-md ring-2 ring-red-500/20"
-                        : isOccupiedByOther
-                        ? "bg-gray-50 border-gray-200 opacity-60 cursor-not-allowed"
-                        : "bg-white border-gray-200 hover:border-red-300 hover:shadow-md"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-black text-base text-gray-900">{b.ten_quay}</span>
-                      {isMyBooth ? (
-                        <CheckCircle2 className="w-5 h-5 text-[#EE0033]" />
-                      ) : isOccupiedByOther ? (
-                        <Lock className="w-4 h-4 text-red-500" />
-                      ) : (
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                      )}
-                    </div>
+                  return (
+                    <button
+                      key={b.ten_quay}
+                      disabled={isOccupiedByOther || boothLoading}
+                      onClick={() => handleSelectBooth(b.ten_quay)}
+                      className={`p-4 rounded-2xl border-2 text-left transition-all duration-200 flex flex-col justify-between space-y-3 cursor-pointer ${
+                        isMyBooth
+                          ? "bg-red-50 border-[#EE0033] shadow-md ring-2 ring-red-500/20"
+                          : isOccupiedByOther
+                          ? "bg-gray-50 border-gray-200 opacity-60 cursor-not-allowed"
+                          : "bg-white border-gray-200 hover:border-red-300 hover:shadow-md"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-black text-base text-gray-900">{b.ten_quay}</span>
+                        {isMyBooth ? (
+                          <CheckCircle2 className="w-5 h-5 text-[#EE0033]" />
+                        ) : isOccupiedByOther ? (
+                          <Lock className="w-4 h-4 text-red-500" />
+                        ) : (
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        )}
+                      </div>
 
-                    <div>
-                      <span className="text-[10px] font-bold text-gray-400 uppercase">Trạng thái</span>
-                      <p className={`text-xs font-bold mt-0.5 ${isOccupiedByOther ? "text-red-600" : isMyBooth ? "text-[#EE0033]" : "text-emerald-600"}`}>
-                        {isOccupiedByOther
-                          ? `Đang trực bởi ${b.nhan_vien}`
-                          : isMyBooth
-                          ? "Quầy của bạn"
-                          : "🟢 Sẵn sàng chọn"}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+                      <div>
+                        <span className="text-[10px] font-bold text-gray-400 uppercase">Trạng thái</span>
+                        <p className={`text-xs font-bold mt-0.5 ${isOccupiedByOther ? "text-red-600" : isMyBooth ? "text-[#EE0033]" : "text-emerald-600"}`}>
+                          {isOccupiedByOther
+                            ? `Đang trực bởi ${b.nhan_vien}`
+                            : isMyBooth
+                            ? "Quầy của bạn"
+                            : "🟢 Sẵn sàng chọn"}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
             <div className="pt-2 text-center border-t border-gray-100 flex items-center justify-between">
-              <span className="text-[11px] text-gray-400 font-medium">Chi nhánh: Viettel Cần Thơ</span>
+              <span className="text-[11px] text-gray-400 font-medium">Chi nhánh: {branchName}</span>
               <button
                 onClick={() => setShowBoothModal(false)}
                 className="text-xs font-bold text-gray-500 hover:text-gray-800 cursor-pointer"

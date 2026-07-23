@@ -1,37 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { Search, ShoppingCart, Eye, Loader2, Building2 } from "lucide-react";
+import { Search, ShoppingCart, Eye, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getAllSims, getSimTypes } from "../../../api/sim/sim.api";
-import { getAllBranches } from "../../../api/branch/branch.api";
 
 const BuySim = () => {
   const [simList, setSimList] = useState([]);
   const [types, setTypes] = useState(["Tất cả"]);
-  const [branches, setBranches] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [selectedType, setSelectedType] = useState("Tất cả");
-  const [selectedBranch, setSelectedBranch] = useState("Tất cả");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
-        // 1. Tải danh sách chi nhánh
-        const branchesRes = await getAllBranches();
-        if (branchesRes?.success && branchesRes?.data) {
-          setBranches(branchesRes.data);
-        }
 
-        // 2. Tải danh sách Loại SIM
+        // 1. Tải danh sách Loại SIM
         const typesRes = await getSimTypes();
         if (typesRes?.success && typesRes?.data) {
           const typeNames = ["Tất cả", ...typesRes.data.map(t => t.ten_loai_sim)];
           setTypes(typeNames);
         }
         
-        // 3. Tải danh sách SIM
+        // 2. Tải danh sách SIM
         const simsRes = await getAllSims();
         if (simsRes?.success && simsRes?.data) {
           const formattedSims = simsRes.data.map(sim => ({
@@ -40,9 +31,7 @@ const BuySim = () => {
             loaiSim: sim.loai_sim?.ten_loai_sim || "Chưa phân loại",
             giaBan: sim.gia_ban.toLocaleString("vi-VN") + "đ",
             trangThai: sim.trang_thai === "ConHang" ? "Còn hàng" : sim.trang_thai === "GiuSo" ? "Đang giữ số" : "Đã bán",
-            rawStatus: sim.trang_thai,
-            idChiNhanh: sim.chi_nhanh?.id_chi_nhanh || "",
-            tenChiNhanh: sim.chi_nhanh?.ten_chi_nhanh || "Hệ thống"
+            rawStatus: sim.trang_thai
           }));
           setSimList(formattedSims);
         }
@@ -56,17 +45,14 @@ const BuySim = () => {
   }, []);
 
   const filteredSim = simList.filter((sim) => {
-    // Chuẩn hóa chuỗi số điện thoại để tìm kiếm thông minh hơn (lược bỏ khoảng trắng hoặc ký tự đặc biệt)
+    // Chuẩn hóa chuỗi số điện thoại để tìm kiếm thông minh hơn
     const cleanSimNumber = sim.soSim.replace(/[^0-9]/g, "");
     const cleanKeyword = keyword.replace(/[^0-9]/g, "");
     const search = cleanSimNumber.includes(cleanKeyword) || sim.soSim.includes(keyword);
 
     const type = selectedType === "Tất cả" || sim.loaiSim === selectedType;
-    
-    // Lọc theo chi nhánh
-    const branch = selectedBranch === "Tất cả" || sim.idChiNhanh === selectedBranch;
 
-    return search && type && branch;
+    return search && type;
   });
 
   return (
@@ -92,22 +78,6 @@ const BuySim = () => {
                   onChange={(e) => setKeyword(e.target.value)}
                   className="w-full border rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-red-500 outline-none text-sm"
                 />
-              </div>
-
-              {/* Lọc Chi nhánh */}
-              <div className="relative w-full sm:w-64">
-                <select
-                  value={selectedBranch}
-                  onChange={(e) => setSelectedBranch(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] bg-gray-50 cursor-pointer font-bold text-gray-700"
-                >
-                  <option value="Tất cả">Tất cả chi nhánh</option>
-                  {branches.map((b) => (
-                    <option key={b.id_chi_nhanh} value={b.id_chi_nhanh}>
-                      {b.ten_chi_nhanh}
-                    </option>
-                  ))}
-                </select>
               </div>
             </div>
 
@@ -155,13 +125,6 @@ const BuySim = () => {
                         <span className="text-gray-400 font-medium">Loại SIM</span>
                         <span className="font-bold text-[#EE0033]">
                           {sim.loaiSim}
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between items-center border-b border-gray-50 pb-2">
-                        <span className="text-gray-400 font-medium">Chi nhánh</span>
-                        <span className="font-semibold text-gray-700 max-w-[180px] truncate" title={sim.tenChiNhanh}>
-                          {sim.tenChiNhanh}
                         </span>
                       </div>
 

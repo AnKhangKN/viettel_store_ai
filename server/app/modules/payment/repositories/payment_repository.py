@@ -52,11 +52,11 @@ class PaymentRepository:
             FROM donhangsim dh
             JOIN chitietdonhang ct ON dh.id_don_hang = ct.id_don_hang
             JOIN sim s ON ct.id_sim = s.id_sim
-            JOIN chinhanh cn ON s.id_chi_nhanh = cn.id_chi_nhanh
+            JOIN chinhanh cn ON dh.id_chi_nhanh = cn.id_chi_nhanh
             LEFT JOIN loaisim ls ON s.id_loai_sim = ls.id_loai_sim
             LEFT JOIN khachhang kh ON dh.id_khach_hang = kh.id_khach_hang
             LEFT JOIN thanhtoan tt ON dh.id_don_hang = tt.id_don_hang
-            WHERE s.id_chi_nhanh = $1 AND dh.da_xoa = false
+            WHERE dh.id_chi_nhanh = $1 AND dh.da_xoa = false
             ORDER BY dh.ngay_dat_hang DESC
         """
         db_uuid = UUID(str(id_chi_nhanh)) if isinstance(id_chi_nhanh, str) else id_chi_nhanh
@@ -120,6 +120,7 @@ class PaymentRepository:
     async def create_sim_order(
         self,
         id_sim: UUID,
+        id_chi_nhanh: UUID,
         id_khach_hang: Optional[UUID] = None,
         ho_ten: Optional[str] = None,
         so_dien_thoai: Optional[str] = None,
@@ -202,16 +203,16 @@ class PaymentRepository:
                 existing_ct = await conn.fetchrow(sql_check_ct, id_sim)
 
                 is_offline = phuong_thuc in ("TienMat", "cod", "offline")
+                branch_uuid = UUID(str(id_chi_nhanh)) if isinstance(id_chi_nhanh, str) else id_chi_nhanh
 
                 if existing_ct:
                     if existing_ct["trang_thai"] == "DaThanhToan":
                         raise ValueError("Số SIM này đã được mua và thanh toán thành công.")
                     elif existing_ct["trang_thai"] == "ChoThanhToan":
                         id_don_hang = existing_ct["id_don_hang"]
-                        # Cập nhật thông tin khách hàng mới nhất cho đơn hàng này
-                        if customer_id:
-                            sql_up_dh = "UPDATE donhangsim SET id_khach_hang = $2, cap_nhat = CURRENT_TIMESTAMP WHERE id_don_hang = $1"
-                            await conn.execute(sql_up_dh, id_don_hang, customer_id)
+                        # Cập nhật thông tin khách hàng và chi nhánh mới nhất cho đơn hàng này
+                        sql_up_dh = "UPDATE donhangsim SET id_khach_hang = COALESCE($2, id_khach_hang), id_chi_nhanh = $3, cap_nhat = CURRENT_TIMESTAMP WHERE id_don_hang = $1"
+                        await conn.execute(sql_up_dh, id_don_hang, customer_id, branch_uuid)
 
                         if is_offline:
                             # Tạo hoặc cập nhật bản ghi thanh toán tại quầy
@@ -227,6 +228,7 @@ class PaymentRepository:
                         return {
                             "id_don_hang": str(id_don_hang),
                             "id_khach_hang": str(customer_id or existing_ct["id_khach_hang"]),
+                            "id_chi_nhanh": str(branch_uuid),
                             "tong_tien": float(existing_ct["tong_tien"]),
                             "trang_thai": existing_ct["trang_thai"],
                             "ngay_dat_hang": existing_ct["ngay_dat_hang"]
@@ -234,11 +236,11 @@ class PaymentRepository:
                     else:
                         id_don_hang = uuid4()
                         sql_dh = """
-                            INSERT INTO donhangsim (id_don_hang, id_khach_hang, tong_tien, trang_thai)
-                            VALUES ($1, $2, $3, 'ChoThanhToan')
-                            RETURNING id_don_hang, id_khach_hang, tong_tien, trang_thai, ngay_dat_hang
+                            INSERT INTO donhangsim (id_don_hang, id_khach_hang, id_chi_nhanh, tong_tien, trang_thai)
+                            VALUES ($1, $2, $3, $4, 'ChoThanhToan')
+                            RETURNING id_don_hang, id_khach_hang, id_chi_nhanh, tong_tien, trang_thai, ngay_dat_hang
                         """
-                        dh_row = await conn.fetchrow(sql_dh, id_don_hang, customer_id, tong_tien)
+                        dh_row = await conn.fetchrow(sql_dh, id_don_hang, customer_id, branch_uuid, tong_tien)
 
                         sql_update_ct = """
                             UPDATE chitietdonhang
@@ -258,6 +260,7 @@ class PaymentRepository:
                         return {
                             "id_don_hang": str(dh_row["id_don_hang"]),
                             "id_khach_hang": str(dh_row["id_khach_hang"]),
+                            "id_chi_nhanh": str(dh_row["id_chi_nhanh"]),
                             "tong_tien": float(dh_row["tong_tien"]),
                             "trang_thai": dh_row["trang_thai"],
                             "ngay_dat_hang": dh_row["ngay_dat_hang"]
@@ -266,11 +269,11 @@ class PaymentRepository:
                 # 5. Nếu chưa có chi tiết đơn hàng nào cho SIM này -> Tạo mới donhangsim & chitietdonhang
                 id_don_hang = uuid4()
                 sql_dh = """
-                    INSERT INTO donhangsim (id_don_hang, id_khach_hang, tong_tien, trang_thai)
-                    VALUES ($1, $2, $3, 'ChoThanhToan')
-                    RETURNING id_don_hang, id_khach_hang, tong_tien, trang_thai, ngay_dat_hang
+                    INSERT INTO donhangsim (id_don_hang, id_khach_hang, id_chi_nhanh, tong_tien, trang_thai)
+                    VALUES ($1, $2, $3, $4, 'ChoThanhToan')
+                    RETURNING id_don_hang, id_khach_hang, id_chi_nhanh, tong_tien, trang_thai, ngay_dat_hang
                 """
-                dh_row = await conn.fetchrow(sql_dh, id_don_hang, customer_id, tong_tien)
+                dh_row = await conn.fetchrow(sql_dh, id_don_hang, customer_id, branch_uuid, tong_tien)
 
                 id_chi_tiet = uuid4()
                 sql_ct = """
@@ -290,6 +293,7 @@ class PaymentRepository:
                 return {
                     "id_don_hang": str(dh_row["id_don_hang"]),
                     "id_khach_hang": str(dh_row["id_khach_hang"]),
+                    "id_chi_nhanh": str(dh_row["id_chi_nhanh"]),
                     "tong_tien": float(dh_row["tong_tien"]),
                     "trang_thai": dh_row["trang_thai"],
                     "ngay_dat_hang": dh_row["ngay_dat_hang"]
@@ -301,7 +305,7 @@ class PaymentRepository:
         """
         pool = get_pool()
         sql = """
-            SELECT id_don_hang, id_khach_hang, tong_tien, trang_thai, ngay_dat_hang
+            SELECT id_don_hang, id_khach_hang, id_chi_nhanh, tong_tien, trang_thai, ngay_dat_hang
             FROM donhangsim
             WHERE id_don_hang = $1 AND da_xoa = false
         """
@@ -324,7 +328,7 @@ class PaymentRepository:
             FROM donhangsim dh
             JOIN chitietdonhang ct ON dh.id_don_hang = ct.id_don_hang
             JOIN sim s ON ct.id_sim = s.id_sim
-            JOIN chinhanh c ON s.id_chi_nhanh = c.id_chi_nhanh
+            JOIN chinhanh c ON dh.id_chi_nhanh = c.id_chi_nhanh
             WHERE dh.id_don_hang = $1 AND dh.da_xoa = false
         """
         row = await pool.fetchrow(sql, id_don_hang)

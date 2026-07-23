@@ -67,7 +67,6 @@ const SimPageAdmin = () => {
   const initialFormState = {
     so_sim: "",
     id_loai_sim: "",
-    id_chi_nhanh: "",
     gia_ban: 0,
     trang_thai: "ConHang"
   };
@@ -81,17 +80,13 @@ const SimPageAdmin = () => {
     setLoading(true);
     setError(null);
     try {
-      const [simsRes, branchesRes, typesRes] = await Promise.all([
+      const [simsRes, typesRes] = await Promise.all([
         getAllSims(),
-        getAllBranches(),
         getSimTypes()
       ]);
 
       if (simsRes?.success && simsRes?.data) {
         setSims(simsRes.data);
-      }
-      if (branchesRes?.success && branchesRes?.data) {
-        setBranches(branchesRes.data);
       }
       if (typesRes?.success && typesRes?.data) {
         setSimTypes(typesRes.data);
@@ -115,7 +110,6 @@ const SimPageAdmin = () => {
     setEditFormData({
       so_sim: sim.so_sim || "",
       id_loai_sim: sim.loai_sim?.id_loai_sim || sim.id_loai_sim || "",
-      id_chi_nhanh: sim.chi_nhanh?.id_chi_nhanh || sim.id_chi_nhanh || "",
       gia_ban: sim.gia_ban || 0,
       trang_thai: sim.trang_thai || "ConHang"
     });
@@ -184,15 +178,16 @@ const SimPageAdmin = () => {
       if (res?.success) {
         setStatusMessage({
           type: "success",
-          text: `Cập nhật thành công thông tin số SIM "${editFormData.so_sim}"!`
+          text: `Đã cập nhật thành công số SIM "${editFormData.so_sim}"!`
         });
         setSelectedSim(null);
+        setEditFormData(initialFormState);
         setEditError(null);
         fetchData(); // Reload list
       }
     } catch (err) {
       console.error(err);
-      const errMsg = err?.response?.data?.message || "Lỗi khi cập nhật SIM. Vui lòng thử lại.";
+      const errMsg = err?.response?.data?.message || "Lỗi khi cập nhật số SIM. Vui lòng kiểm tra lại.";
       setEditError(errMsg);
     } finally {
       setFormSubmitLoading(false);
@@ -217,17 +212,6 @@ const SimPageAdmin = () => {
         <span className="text-gray-700 font-semibold">
           {row.loai_sim?.ten_loai_sim || "Chưa phân loại"}
         </span>
-      )
-    },
-    {
-      header: "Chi nhánh sở hữu",
-      accessor: "ten_chi_nhanh",
-      sortable: true,
-      render: (row) => (
-        <div className="flex items-center gap-1.5 text-gray-600 font-medium">
-          <Building className="w-4 h-4 text-gray-400" />
-          <span>{row.chi_nhanh?.ten_chi_nhanh || "Tổng kho Viettel"}</span>
-        </div>
       )
     },
     {
@@ -291,16 +275,14 @@ const SimPageAdmin = () => {
             Quản lý Kho SIM
           </h1>
           <p className="text-gray-500 text-sm mt-1">
-            Quản lý danh sách SIM số đẹp, phân bổ chi nhánh và cập nhật trạng thái kho hàng. Nhấp vào dòng để chỉnh sửa.
+            Quản lý kho SIM số đẹp dùng chung toàn hệ thống. Nhấp vào dòng để chỉnh sửa.
           </p>
         </div>
         <button
           onClick={() => {
-            // Set defaults to first options if available
             setCreateFormData({
               ...initialFormState,
-              id_loai_sim: simTypes[0]?.id_loai_sim || "",
-              id_chi_nhanh: branches[0]?.id_chi_nhanh || ""
+              id_loai_sim: simTypes[0]?.id_loai_sim || ""
             });
             setCreateError(null);
             setIsCreateModalOpen(true);
@@ -392,36 +374,22 @@ const SimPageAdmin = () => {
             </div>
 
             {/* Modal Form Body */}
-            {simTypes.length === 0 || branches.length === 0 ? (
+            {simTypes.length === 0 ? (
               <div className="p-8 flex flex-col items-center justify-center text-center space-y-4">
                 <AlertCircle className="w-12 h-12 text-yellow-500 animate-bounce" />
                 <h4 className="text-base font-bold text-gray-800">
                   Chưa đủ điều kiện tạo SIM mới
                 </h4>
                 <p className="text-xs text-gray-500 max-w-sm leading-relaxed">
-                  {simTypes.length === 0 && branches.length === 0
-                    ? "Hệ thống hiện chưa có loại SIM và chi nhánh nào. Vui lòng cấu hình cả hai dữ liệu này trước khi đăng ký SIM số."
-                    : simTypes.length === 0
-                    ? "Hệ thống hiện chưa có loại SIM nào. Bạn cần khởi tạo ít nhất một loại SIM trước khi đăng ký SIM số."
-                    : "Hệ thống hiện chưa có chi nhánh cửa hàng nào. Bạn cần thêm chi nhánh làm việc trước khi phân bổ SIM."}
+                  Hệ thống hiện chưa có loại SIM nào. Bạn cần khởi tạo ít nhất một loại SIM trước khi đăng ký SIM số.
                 </p>
                 <div className="flex gap-3 pt-4 w-full">
-                  {simTypes.length === 0 && (
-                    <a
-                      href="/admin/sim-types"
-                      className="flex-1 bg-[#EE0033] hover:bg-[#A00022] text-white font-bold py-3 rounded-xl text-xs transition-all text-center block shadow-md uppercase tracking-wider"
-                    >
-                      Thêm loại SIM
-                    </a>
-                  )}
-                  {branches.length === 0 && (
-                    <a
-                      href="/admin/stores"
-                      className="flex-1 bg-[#EE0033] hover:bg-[#A00022] text-white font-bold py-3 rounded-xl text-xs transition-all text-center block shadow-md uppercase tracking-wider"
-                    >
-                      Thêm chi nhánh
-                    </a>
-                  )}
+                  <a
+                    href="/admin/sim-types"
+                    className="flex-1 bg-[#EE0033] hover:bg-[#A00022] text-white font-bold py-3 rounded-xl text-xs transition-all text-center block shadow-md uppercase tracking-wider"
+                  >
+                    Thêm loại SIM
+                  </a>
                 </div>
                 <button
                   type="button"
@@ -499,45 +467,23 @@ const SimPageAdmin = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Chi nhánh sở hữu */}
-                    <div>
-                      <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                        Phân bổ Chi nhánh *
-                      </label>
-                      <select
-                        value={createFormData.id_chi_nhanh}
-                        onChange={(e) =>
-                          setCreateFormData({ ...createFormData, id_chi_nhanh: e.target.value })
-                        }
-                        className="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] cursor-pointer"
-                      >
-                        {branches.map((b) => (
-                          <option key={b.id_chi_nhanh} value={b.id_chi_nhanh}>
-                            {b.ten_chi_nhanh} ({b.trang_thai === "HoatDong" ? "Hoạt động" : "Đóng cửa"})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
+                  <div>
                     {/* Trạng thái */}
-                    <div>
-                      <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                        Trạng thái ban đầu
-                      </label>
-                      <select
-                        value={createFormData.trang_thai}
-                        onChange={(e) =>
-                          setCreateFormData({ ...createFormData, trang_thai: e.target.value })
-                        }
-                        className="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] cursor-pointer"
-                      >
-                        <option value="ConHang">Còn hàng</option>
-                        <option value="DaDat">Đã đặt</option>
-                        <option value="DaBan">Đã bán</option>
-                        <option value="NgungKinhDoanh">Ngừng kinh doanh</option>
-                      </select>
-                    </div>
+                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
+                      Trạng thái ban đầu
+                    </label>
+                    <select
+                      value={createFormData.trang_thai}
+                      onChange={(e) =>
+                        setCreateFormData({ ...createFormData, trang_thai: e.target.value })
+                      }
+                      className="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] cursor-pointer"
+                    >
+                      <option value="ConHang">Còn hàng</option>
+                      <option value="DaDat">Đã đặt</option>
+                      <option value="DaBan">Đã bán</option>
+                      <option value="NgungKinhDoanh">Ngừng kinh doanh</option>
+                    </select>
                   </div>
                 </div>
 
@@ -571,7 +517,7 @@ const SimPageAdmin = () => {
         </div>
       )}
 
-      {/* 2. Slide-over Drawer: Chỉnh sửa / Điều chuyển Chi nhánh SIM */}
+      {/* 2. Slide-over Drawer: Chỉnh sửa SIM */}
       {selectedSim && (
         <>
           <div
@@ -589,7 +535,7 @@ const SimPageAdmin = () => {
               <div className="flex items-center gap-2">
                 <Edit className="w-5 h-5 text-[#EE0033]" />
                 <h3 className="text-lg font-black text-gray-800 uppercase tracking-tight">
-                  Chỉnh sửa / Điều chuyển SIM
+                  Chỉnh sửa thông tin SIM
                 </h3>
               </div>
               <button
@@ -618,16 +564,6 @@ const SimPageAdmin = () => {
                   <p className="text-[10px] text-gray-400 font-mono select-all truncate">ID: {selectedSim.id_sim}</p>
                 </div>
               </div>
-
-              {/* Thông tin cảnh báo nếu chi nhánh cũ đang có sự cố */}
-              {selectedSim.chi_nhanh && branches.find(b => b.id_chi_nhanh === selectedSim.chi_nhanh.id_chi_nhanh)?.trang_thai !== "HoatDong" && (
-                <div className="p-3 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl text-xs font-semibold flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-yellow-600" />
-                  <span>
-                    <strong>Cảnh báo:</strong> Chi nhánh hiện tại của SIM (<strong>{selectedSim.chi_nhanh.ten_chi_nhanh}</strong>) hiện đang tạm dừng hoạt động hoặc có vấn đề. Vui lòng thực hiện điều chuyển SIM sang chi nhánh khác hoạt động tốt.
-                  </span>
-                </div>
-              )}
 
               <div className="space-y-4">
                 {/* Số SIM */}
@@ -681,33 +617,6 @@ const SimPageAdmin = () => {
                     }
                     className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
                   />
-                </div>
-
-                {/* ĐIỀU CHUYỂN CHI NHÁNH */}
-                <div>
-                  <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide flex items-center gap-1">
-                    <Building className="w-3.5 h-3.5 text-[#EE0033]" /> Điều chuyển Chi nhánh sở hữu *
-                  </label>
-                  <select
-                    value={editFormData.id_chi_nhanh}
-                    onChange={(e) =>
-                      setEditFormData({ ...editFormData, id_chi_nhanh: e.target.value })
-                    }
-                    className="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] cursor-pointer font-semibold text-gray-800"
-                  >
-                    {branches.map((b) => (
-                      <option
-                        key={b.id_chi_nhanh}
-                        value={b.id_chi_nhanh}
-                        className={b.trang_thai !== "HoatDong" ? "text-red-500 font-bold" : "text-gray-800"}
-                      >
-                        {b.ten_chi_nhanh} {b.trang_thai === "HoatDong" ? "(Hoạt động)" : b.trang_thai === "TamDongCua" ? "(Tạm đóng cửa ⚠️)" : "(Ngừng hoạt động ❌)"}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-[10px] text-gray-400 mt-1">
-                    Hỗ trợ chuyển đổi nhanh kho hàng của SIM này sang cửa hàng khác trên hệ thống.
-                  </p>
                 </div>
 
                 {/* Trạng thái */}

@@ -355,12 +355,13 @@ class QueueService:
         else:
             id_chi_nhanh = str(branch_row["id_chi_nhanh"])
 
-        # 2. Lấy danh sách quầy thực tế của chi nhánh từ DB (nếu chưa có thì dùng mặc định)
+        # Lấy thông tin chi nhánh
+        branch = await self.branch_repository.get_by_id(id_chi_nhanh)
+        ten_chi_nhanh = branch["ten_chi_nhanh"] if branch else "Viettel Store"
+
+        # 2. Lấy danh sách quầy thực tế của chi nhánh từ DB (Không dùng mock data)
         db_booths = await self.repository.get_booths_by_branch(id_chi_nhanh)
-        if db_booths and len(db_booths) > 0:
-            branch_booths_list = [b["ten_quay"] for b in db_booths]
-        else:
-            branch_booths_list = ["Quầy 1", "Quầy 2", "Quầy 3", "Quầy 4"]
+        branch_booths_list = [b["ten_quay"] for b in db_booths] if db_booths else []
 
         branch_booths = booth_occupancy_manager.get(id_chi_nhanh, {})
 
@@ -399,6 +400,7 @@ class QueueService:
         return {
             "success": True,
             "id_chi_nhanh": id_chi_nhanh,
+            "ten_chi_nhanh": ten_chi_nhanh,
             "my_active_booth": my_active_booth,
             "is_serving_customer": is_serving_customer,
             "serving_ticket_no": serving_ticket_no,
@@ -422,13 +424,10 @@ class QueueService:
             id_chi_nhanh = str(branch_row["id_chi_nhanh"])
 
         db_booths = await self.repository.get_booths_by_branch(id_chi_nhanh)
-        if db_booths and len(db_booths) > 0:
-            valid_booths = [b["ten_quay"] for b in db_booths]
-        else:
-            valid_booths = ["Quầy 1", "Quầy 2", "Quầy 3", "Quầy 4"]
+        valid_booths = [b["ten_quay"] for b in db_booths] if db_booths else []
 
         if ten_quay not in valid_booths:
-            raise AppException(status_code=status.HTTP_400_BAD_REQUEST, message=f"Quầy '{ten_quay}' không thuộc chi nhánh này")
+            raise AppException(status_code=status.HTTP_400_BAD_REQUEST, message=f"Quầy '{ten_quay}' chưa được Admin khởi tạo cho chi nhánh này")
 
         # RÀNG BUỘC: Kiểm tra nếu nhân viên đang có khách DangPhucVu -> Không cho phép đổi quầy!
         tickets_today = await self.repository.get_tickets_by_branch_today(id_chi_nhanh)

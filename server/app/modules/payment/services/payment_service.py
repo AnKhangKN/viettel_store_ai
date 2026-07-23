@@ -16,6 +16,7 @@ class PaymentService:
     async def create_sim_order(
         self,
         id_sim: UUID,
+        id_chi_nhanh: UUID,
         id_khach_hang: Optional[UUID] = None,
         ho_ten: Optional[str] = None,
         so_dien_thoai: Optional[str] = None,
@@ -27,6 +28,7 @@ class PaymentService:
         try:
             return await self.repository.create_sim_order(
                 id_sim=id_sim,
+                id_chi_nhanh=id_chi_nhanh,
                 id_khach_hang=id_khach_hang,
                 ho_ten=ho_ten,
                 so_dien_thoai=so_dien_thoai,

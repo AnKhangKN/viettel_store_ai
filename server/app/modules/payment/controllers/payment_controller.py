@@ -1,3 +1,4 @@
+from uuid import UUID
 from fastapi import Request, Depends
 from app.modules.payment.schemas.payment_schema import CreateSimPaymentRequest, CreateSimOrderRequest
 from app.modules.payment.services.payment_service import PaymentService
@@ -10,9 +11,14 @@ class PaymentController:
         self.service = PaymentService()
 
     async def create_sim_order(self, body: CreateSimOrderRequest):
+        id_sim = UUID(str(body.id_sim)) if isinstance(body.id_sim, str) else body.id_sim
+        id_chi_nhanh = UUID(str(body.id_chi_nhanh)) if isinstance(body.id_chi_nhanh, str) else body.id_chi_nhanh
+        id_khach_hang = UUID(str(body.id_khach_hang)) if body.id_khach_hang and isinstance(body.id_khach_hang, str) else body.id_khach_hang
+
         res = await self.service.create_sim_order(
-            id_sim=body.id_sim,
-            id_khach_hang=body.id_khach_hang,
+            id_sim=id_sim,
+            id_chi_nhanh=id_chi_nhanh,
+            id_khach_hang=id_khach_hang,
             ho_ten=body.ho_ten,
             so_dien_thoai=body.so_dien_thoai,
             cccd=body.cccd,
@@ -27,8 +33,9 @@ class PaymentController:
 
     async def create_sim_payment(self, body: CreateSimPaymentRequest, request: Request):
         client_ip = request.client.host if request.client else "127.0.0.1"
+        id_don_hang = UUID(str(body.id_don_hang)) if isinstance(body.id_don_hang, str) else body.id_don_hang
         res = await self.service.create_sim_payment_url(
-            id_don_hang=body.id_don_hang,
+            id_don_hang=id_don_hang,
             client_ip=client_ip,
             bank_code=body.bank_code
         )
