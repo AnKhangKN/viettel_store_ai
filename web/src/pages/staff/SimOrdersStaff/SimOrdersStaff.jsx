@@ -195,22 +195,23 @@ export default function SimOrdersStaff() {
           {/* Filter Pills */}
           <div className="flex flex-wrap gap-2 w-full lg:w-auto">
             {[
-              { id: "all", label: "Tất cả đơn" },
-              { id: "vnpay", label: "💳 Thanh toán VNPay Online" },
-              { id: "cod", label: "🏪 Thanh toán Tại Quầy" },
-              { id: "pending", label: "⏳ Chờ nhận SIM" },
-              { id: "received", label: "✅ Đã nhận SIM" },
+              { id: "all", label: "Tất cả đơn", icon: <ShoppingBag className="w-3.5 h-3.5" /> },
+              { id: "vnpay", label: "Thanh toán VNPay Online", icon: <CreditCard className="w-3.5 h-3.5" /> },
+              { id: "cod", label: "Thanh toán Tại Quầy", icon: <Store className="w-3.5 h-3.5" /> },
+              { id: "pending", label: "Chờ nhận SIM", icon: <Clock className="w-3.5 h-3.5" /> },
+              { id: "received", label: "Đã nhận SIM", icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setFilterType(tab.id)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
                   filterType === tab.id
                     ? "bg-[#EE0033] text-white shadow-md shadow-red-500/20"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
-                {tab.label}
+                {tab.icon}
+                <span>{tab.label}</span>
               </button>
             ))}
           </div>

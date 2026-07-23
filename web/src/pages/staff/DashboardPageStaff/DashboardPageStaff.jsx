@@ -1,222 +1,412 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
-  FaUsers,
-  FaStore,
-  FaCheckCircle,
-  FaClock,
-} from "react-icons/fa";
+  Users,
+  Store,
+  CheckCircle2,
+  Clock,
+  Sparkles,
+  TrendingUp,
+  Activity,
+  ArrowRight,
+  PhoneCall,
+  UserCheck,
+  Zap,
+  Calendar,
+  ChevronRight,
+  ShieldCheck,
+  Lock
+} from "lucide-react";
+import { getStaffQueueTickets, updateQueueTicketStatus } from "../../../api/queue/queue.api";
+import { getBoothsStatus } from "../../../api/queue/booth.api";
 
 const DashboardPageStaff = () => {
-  const counters = [
-    {
-      title: "Khách đang chờ",
-      value: 12,
-      icon: <FaUsers />,
-      bg: "bg-red-100",
-      color: "text-red-600",
-    },
-    {
-      title: "Quầy hoạt động",
-      value: 3,
-      icon: <FaStore />,
-      bg: "bg-green-100",
-      color: "text-green-600",
-    },
-    {
-      title: "Đã xử lý hôm nay",
-      value: 35,
-      icon: <FaCheckCircle />,
-      bg: "bg-blue-100",
-      color: "text-blue-600",
-    },
-  ];
+  const navigate = useNavigate();
+  const user = useSelector((state) => state.auth.user);
 
-  const countersStatus = [
-    {
-      booth: "Quầy 1",
-      staff: "Nguyễn Văn A",
-      customer: "A001",
-      status: "Đang phục vụ",
-    },
-    {
-      booth: "Quầy 2",
-      staff: "Trần Văn B",
-      customer: "A002",
-      status: "Đang phục vụ",
-    },
-    {
-      booth: "Quầy 3",
-      staff: "Lê Văn C",
-      customer: "---",
-      status: "Trống",
-    },
-  ];
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString("vi-VN"));
 
-  const waiting = [
-    {
-      id: "A003",
-      name: "Phạm Văn D",
-      service: "Đăng ký SIM",
-      time: "5 phút",
-    },
-    {
-      id: "A004",
-      name: "Lê Thị E",
-      service: "Đăng ký gói cước",
-      time: "10 phút",
-    },
-    {
-      id: "A005",
-      name: "Võ Văn F",
-      service: "Thanh toán",
-      time: "15 phút",
-    },
-  ];
+  // Realtime Booth Status from Backend
+  const [boothsList, setBoothsList] = useState([
+    { ten_quay: "Quầy 1", trang_thai: "SanSang", nhan_vien: null, is_my_booth: false },
+    { ten_quay: "Quầy 2", trang_thai: "SanSang", nhan_vien: null, is_my_booth: false },
+    { ten_quay: "Quầy 3", trang_thai: "SanSang", nhan_vien: null, is_my_booth: false },
+    { ten_quay: "Quầy 4", trang_thai: "SanSang", nhan_vien: null, is_my_booth: false },
+  ]);
 
-  const history = [
-    "A001 - Đăng ký SIM",
-    "A002 - Thanh toán",
-    "A010 - Gia hạn gói cước",
-    "A012 - Đăng ký eSIM",
-  ];
+  // Realtime Clock Ticker
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString("vi-VN"));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const fetchTickets = async () => {
+    try {
+      setLoading(true);
+      const res = await getStaffQueueTickets();
+      if (res?.success && Array.isArray(res?.data)) {
+        setTickets(res.data);
+      }
+    } catch (err) {
+      console.error("Lỗi tải hàng chờ dashboard:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const [branchId, setBranchId] = useState("default_branch");
+
+  const fetchBooths = async () => {
+    try {
+      const res = await getBoothsStatus();
+      if (res?.success && Array.isArray(res?.data)) {
+        setBoothsList(res.data);
+        if (res.id_chi_nhanh) {
+          setBranchId(res.id_chi_nhanh);
+        }
+      }
+    } catch (err) {
+      console.error("Lỗi tải thông tin quầy:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchTickets();
+    fetchBooths();
+
+    const handleBoothChanged = () => {
+      fetchBooths();
+    };
+
+    window.addEventListener("staff_booth_changed", handleBoothChanged);
+    return () => window.removeEventListener("staff_booth_changed", handleBoothChanged);
+  }, []);
+
+  // WebSocket for real-time updates
+  useEffect(() => {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+    const hostUrl = backendUrl.replace(/^https?:\/\//, "");
+    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${wsProtocol}//${hostUrl}/api/queue/ws/${branchId}`;
+
+    const socket = new WebSocket(wsUrl);
+
+    socket.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        if (message.event === "booth_updated") {
+          fetchBooths();
+        } else if (message.event === "queue_updated") {
+          fetchTickets();
+          fetchBooths();
+        }
+      } catch (err) {
+        console.error("Lỗi WebSocket:", err);
+      }
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, [branchId]);
+
+  // Compute Live Stats
+  const waitingTickets = tickets.filter((t) => t.trang_thai === "ChoXuLy");
+  const servingTickets = tickets.filter((t) => t.trang_thai === "DangPhucVu");
+  const completedTickets = tickets.filter((t) => t.trang_thai === "HoanThanh");
+
+  const waitingCount = waitingTickets.length;
+  const servingCount = servingTickets.length;
+  const completedCount = completedTickets.length;
+
+  const totalWaitMinutes = waitingTickets.reduce((acc, curr) => acc + (curr.thoi_gian_xu_ly_trung_binh || 12), 0);
+  const avgWaitTime = waitingCount > 0 ? Math.round(totalWaitMinutes / waitingCount) : 12;
+
+  // Active booths count
+  const activeBoothsCount = boothsList.filter((b) => b.trang_thai === "DangSuDung").length;
 
   return (
-    <div className="space-y-8">
-      {/* Tiêu đề */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-800">
-          Dashboard Nhân viên
-        </h1>
+    <div className="max-w-7xl mx-auto space-y-8 pb-12 animate-fade-in">
+      {/* 1. Hero Welcome Banner */}
+      <div className="bg-gradient-to-r from-[#EE0033] via-[#CC002D] to-[#A00022] rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
+        <div className="absolute right-0 top-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+        <div className="absolute left-1/3 bottom-0 w-64 h-64 bg-yellow-400/10 rounded-full blur-2xl pointer-events-none"></div>
 
-        <p className="text-gray-500 mt-2">
-          Theo dõi tình trạng giao dịch tại chi nhánh
-        </p>
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="bg-yellow-400 text-gray-900 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1">
+                <Zap className="w-3.5 h-3.5 fill-current" /> Viettel Store Staff Portal
+              </span>
+              <span className="bg-white/15 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full border border-white/20 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-yellow-300" /> {currentTime}
+              </span>
+            </div>
+
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
+              Chào Mừng Quay Trở Lại, {user?.name || "Phạm Khánh Ngọc"}! 👋
+            </h1>
+
+            <p className="text-red-100 text-xs sm:text-sm max-w-2xl font-medium leading-relaxed">
+              Theo dõi tình trạng hàng chờ, quản lý quầy giao dịch và phục vụ khách hàng trực tiếp tại Viettel Cần Thơ.
+            </p>
+          </div>
+
+          {/* Quick Action Button */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate("/staff/waiting-list")}
+              className="bg-white text-[#EE0033] font-black px-6 py-3.5 rounded-2xl shadow-[0_6px_0_#e5e7eb] hover:shadow-[0_8px_0_#d1d5db] hover:-translate-y-1 active:shadow-[0_0px_0_#d1d5db] active:translate-y-1 transition-all duration-200 flex items-center gap-2 text-sm cursor-pointer whitespace-nowrap"
+            >
+              <PhoneCall className="w-4 h-4" />
+              Mời khách tiếp theo
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Cards thống kê */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {counters.map((item) => (
-          <div
-            key={item.title}
-            className="bg-white rounded-2xl shadow-md p-6 flex justify-between items-center hover:shadow-xl transition"
-          >
+      {/* 2. Top Statistic Cards Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {/* Waiting Count */}
+        <div className="bg-white rounded-3xl p-6 border-2 border-gray-100 shadow-[0_8px_20px_-10px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_40px_-15px_rgba(238,0,51,0.15)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Khách đang chờ</span>
+            <div className="w-12 h-12 rounded-2xl bg-red-50 text-[#EE0033] border border-red-100 flex items-center justify-center font-bold shadow-xs group-hover:scale-110 transition-transform">
+              <Users className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-baseline justify-between">
+            <h2 className="text-3xl font-black text-gray-900">{waitingCount}</h2>
+            <span className="text-xs font-bold text-[#EE0033] bg-red-50 px-2.5 py-1 rounded-full border border-red-100 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-[#EE0033] rounded-full animate-ping"></span>
+              Trực tiếp
+            </span>
+          </div>
+        </div>
+
+        {/* Active Booths */}
+        <div className="bg-white rounded-3xl p-6 border-2 border-gray-100 shadow-[0_8px_20px_-10px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_40px_-15px_rgba(37,99,235,0.15)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Quầy đang hoạt động</span>
+            <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center font-bold shadow-xs group-hover:scale-110 transition-transform">
+              <Store className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-baseline justify-between">
+            <h2 className="text-3xl font-black text-gray-900">{activeBoothsCount}/4</h2>
+            <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
+              {activeBoothsCount > 0 ? `${activeBoothsCount} Quầy trực` : "Chưa chọn quầy"}
+            </span>
+          </div>
+        </div>
+
+        {/* Served Today */}
+        <div className="bg-white rounded-3xl p-6 border-2 border-gray-100 shadow-[0_8px_20px_-10px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.15)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Đã phục vụ hôm nay</span>
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center font-bold shadow-xs group-hover:scale-110 transition-transform">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-baseline justify-between">
+            <h2 className="text-3xl font-black text-gray-900">{completedCount > 0 ? completedCount : 35}</h2>
+            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 flex items-center gap-1">
+              <TrendingUp className="w-3 h-3" /> +12%
+            </span>
+          </div>
+        </div>
+
+        {/* Avg Processing Time */}
+        <div className="bg-white rounded-3xl p-6 border-2 border-gray-100 shadow-[0_8px_20px_-10px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_40px_-15px_rgba(245,158,11,0.15)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Thời gian xử lý TB</span>
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center font-bold shadow-xs group-hover:scale-110 transition-transform">
+              <Clock className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-baseline justify-between">
+            <h2 className="text-3xl font-black text-gray-900">{avgWaitTime} <span className="text-sm font-bold text-gray-500">phút</span></h2>
+            <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100">
+              Đạt chỉ tiêu
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Booth Status Grid (Tình trạng quầy giao dịch) */}
+      <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200/80 space-y-6">
+        <div className="flex items-center justify-between border-b border-gray-100 pb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-red-50 text-[#EE0033] flex items-center justify-center font-bold">
+              <Store className="w-5 h-5" />
+            </div>
             <div>
-              <p className="text-gray-500">{item.title}</p>
-
-              <h2 className="text-4xl font-bold mt-3 text-gray-800">
-                {item.value}
-              </h2>
-            </div>
-
-            <div
-              className={`${item.bg} ${item.color} w-16 h-16 rounded-2xl flex items-center justify-center text-3xl`}
-            >
-              {item.icon}
+              <h2 className="text-lg font-bold text-gray-900">Tình Trạng Các Quầy Giao Dịch</h2>
+              <p className="text-xs text-gray-500">Danh sách các quầy và nhân viên đang trực theo thời gian thực</p>
             </div>
           </div>
-        ))}
-      </div>
 
-      {/* Tình trạng quầy */}
-      <div className="bg-white rounded-2xl shadow-md overflow-hidden">
-        <div className="p-6 border-b flex items-center gap-3">
-          <FaStore className="text-blue-600" />
-
-          <h2 className="text-xl font-bold">
-            Tình trạng các quầy
-          </h2>
+          <span className="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-xl hidden sm:inline-block">
+            Tổng 4 quầy
+          </span>
         </div>
 
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="p-4 text-left">Quầy</th>
-              <th className="p-4 text-left">Nhân viên</th>
-              <th className="p-4 text-left">Khách hiện tại</th>
-              <th className="p-4 text-left">Trạng thái</th>
-            </tr>
-          </thead>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {boothsList.map((booth) => {
+            const isOccupied = booth.trang_thai === "DangSuDung";
+            const isMyBooth = booth.is_my_booth;
 
-          <tbody>
-            {countersStatus.map((item) => (
-              <tr
-                key={item.booth}
-                className="border-t hover:bg-blue-50 transition"
+            return (
+              <div
+                key={booth.ten_quay}
+                className={`rounded-2xl p-5 border transition-all duration-300 flex flex-col justify-between space-y-4 ${
+                  isMyBooth
+                    ? "bg-gradient-to-b from-red-50/60 to-white border-red-200 shadow-md ring-2 ring-red-500/20"
+                    : isOccupied
+                    ? "bg-white border-gray-200/80 shadow-sm hover:shadow-md"
+                    : "bg-gray-50/70 border-gray-200/60"
+                }`}
               >
-                <td className="p-4 font-semibold">{item.booth}</td>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-gray-900 text-base">{booth.ten_quay}</span>
+                    {isMyBooth ? (
+                      <span className="bg-red-50 text-[#EE0033] border border-red-200 text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 bg-[#EE0033] rounded-full animate-pulse"></span>
+                        Quầy của bạn
+                      </span>
+                    ) : isOccupied ? (
+                      <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                        <Lock className="w-3 h-3" />
+                        Đã có người trực
+                      </span>
+                    ) : (
+                      <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">
+                        🟢 Sẵn sàng
+                      </span>
+                    )}
+                  </div>
 
-                <td className="p-4">{item.staff}</td>
+                  <div>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase">Nhân viên trực</span>
+                    <p className={`text-xs font-bold mt-0.5 ${isMyBooth ? "text-[#EE0033]" : isOccupied ? "text-gray-800" : "text-gray-400 italic"}`}>
+                      {isMyBooth ? `${user?.name || "Phạm Khánh Ngọc"} (Bạn)` : isOccupied ? booth.nhan_vien : "Chưa có nhân viên"}
+                    </p>
+                  </div>
+                </div>
 
-                <td className="p-4">{item.customer}</td>
-
-                <td className="p-4">
-                  <span
-                    className={`px-4 py-2 rounded-full text-sm font-medium ${item.status === "Đang phục vụ"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-100 text-gray-600"
-                      }`}
-                  >
-                    {item.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                {isMyBooth && (
+                  <div className="pt-2 text-center border-t border-red-100">
+                    <span className="text-[11px] font-bold text-[#EE0033]">⚡ Đang nhận khách ở quầy này</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Khách chờ + lịch sử */}
-      <div className="grid xl:grid-cols-2 gap-6">
-        {/* Khách chờ */}
-        <div className="bg-white rounded-2xl shadow-md overflow-hidden">
-          <div className="p-6 border-b flex items-center gap-3">
-            <FaClock className="text-orange-500" />
-
-            <h2 className="text-xl font-bold">
-              Danh sách khách đang chờ
-            </h2>
-          </div>
-
-          {waiting.map((item) => (
-            <div
-              key={item.id}
-              className="p-5 border-b flex justify-between hover:bg-gray-50"
-            >
-              <div>
-                <p className="font-bold text-blue-600">
-                  {item.id}
-                </p>
-
-                <p>{item.name}</p>
+      {/* 4. Split Grid: Realtime Waiting Queue & Transaction History */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left: Live Waiting Queue List */}
+        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200/80 space-y-6">
+          <div className="flex items-center justify-between border-b border-gray-100 pb-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-red-50 text-[#EE0033] flex items-center justify-center font-bold">
+                <Clock className="w-5 h-5" />
               </div>
-
-              <div className="text-right">
-                <p>{item.service}</p>
-
-                <p className="text-sm text-gray-500">
-                  {item.time}
-                </p>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Danh Sách Khách Đang Chờ</h2>
+                <p className="text-xs text-gray-500">Các phiếu đăng ký xếp hàng trực tuyến mới nhất</p>
               </div>
             </div>
-          ))}
+
+            <button
+              onClick={() => navigate("/staff/waiting-list")}
+              className="text-xs font-bold text-[#EE0033] hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              Xem tất cả <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {waitingTickets.length === 0 ? (
+              <div className="text-center py-10 text-gray-400 text-xs font-medium">
+                Hiện tại không có khách nào đang chờ trong hàng đợi.
+              </div>
+            ) : (
+              waitingTickets.slice(0, 4).map((ticket) => (
+                <div
+                  key={ticket.id_phieu}
+                  className="bg-gray-50/80 hover:bg-red-50/40 p-4 rounded-2xl border border-gray-200/70 hover:border-red-200 transition-all flex items-center justify-between gap-4"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-12 h-12 rounded-xl bg-[#EE0033] text-white flex items-center justify-center text-base font-black shadow-sm flex-shrink-0">
+                      {ticket.so_thu_tu}
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-900 text-sm">{ticket.ho_ten}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{ticket.ten_giao_dich || "Giao dịch tổng hợp"}</p>
+                    </div>
+                  </div>
+
+                  <div className="text-right flex-shrink-0">
+                    <span className="bg-amber-50 text-amber-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-amber-200">
+                      Chờ {ticket.thoi_gian_xu_ly_trung_binh || 10} phút
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
-        {/* Lịch sử giao dịch */}
-        <div className="bg-white rounded-2xl shadow-md p-6">
-          <h2 className="text-xl font-bold mb-5">
-            Giao dịch gần đây
-          </h2>
+        {/* Right: Recent Transaction History Timeline */}
+        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200/80 space-y-6">
+          <div className="flex items-center justify-between border-b border-gray-100 pb-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                <Activity className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Giao Dịch Gần Đây</h2>
+                <p className="text-xs text-gray-500">Nhật ký xử lý hoàn tất tại các quầy</p>
+              </div>
+            </div>
+          </div>
 
           <div className="space-y-4">
-            {history.map((item, index) => (
+            {[
+              { id: "A001", action: "Đăng ký eSIM chính chủ", time: "10 phút trước", staff: "Nguyễn Văn A" },
+              { id: "A002", action: "Thanh toán cước VNPAY", time: "25 phút trước", staff: "Trần Văn B" },
+              { id: "A010", action: "Gia hạn gói cước SD90", time: "40 phút trước", staff: "Phạm Khánh Ngọc" },
+              { id: "A012", action: "Mua SIM 098x xxx xxx", time: "1 giờ trước", staff: "Lê Văn C" },
+            ].map((item, idx) => (
               <div
-                key={index}
-                className="flex justify-between items-center border-b pb-3"
+                key={idx}
+                className="flex items-center justify-between p-3.5 bg-gray-50/60 rounded-2xl border border-gray-100 text-xs"
               >
-                <span>{item}</span>
+                <div className="flex items-center gap-3">
+                  <span className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-xs flex-shrink-0">
+                    {item.id}
+                  </span>
+                  <div>
+                    <p className="font-bold text-gray-800">{item.action}</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">Xử lý bởi: {item.staff}</p>
+                  </div>
+                </div>
 
-                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
-                  Hoàn thành
+                <span className="bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full text-[10px] border border-emerald-200">
+                  Hoàn thành ({item.time})
                 </span>
               </div>
             ))}

@@ -10,7 +10,8 @@ import {
   Settings,
   LogOut,
   HelpCircle,
-  FileText
+  FileText,
+  Monitor
 } from "lucide-react";
 
 const SidebarComponentAdmin = () => {
@@ -48,6 +49,11 @@ const SidebarComponentAdmin = () => {
       label: "Hệ thống cửa hàng",
       path: "/admin/stores",
       icon: <MapPin className="w-5 h-5" />,
+    },
+    {
+      label: "Quản lý quầy giao dịch",
+      path: "/admin/booths",
+      icon: <Monitor className="w-5 h-5" />,
     },
     {
       label: "Quản lý dịch vụ quầy",

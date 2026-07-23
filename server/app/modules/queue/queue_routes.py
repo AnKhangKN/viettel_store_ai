@@ -17,9 +17,13 @@ class QueueRoutes:
         self.router.get("/services")(controller.get_all_services)
         self.router.post("/ticket")(controller.create_queue_ticket)
 
-        # Staff APIs (Nhân viên cửa hàng & Admin) - Dependencies are handled directly in controller parameters
+        # Staff APIs (Nhân viên cửa hàng & Admin)
         self.router.get("/staff/tickets")(controller.get_staff_queue_tickets)
         self.router.patch("/tickets/{id_phieu}/status")(controller.update_ticket_status)
+        self.router.get("/staff/booths")(controller.get_booths_status)
+        self.router.post("/staff/booths/select")(controller.select_booth)
+        self.router.post("/staff/booths/release")(controller.release_booth)
+
 
         # WebSocket endpoint for real-time notifications by branch (using general room format)
         @self.router.websocket("/ws/{id_chi_nhanh}")
@@ -38,3 +42,9 @@ class QueueRoutes:
         self.router.post("/services", dependencies=[Depends(get_current_admin)])(controller.create_service)
         self.router.patch("/services/{id_loai_giao_dich}", dependencies=[Depends(get_current_admin)])(controller.update_service)
         self.router.delete("/services/{id_loai_giao_dich}", dependencies=[Depends(get_current_admin)])(controller.delete_service)
+
+        # Admin Booth Management APIs
+        self.router.get("/admin/booths", dependencies=[Depends(get_current_admin)])(controller.get_all_booths_admin)
+        self.router.post("/admin/booths", dependencies=[Depends(get_current_admin)])(controller.create_booth_admin)
+        self.router.put("/admin/booths/{id_quay}", dependencies=[Depends(get_current_admin)])(controller.update_booth_admin)
+        self.router.delete("/admin/booths/{id_quay}", dependencies=[Depends(get_current_admin)])(controller.delete_booth_admin)

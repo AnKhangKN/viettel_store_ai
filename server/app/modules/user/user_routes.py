@@ -22,3 +22,6 @@ class UserRoutes:
         self.router.get("/account", dependencies=[Depends(get_current_admin)])(controller.get_all_accounts)
         self.router.patch("/account/{id_khach_hang}/role", dependencies=[Depends(get_current_admin)])(controller.update_account_role)
         self.router.patch("/profile")(controller.update_profile)
+        self.router.get("/staff-profile")(controller.get_staff_profile)
+        self.router.patch("/staff-profile")(controller.update_staff_profile)
+

@@ -271,4 +271,111 @@ class QueueRepository:
         db_uuid = uuid.UUID(id_phieu) if isinstance(id_phieu, str) else id_phieu
         return await get_pool().fetchrow(sql, db_uuid, trang_thai)
 
+    async def get_booths_by_branch(self, id_chi_nhanh: str):
+        sql = """
+            SELECT id_quay, id_chi_nhanh, so_quay, ten_quay, mo_ta, trang_thai
+            FROM quaygiaodich
+            WHERE id_chi_nhanh = $1 AND da_xoa = false AND trang_thai = 'HoatDong'
+            ORDER BY so_quay ASC
+        """
+        db_uuid = uuid.UUID(id_chi_nhanh) if isinstance(id_chi_nhanh, str) else id_chi_nhanh
+        return await get_pool().fetch(sql, db_uuid)
+
+    # --- ADMIN CRUD QUAYGIAODICH ---
+    async def get_all_booths_admin(self):
+        sql = """
+            SELECT 
+                q.id_quay, 
+                q.id_chi_nhanh, 
+                c.ten_chi_nhanh,
+                q.so_quay, 
+                q.ten_quay, 
+                q.mo_ta, 
+                q.trang_thai,
+                q.ngay_tao,
+                q.cap_nhat
+            FROM quaygiaodich q
+            JOIN chinhanh c ON q.id_chi_nhanh = c.id_chi_nhanh
+            WHERE q.da_xoa = false
+            ORDER BY c.ten_chi_nhanh ASC, q.so_quay ASC
+        """
+        return await get_pool().fetch(sql)
+
+    async def get_booth_by_id(self, id_quay: str):
+        sql = """
+            SELECT id_quay, id_chi_nhanh, so_quay, ten_quay, mo_ta, trang_thai
+            FROM quaygiaodich
+            WHERE id_quay = $1 AND da_xoa = false
+        """
+        db_uuid = uuid.UUID(id_quay) if isinstance(id_quay, str) else id_quay
+        return await get_pool().fetchrow(sql, db_uuid)
+
+    async def check_duplicate_booth(self, id_chi_nhanh: str, so_quay: int, ten_quay: str, exclude_id_quay: str | None = None):
+        sql = """
+            SELECT id_quay, so_quay, ten_quay
+            FROM quaygiaodich
+            WHERE id_chi_nhanh = $1 AND (so_quay = $2 OR ten_quay = $3) AND da_xoa = false
+        """
+        branch_uuid = uuid.UUID(id_chi_nhanh) if isinstance(id_chi_nhanh, str) else id_chi_nhanh
+        if exclude_id_quay:
+            sql += " AND id_quay != $4"
+            ex_uuid = uuid.UUID(exclude_id_quay) if isinstance(exclude_id_quay, str) else exclude_id_quay
+            return await get_pool().fetchrow(sql, branch_uuid, so_quay, ten_quay, ex_uuid)
+        return await get_pool().fetchrow(sql, branch_uuid, so_quay, ten_quay)
+
+    async def create_booth_admin(
+        self,
+        id_quay: str,
+        id_chi_nhanh: str,
+        so_quay: int,
+        ten_quay: str,
+        mo_ta: str,
+        trang_thai: str
+    ):
+        sql = """
+            INSERT INTO quaygiaodich (
+                id_quay, id_chi_nhanh, so_quay, ten_quay, mo_ta, trang_thai
+            )
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id_quay, id_chi_nhanh, so_quay, ten_quay, mo_ta, trang_thai
+        """
+        db_uuid = uuid.UUID(id_quay) if isinstance(id_quay, str) else id_quay
+        branch_uuid = uuid.UUID(id_chi_nhanh) if isinstance(id_chi_nhanh, str) else id_chi_nhanh
+        return await get_pool().fetchrow(sql, db_uuid, branch_uuid, so_quay, ten_quay, mo_ta, trang_thai)
+
+    async def update_booth_admin(
+        self,
+        id_quay: str,
+        id_chi_nhanh: str,
+        so_quay: int,
+        ten_quay: str,
+        mo_ta: str,
+        trang_thai: str
+    ):
+        sql = """
+            UPDATE quaygiaodich
+            SET
+                id_chi_nhanh = $2,
+                so_quay = $3,
+                ten_quay = $4,
+                mo_ta = $5,
+                trang_thai = $6,
+                cap_nhat = CURRENT_TIMESTAMP
+            WHERE id_quay = $1 AND da_xoa = false
+            RETURNING id_quay, id_chi_nhanh, so_quay, ten_quay, mo_ta, trang_thai
+        """
+        db_uuid = uuid.UUID(id_quay) if isinstance(id_quay, str) else id_quay
+        branch_uuid = uuid.UUID(id_chi_nhanh) if isinstance(id_chi_nhanh, str) else id_chi_nhanh
+        return await get_pool().fetchrow(sql, db_uuid, branch_uuid, so_quay, ten_quay, mo_ta, trang_thai)
+
+    async def delete_booth_admin(self, id_quay: str):
+        sql = """
+            UPDATE quaygiaodich
+            SET da_xoa = true, cap_nhat = CURRENT_TIMESTAMP
+            WHERE id_quay = $1 AND da_xoa = false
+            RETURNING id_quay
+        """
+        db_uuid = uuid.UUID(id_quay) if isinstance(id_quay, str) else id_quay
+        return await get_pool().fetchrow(sql, db_uuid)
+
 

@@ -104,3 +104,26 @@ export const updateProfile = async (profileData) => {
         throw error;
     }
 };
+
+// API staff - lấy thông tin chi tiết cá nhân & chi nhánh làm việc
+export const getStaffProfile = async () => {
+    try {
+        const response = await axiosJWT.get(`/api/user/staff-profile`);
+        return response.data;
+    } catch (error) {
+        console.error("Lỗi lấy thông tin hồ sơ nhân viên:", error);
+        throw error;
+    }
+};
+
+// API staff - cập nhật thông tin cá nhân của nhân viên
+export const updateStaffProfile = async (profileData) => {
+    try {
+        const response = await axiosJWT.patch(`/api/user/staff-profile`, profileData);
+        return response.data;
+    } catch (error) {
+        console.error("Lỗi cập nhật hồ sơ nhân viên:", error);
+        throw error;
+    }
+};
+

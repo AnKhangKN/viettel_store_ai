@@ -137,11 +137,25 @@ Repository (Tương tác Cơ sở dữ liệu qua raw SQL)
 
 ---
 
-## 7. Ràng buộc về kiểu dữ liệu ở Controllers (FastAPI)
+## 7. Ràng buộc về kiểu dữ liệu (Python Type Hints & Pyrefly)
 
 ### 7.1 Sử dụng Pydantic thay vì Dict cho Request Body
 - Tuyệt đối không dùng kiểu `dict` chung chung cho dữ liệu nhận vào ở Controller để tránh giá trị mang kiểu `Unknown | None` khi gọi `.get()`.
 - Luôn định nghĩa Request Schema kế thừa từ Pydantic `BaseModel` và chỉ định rõ kiểu dữ liệu mong đợi (ví dụ: `str` thay vì `Optional[str]`/`None` nếu trường đó là bắt buộc). Điều này giúp sửa lỗi kiểm tra kiểu tĩnh (Pyrefly `bad-argument-type`) và tự động hóa validate dữ liệu.
 
+### 7.2 Type Hint cho Tham số mặc định `None` trong Python (Khắc phục lỗi Pyrefly bad-function-definition)
+- Khi một tham số phương thức có giá trị mặc định là `None`, **BẮT BỘC** phải chỉ định kiểu hợp nhất kèm `None` (ví dụ: `param: str | None = None` hoặc `param: int | None = None`).
+- **TUYỆT ĐỐI KHÔNG** được viết kiểu `param: str = None` hoặc `param: int = None` đơn thuần, vì trình kiểm tra kiểu tĩnh (Pyrefly) sẽ báo lỗi: *Default `None` is not assignable to parameter with type `str`*.
 
+---
 
+## 8. Quy tắc Debug & Xử lý lỗi (Log-First Debugging)
+
+### 8.1 Không tự đoán lỗi
+- Khi xảy ra sự cố hoặc lỗi runtime/build, AI tuyệt đối không đưa ra giả định chủ quan hoặc đoán nguyên nhân lỗi khi chưa kiểm tra bằng chứng log thực tế.
+- Bước đầu tiên BẮT BỘC luôn luôn là kiểm tra, trích xuất và đọc toàn bộ thông tin log/stack trace không bị cắt ngắn từ terminal hoặc log file.
+
+### 8.2 Không sửa lỗi bề mặt
+- Không nuốt exception bằng `try-except` rỗng.
+- Không trả về giá trị giả (dummy value) chỉ để qua mắt lỗi.
+- Luôn truy tìm và khắc phục tận gốc vị trí phát sinh lỗi dựa trên traceback thực tế.

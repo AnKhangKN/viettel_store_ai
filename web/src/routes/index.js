@@ -194,6 +194,13 @@ export const routes = [
     isShowAdminLayout: true,
     requiredRole: "admin",
   },
+  {
+    path: "/admin/booths",
+    name: "BoothsAdmin",
+    page: React.lazy(() => import("../pages/admin/BoothPageAdmin/BoothPageAdmin")),
+    isShowAdminLayout: true,
+    requiredRole: "admin",
+  },
 
   {
     path: "/admin/settings",
@@ -231,6 +238,20 @@ export const routes = [
     page: React.lazy(() => import("../pages/staff/SimOrdersStaff/SimOrdersStaff")),
     isShowStaffLayout: true,
     requiredRole: "staff",
+  },
+  {
+    path: "/staff/profile",
+    name: "Staff Profile",
+    page: React.lazy(() => import("../pages/staff/StaffProfilePage/StaffProfilePage")),
+    isShowStaffLayout: true,
+    requiredRole: "staff",
+  },
+  {
+    path: "/staff/customer",
+    name: "Customer Staff",
+    page: React.lazy(() => import("../pages/staff/CustomerPageStaff/CustomerPageStaff")),
+    isShowStaffLayout: true,
+    requiredRole: "staff",
   }
-
 ];
+

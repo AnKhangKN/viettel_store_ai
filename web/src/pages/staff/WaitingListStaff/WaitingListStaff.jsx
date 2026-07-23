@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from "react";
 import {
-  FaUsers,
-  FaClock,
-  FaPhoneAlt,
-  FaCheck,
-  FaChartLine,
-  FaTimes,
-  FaSync
-} from "react-icons/fa";
+  Users,
+  Clock,
+  PhoneCall,
+  CheckCircle2,
+  XCircle,
+  RefreshCw,
+  TrendingUp,
+  Sparkles,
+  AlertCircle,
+  Zap,
+  Check,
+  UserCheck
+} from "lucide-react";
 import { getStaffQueueTickets, updateQueueTicketStatus } from "../../../api/queue/queue.api";
 
 const WaitingListStaffPage = () => {
@@ -39,12 +44,12 @@ const WaitingListStaffPage = () => {
     }
   };
 
-  // Tải dữ liệu lần đầu và set interval tự động cập nhật hàng chờ mỗi 60 giây (dự phòng đứt WebSocket)
+  // Tải dữ liệu lần đầu & thiết lập tự động cập nhật ngầm
   useEffect(() => {
     fetchQueueTickets();
 
     const interval = setInterval(() => {
-      fetchQueueTickets(false); // Cập nhật ngầm làm dự phòng
+      fetchQueueTickets(false);
     }, 60000);
 
     return () => clearInterval(interval);
@@ -54,11 +59,8 @@ const WaitingListStaffPage = () => {
   useEffect(() => {
     if (!branchId) return;
 
-    // Trích xuất host và port từ backend URL
     const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
     const hostUrl = backendUrl.replace(/^https?:\/\//, "");
-    
-    // Sử dụng giao thức ws:// hoặc wss:// dựa trên giao thức hiện tại của web
     const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${wsProtocol}//${hostUrl}/api/queue/ws/${branchId}`;
 
@@ -94,13 +96,12 @@ const WaitingListStaffPage = () => {
     };
   }, [branchId]);
 
-  // Xử lý cập nhật trạng thái phiếu (Gọi khách / Hoàn thành / Hủy)
+  // Xử lý cập nhật trạng thái phiếu (Mời vào quầy / Hoàn thành / Hủy)
   const handleUpdateStatus = async (idPhieu, trangThai) => {
     setActionLoading(true);
     try {
       const res = await updateQueueTicketStatus(idPhieu, trangThai);
       if (res?.success) {
-        // Cập nhật lại danh sách ngay lập tức
         await fetchQueueTickets(false);
       } else {
         alert(res?.message || "Cập nhật trạng thái thất bại.");
@@ -113,107 +114,115 @@ const WaitingListStaffPage = () => {
     }
   };
 
-  // Thống kê số lượng khách hàng hôm nay
-  const waitingTickets = tickets.filter(t => t.trang_thai === "ChoXuLy");
-  const servingTickets = tickets.filter(t => t.trang_thai === "DangPhucVu");
-  const completedTickets = tickets.filter(t => t.trang_thai === "HoanThanh");
+  // Thống kê số lượng phiếu hôm nay
+  const waitingTickets = tickets.filter((t) => t.trang_thai === "ChoXuLy");
+  const servingTickets = tickets.filter((t) => t.trang_thai === "DangPhucVu");
+  const completedTickets = tickets.filter((t) => t.trang_thai === "HoanThanh");
 
   const waitingCount = waitingTickets.length;
   const servingCount = servingTickets.length;
   const servedToday = completedTickets.length;
 
-  // Tính thời gian chờ trung bình dựa trên các dịch vụ đang chờ
   const totalWaitingTime = waitingTickets.reduce((sum, t) => sum + (t.thoi_gian_xu_ly_trung_binh || 15), 0);
   const avgWaitingTime = waitingCount > 0 ? Math.round(totalWaitingTime / waitingCount) : 15;
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      
-      {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
+    <div className="max-w-7xl mx-auto space-y-8 pb-12 animate-fade-in">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Hàng chờ giao dịch
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2.5">
+            <Clock className="w-8 h-8 text-[#EE0033]" />
+            Hàng Chờ Giao Dịch Direct
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Quản lý và xử lý khách hàng lấy số trực tuyến tại quầy
+          <p className="text-xs text-gray-500 mt-1">
+            Quản lý và điều phối luồng khách hàng xếp hàng trực tuyến tại quầy giao dịch chi nhánh
           </p>
         </div>
+
         <button
           onClick={() => fetchQueueTickets(true)}
           disabled={loading || actionLoading}
-          className="flex items-center gap-2 bg-white text-gray-700 hover:text-[#EE0033] px-4 py-2.5 rounded-xl border border-gray-200 font-semibold shadow-sm transition-all duration-200 cursor-pointer disabled:opacity-50"
+          className="bg-white border border-gray-200 text-gray-700 hover:text-[#EE0033] hover:border-red-200 font-bold px-4 py-2.5 rounded-xl shadow-sm hover:shadow transition-all flex items-center gap-2 text-xs cursor-pointer w-fit disabled:opacity-50"
         >
-          <FaSync className={`w-4 h-4 ${loading ? "animate-spin text-[#EE0033]" : ""}`} />
-          <span>Làm mới</span>
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#EE0033]" : ""}`} />
+          <span>Làm mới hàng chờ</span>
         </button>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 text-red-800 font-semibold text-sm">
+        <div className="p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-3 text-red-800 font-bold text-xs shadow-sm">
+          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      {/* STATISTIC CARD SECTION */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-        
-        {/* KHÁCH CHỜ */}
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex justify-between items-center transition-all duration-300 hover:shadow-md">
+      {/* Top Statistic Cards Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {/* Waiting Count */}
+        <div className="bg-white rounded-3xl p-6 border-2 border-gray-100 shadow-[0_8px_20px_-10px_rgba(0,0,0,0.06)] hover:shadow-md transition-all flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-500">Khách đang chờ</p>
-            <h2 className="text-3xl font-black mt-1 text-gray-800">{waitingCount} người</h2>
+            <span className="text-xs font-bold text-gray-400 uppercase">Khách đang chờ</span>
+            <h2 className="text-3xl font-black text-gray-900 mt-1">{waitingCount} <span className="text-sm font-semibold text-gray-500">người</span></h2>
             {servingCount > 0 && (
-              <span className="text-xs text-blue-600 font-medium">({servingCount} khách đang phục vụ)</span>
+              <p className="text-xs text-blue-600 font-bold mt-1">({servingCount} khách đang phục vụ)</p>
             )}
           </div>
-          <div className="w-14 h-14 rounded-2xl bg-red-50 text-[#EE0033] flex justify-center items-center">
-            <FaUsers size={25} />
+          <div className="w-14 h-14 rounded-2xl bg-red-50 text-[#EE0033] flex justify-center items-center font-bold shadow-xs">
+            <Users className="w-7 h-7" />
           </div>
         </div>
 
-        {/* ĐÃ PHỤC VỤ */}
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex justify-between items-center transition-all duration-300 hover:shadow-md">
+        {/* Served Today */}
+        <div className="bg-white rounded-3xl p-6 border-2 border-gray-100 shadow-[0_8px_20px_-10px_rgba(0,0,0,0.06)] hover:shadow-md transition-all flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-500">Đã phục vụ hôm nay</p>
-            <h2 className="text-3xl font-black mt-1 text-green-600">{servedToday} lượt</h2>
+            <span className="text-xs font-bold text-gray-400 uppercase">Đã phục vụ hôm nay</span>
+            <h2 className="text-3xl font-black text-emerald-600 mt-1">{servedToday} <span className="text-sm font-semibold text-gray-500">lượt</span></h2>
           </div>
-          <div className="w-14 h-14 rounded-2xl bg-green-50 text-green-600 flex justify-center items-center">
-            <FaChartLine size={25} />
+          <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex justify-center items-center font-bold shadow-xs">
+            <TrendingUp className="w-7 h-7" />
           </div>
         </div>
 
-        {/* THỜI GIAN CHỜ TRUNG BÌNH */}
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex justify-between items-center transition-all duration-300 hover:shadow-md">
+        {/* Avg Wait Time */}
+        <div className="bg-white rounded-3xl p-6 border-2 border-gray-100 shadow-[0_8px_20px_-10px_rgba(0,0,0,0.06)] hover:shadow-md transition-all flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-500">Thời gian xử lý dự kiến</p>
-            <h2 className="text-3xl font-black mt-1 text-orange-600">{avgWaitingTime} phút/khách</h2>
+            <span className="text-xs font-bold text-gray-400 uppercase">Thời gian xử lý dự kiến</span>
+            <h2 className="text-3xl font-black text-amber-600 mt-1">{avgWaitingTime} <span className="text-sm font-semibold text-gray-500">phút/khách</span></h2>
           </div>
-          <div className="w-14 h-14 rounded-2xl bg-orange-50 text-orange-600 flex justify-center items-center">
-            <FaClock size={25} />
+          <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex justify-center items-center font-bold shadow-xs">
+            <Clock className="w-7 h-7" />
           </div>
         </div>
-
       </div>
 
-      {/* QUEUE LIST */}
-      <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-bold text-gray-800">
-            Danh sách xếp hàng quầy giao dịch
-          </h2>
-          <span className="bg-red-50 text-[#EE0033] border border-red-100 px-4 py-1.5 rounded-full text-xs font-bold">
-            Hàng chờ ngày hôm nay
+      {/* Main Queue List Container */}
+      <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200/80 space-y-6">
+        <div className="flex items-center justify-between pb-5 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-red-50 text-[#EE0033] flex items-center justify-center font-bold">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">Danh Sách Xếp Hàng Quầy Giao Dịch</h2>
+              <p className="text-xs text-gray-500">Cập nhật danh sách phiếu thứ tự và trạng thái phục vụ thời gian thực</p>
+            </div>
+          </div>
+
+          <span className="bg-red-50 text-[#EE0033] border border-red-100 px-4 py-1.5 rounded-full text-xs font-extrabold shadow-xs inline-flex items-center gap-1">
+            <Zap className="w-3.5 h-3.5 fill-current" />
+            <span>Hàng chờ trực tiếp</span>
           </span>
         </div>
 
         {loading ? (
           <div className="text-center py-20 flex flex-col justify-center items-center gap-3">
-            <div className="w-10 h-10 border-4 border-[#EE0033] border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-gray-400 font-semibold">Đang tải danh sách hàng chờ...</span>
+            <RefreshCw className="w-10 h-10 text-[#EE0033] animate-spin" />
+            <span className="text-gray-500 font-semibold text-sm">Đang kết nối danh sách hàng chờ...</span>
           </div>
         ) : tickets.filter((t) => t.trang_thai === "ChoXuLy" || t.trang_thai === "DangPhucVu").length === 0 ? (
-          <div className="text-center py-16 text-gray-400 font-medium">
+          <div className="text-center py-16 text-gray-400 font-medium text-sm">
+            <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             Hiện tại không có khách hàng nào trong hàng chờ giao dịch hôm nay.
           </div>
         ) : (
@@ -221,112 +230,98 @@ const WaitingListStaffPage = () => {
             {tickets
               .filter((t) => t.trang_thai === "ChoXuLy" || t.trang_thai === "DangPhucVu")
               .map((item) => {
-              // Phân loại style trạng thái
-              let statusLabel = "";
-              let statusClass = "";
-              if (item.trang_thai === "ChoXuLy") {
-                statusLabel = "Đang chờ";
-                statusClass = "bg-yellow-50 text-yellow-700 border border-yellow-200";
-              } else if (item.trang_thai === "DangPhucVu") {
-                statusLabel = "Đang phục vụ";
-                statusClass = "bg-blue-50 text-blue-700 border border-blue-200 animate-pulse";
-              } else if (item.trang_thai === "HoanThanh") {
-                statusLabel = "Đã hoàn thành";
-                statusClass = "bg-green-50 text-green-700 border border-green-200";
-              } else {
-                statusLabel = "Đã hủy";
-                statusClass = "bg-gray-50 text-gray-600 border border-gray-200";
-              }
+                const isWaiting = item.trang_thai === "ChoXuLy";
+                const isServing = item.trang_thai === "DangPhucVu";
 
-              // Chỉ hiện nút hành động nếu phiếu là Đang chờ hoặc Đang phục vụ
-              const isWaiting = item.trang_thai === "ChoXuLy";
-              const isServing = item.trang_thai === "DangPhucVu";
+                const registerTime = new Date(item.ngay_tao).toLocaleTimeString("vi-VN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
 
-              // Định dạng thời gian đăng ký (lấy giờ phút)
-              const registerTime = new Date(item.ngay_tao).toLocaleTimeString("vi-VN", {
-                hour: "2-digit",
-                minute: "2-digit"
-              });
+                return (
+                  <div
+                    key={item.id_phieu}
+                    className={`rounded-3xl p-6 border transition-all duration-300 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 ${
+                      isServing
+                        ? "bg-gradient-to-r from-blue-50/70 to-white border-blue-200 shadow-md ring-2 ring-blue-500/20"
+                        : "bg-white border-gray-200/80 hover:border-red-200 hover:shadow-md"
+                    }`}
+                  >
+                    <div className="flex items-center gap-5">
+                      {/* Ticket Number Badge */}
+                      <div className="w-20 h-20 bg-gradient-to-br from-[#EE0033] to-[#A00022] rounded-2xl text-white flex flex-col justify-center items-center font-black text-2xl shadow-md flex-shrink-0">
+                        <span className="text-[10px] text-red-200 font-bold uppercase tracking-wider">Số phiếu</span>
+                        {item.so_thu_tu}
+                      </div>
 
-              return (
-                <div
-                  key={item.id_phieu}
-                  className={`border rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all duration-200 hover:shadow-md border-gray-100 ${
-                    isServing ? "bg-blue-50/20 border-blue-200" : "bg-white"
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    {/* Số thứ tự */}
-                    <div className="w-16 h-16 bg-gradient-to-br from-[#EE0033] to-[#A00022] rounded-2xl text-white flex justify-center items-center font-black text-xl shadow-sm">
-                      {item.so_thu_tu}
-                    </div>
+                      {/* Customer & Service Info */}
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-extrabold text-gray-900 text-base sm:text-lg">{item.ho_ten}</h3>
+                          {isServing && (
+                            <span className="bg-blue-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full animate-pulse uppercase">
+                              Đang phục vụ
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 font-semibold">{item.so_dien_thoai || "Chưa có SĐT"}</p>
 
-                    {/* Thông tin khách hàng */}
-                    <div>
-                      <h3 className="font-bold text-gray-800 text-base">{item.ho_ten}</h3>
-                      <p className="text-xs text-gray-500 font-semibold mt-0.5">{item.so_dien_thoai}</p>
-                      
-                      <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-gray-400">
-                        <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-medium">
-                          {item.ten_giao_dich}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <FaClock className="text-gray-400" />
-                          <span>Lấy số lúc: {registerTime}</span>
-                        </span>
+                        <div className="flex flex-wrap items-center gap-3 pt-1.5 text-xs text-gray-500">
+                          <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-xl font-bold border border-gray-200/80">
+                            {item.ten_giao_dich || "Dịch vụ chung"}
+                          </span>
+                          <span className="flex items-center gap-1.5 text-gray-400 text-xs">
+                            <Clock className="w-3.5 h-3.5 text-gray-400" />
+                            Lấy số lúc: <strong>{registerTime}</strong>
+                          </span>
+                        </div>
                       </div>
                     </div>
+
+                    {/* Actions Group */}
+                    <div className="flex items-center gap-3 self-end sm:self-auto w-full sm:w-auto justify-end pt-3 sm:pt-0 border-t sm:border-t-0 border-gray-100">
+                      {/* Call Customer Button */}
+                      {isWaiting && (
+                        <button
+                          onClick={() => handleUpdateStatus(item.id_phieu, "DangPhucVu")}
+                          disabled={actionLoading}
+                          className="bg-[#EE0033] text-white font-black px-6 py-3 rounded-xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:shadow-[0_0px_0_#A00022] active:translate-y-1 transition-all duration-200 flex items-center gap-2 text-xs cursor-pointer disabled:opacity-50"
+                        >
+                          <PhoneCall className="w-4 h-4" />
+                          <span>Mời vào quầy</span>
+                        </button>
+                      )}
+
+                      {/* Complete Ticket Button */}
+                      {isServing && (
+                        <button
+                          onClick={() => handleUpdateStatus(item.id_phieu, "HoanThanh")}
+                          disabled={actionLoading}
+                          className="bg-emerald-600 text-white font-black px-6 py-3 rounded-xl shadow-[0_6px_0_#065f46] hover:shadow-[0_8px_0_#065f46] hover:-translate-y-1 active:shadow-[0_0px_0_#065f46] active:translate-y-1 transition-all duration-200 flex items-center gap-2 text-xs cursor-pointer disabled:opacity-50"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>Hoàn thành</span>
+                        </button>
+                      )}
+
+                      {/* Cancel Ticket Button */}
+                      {(isWaiting || isServing) && (
+                        <button
+                          onClick={() => handleUpdateStatus(item.id_phieu, "DaHuy")}
+                          disabled={actionLoading}
+                          className="p-3 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl border border-gray-200 transition-all cursor-pointer disabled:opacity-50"
+                          title="Hủy lượt xếp hàng"
+                        >
+                          <XCircle className="w-5 h-5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
-
-                  {/* Nhóm Trạng thái và Hành động */}
-                  <div className="flex items-center gap-3 self-end sm:self-auto">
-                    <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${statusClass}`}>
-                      {statusLabel}
-                    </span>
-
-                    {/* Nút Gọi khách (sang Đang phục vụ) */}
-                    {isWaiting && (
-                      <button
-                        onClick={() => handleUpdateStatus(item.id_phieu, "DangPhucVu")}
-                        disabled={actionLoading}
-                        className="bg-[#EE0033] hover:bg-opacity-95 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-xs font-bold shadow-sm transition-all cursor-pointer disabled:opacity-50"
-                      >
-                        <FaPhoneAlt />
-                        <span>Mời vào quầy</span>
-                      </button>
-                    )}
-
-                    {/* Nút Hoàn thành giao dịch */}
-                    {isServing && (
-                      <button
-                        onClick={() => handleUpdateStatus(item.id_phieu, "HoanThanh")}
-                        disabled={actionLoading}
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-xs font-bold shadow-sm transition-all cursor-pointer disabled:opacity-50"
-                      >
-                        <FaCheck />
-                        <span>Hoàn thành</span>
-                      </button>
-                    )}
-
-                    {/* Nút Hủy lượt */}
-                    {(isWaiting || isServing) && (
-                      <button
-                        onClick={() => handleUpdateStatus(item.id_phieu, "DaHuy")}
-                        disabled={actionLoading}
-                        className="bg-gray-100 text-gray-500 hover:text-red-600 hover:bg-red-50 p-2.5 rounded-xl border border-gray-200 transition-all cursor-pointer disabled:opacity-50"
-                        title="Hủy lượt xếp hàng"
-                      >
-                        <FaTimes size={12} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         )}
       </div>
-
     </div>
   );
 };

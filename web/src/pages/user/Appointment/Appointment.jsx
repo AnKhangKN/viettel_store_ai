@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getAllBranches } from "../../../api/branch/branch.api";
 import { getQueueServices, createQueueTicket } from "../../../api/queue/queue.api";
-import { MapPin, Calendar, Clock, Phone, User, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { MapPin, Calendar, Clock, Phone, User, Loader2, CheckCircle2, AlertCircle, Monitor, Sparkles } from "lucide-react";
 
 const Appointment = () => {
   const [branches, setBranches] = useState([]);
@@ -275,10 +275,29 @@ const Appointment = () => {
                 </div>
               </div>
 
+              {/* Thông tin Quầy phân bổ tối ưu */}
+              {result.quay_du_kien && (
+                <div className="bg-red-50 border border-red-100 rounded-2xl p-3.5 flex items-center justify-between text-left">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-[#EE0033] text-white flex items-center justify-center font-bold shrink-0">
+                      <Monitor className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider block">QUẦY ĐIỀU PHỐI TỐI ƯU</span>
+                      <span className="text-sm font-black text-gray-900">{result.quay_du_kien}</span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-extrabold text-[#EE0033] bg-white px-2.5 py-1 rounded-full border border-red-200 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" />
+                    Tối ưu nhất
+                  </span>
+                </div>
+              )}
+
               <div className="border-t border-gray-100 pt-4 flex flex-col items-center gap-1.5 text-sm text-gray-700">
                 <div className="flex items-center gap-1.5 font-bold text-gray-800">
                   <Clock className="w-4 h-4 text-blue-500" />
-                  <span>Thời gian chờ ước tính: <span className="text-[#EE0033]">{result.so_phut_cho} phút</span></span>
+                  <span>Thời gian chờ tối ưu: <span className="text-[#EE0033]">{result.so_phut_cho} phút</span></span>
                 </div>
                 <p className="text-xs text-gray-400">
                   Dự kiến phục vụ lúc: {new Date(result.thoi_gian_du_kien).toLocaleTimeString("vi-VN", {hour: '2-digit', minute:'2-digit'})}

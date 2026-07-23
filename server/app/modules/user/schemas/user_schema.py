@@ -22,3 +22,12 @@ class UserProfileUpdateRequest(BaseModel):
     so_dien_thoai: str = Field(..., description="Số điện thoại")
     cccd: Optional[str] = Field(None, description="Số CCCD/CMND")
     dia_chi: Optional[str] = Field(None, description="Địa chỉ giao hàng")
+
+class StaffProfileUpdateRequest(BaseModel):
+    ho_ten: str = Field(..., description="Họ và tên nhân viên")
+    so_dien_thoai: str = Field(..., description="Số điện thoại")
+    cccd: Optional[str] = Field(None, description="Số CCCD/CMND")
+    dia_chi: Optional[str] = Field(None, description="Địa chỉ thường trú")
+    gioi_tinh: Optional[str] = Field(None, description="Giới tính ('Nam', 'Nữ', 'Khác')")
+    ngay_sinh: Optional[str] = Field(None, description="Ngày sinh (YYYY-MM-DD)")
+

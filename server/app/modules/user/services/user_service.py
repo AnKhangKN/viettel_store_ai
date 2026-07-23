@@ -3,7 +3,7 @@ from app.core.exceptions import AppException
 from app.common.utils.uuid import generate_uuid7
 from app.core.security import hash_password
 from app.modules.user.repositories.user_repository import UserRepository
-from app.modules.user.schemas.user_schema import EmployeeCreateRequest, EmployeeApproveRequest, AccountRoleUpdateRequest
+from app.modules.user.schemas.user_schema import EmployeeCreateRequest, EmployeeApproveRequest, AccountRoleUpdateRequest, StaffProfileUpdateRequest
 from app.common.enums.role_enum import RoleEnum
 from app.modules.branch.repositories.branch_repository import BranchRepository
 
@@ -144,13 +144,19 @@ class UserService:
                 "ho_ten": r["ho_ten"],
                 "so_dien_thoai": r["so_dien_thoai"],
                 "email": r["email"],
-                "trang_thai": r["trang_thai"]
+                "cccd": r["cccd"],
+                "gioi_tinh": r["gioi_tinh"],
+                "ngay_sinh": str(r["ngay_sinh"]) if r["ngay_sinh"] else None,
+                "dia_chi": r["dia_chi"],
+                "trang_thai": r["trang_thai"],
+                "ngay_tao": str(r["ngay_tao"]) if r["ngay_tao"] else None
             })
 
         return {
             "success": True,
             "data": customers
         }
+
 
     async def get_customer_details(self, id_khach_hang: str):
         r = await self.repository.get_customer_by_id(id_khach_hang)
@@ -265,4 +271,86 @@ class UserService:
                 "email": res["email"]
             }
         }
+
+    async def get_staff_profile(self, payload: dict):
+        id_khach_hang = payload.get("id_khach_hang")
+        if not id_khach_hang:
+            raise AppException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                message="Không xác định được danh tính nhân viên"
+            )
+
+        r = await self.repository.get_staff_profile(id_khach_hang)
+        if not r:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Không tìm thấy thông tin nhân viên"
+            )
+
+        return {
+            "success": True,
+            "data": {
+                "id_khach_hang": str(r["id_khach_hang"]),
+                "ten_dang_nhap": r["ten_dang_nhap"],
+                "ho_ten": r["ho_ten"],
+                "email": r["email"],
+                "so_dien_thoai": r["so_dien_thoai"],
+                "cccd": r["cccd"],
+                "gioi_tinh": r["gioi_tinh"],
+                "ngay_sinh": str(r["ngay_sinh"]) if r["ngay_sinh"] else None,
+                "dia_chi": r["dia_chi"],
+                "anh_dai_dien": r["anh_dai_dien"],
+                "vai_tro": r["vai_tro"],
+                "trang_thai": r["trang_thai"],
+                "lan_dang_nhap_cuoi": str(r["lan_dang_nhap_cuoi"]) if r["lan_dang_nhap_cuoi"] else None,
+                "ngay_tao": str(r["ngay_tao"]) if r["ngay_tao"] else None,
+                "chi_nhanh": {
+                    "id_chi_nhanh": str(r["id_chi_nhanh"]) if r["id_chi_nhanh"] else None,
+                    "ten_chi_nhanh": r["ten_chi_nhanh"],
+                    "dia_chi_chi_nhanh": r["dia_chi_chi_nhanh"],
+                    "hotline_chi_nhanh": r["hotline_chi_nhanh"],
+                    "gio_lam_viec_chi_nhanh": r["gio_lam_viec_chi_nhanh"]
+                } if r["id_chi_nhanh"] else None
+            }
+        }
+
+    async def update_staff_profile(self, payload: dict, body: StaffProfileUpdateRequest):
+        id_khach_hang = payload.get("id_khach_hang")
+        if not id_khach_hang:
+            raise AppException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                message="Không xác định được danh tính nhân viên"
+            )
+
+        res = await self.repository.update_staff_profile(
+            id_khach_hang=id_khach_hang,
+            ho_ten=body.ho_ten,
+            so_dien_thoai=body.so_dien_thoai,
+            cccd=body.cccd,
+            dia_chi=body.dia_chi,
+            gioi_tinh=body.gioi_tinh,
+            ngay_sinh=body.ngay_sinh
+        )
+
+        if not res:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Nhân viên không tồn tại"
+            )
+
+        return {
+            "success": True,
+            "message": "Cập nhật hồ sơ nhân viên thành công",
+            "data": {
+                "id_khach_hang": str(res["id_khach_hang"]),
+                "ho_ten": res["ho_ten"],
+                "so_dien_thoai": res["so_dien_thoai"],
+                "cccd": res["cccd"],
+                "dia_chi": res["dia_chi"],
+                "gioi_tinh": res["gioi_tinh"],
+                "ngay_sinh": str(res["ngay_sinh"]) if res["ngay_sinh"] else None,
+                "email": res["email"]
+            }
+        }
+
 

@@ -129,12 +129,18 @@ class UserRepository:
                 ho_ten,
                 so_dien_thoai,
                 email,
-                trang_thai
+                cccd,
+                gioi_tinh,
+                ngay_sinh,
+                dia_chi,
+                trang_thai,
+                ngay_tao
             FROM khachhang
             WHERE vai_tro = 'user' AND da_xoa = false
             ORDER BY ngay_tao DESC
         """
         return await get_pool().fetch(sql)
+
 
     async def get_customer_by_id(self, id_khach_hang: str):
         sql = """
@@ -235,4 +241,61 @@ class UserRepository:
         """
         db_uuid = uuid.UUID(id_khach_hang) if isinstance(id_khach_hang, str) else id_khach_hang
         return await get_pool().fetchrow(sql, db_uuid, ho_ten, so_dien_thoai, cccd, dia_chi)
+
+    async def get_staff_profile(self, id_khach_hang: str):
+        sql = """
+            SELECT 
+                k.id_khach_hang,
+                k.ten_dang_nhap,
+                k.ho_ten,
+                k.email,
+                k.so_dien_thoai,
+                k.cccd,
+                k.gioi_tinh,
+                k.ngay_sinh,
+                k.dia_chi,
+                k.anh_dai_dien,
+                k.vai_tro,
+                k.trang_thai,
+                k.lan_dang_nhap_cuoi,
+                k.ngay_tao,
+                nv.id_chi_nhanh,
+                c.ten_chi_nhanh,
+                c.dia_chi AS dia_chi_chi_nhanh,
+                c.so_hotline AS hotline_chi_nhanh,
+                c.gio_lam_viec AS gio_lam_viec_chi_nhanh
+            FROM khachhang k
+            LEFT JOIN nhanvien nv ON k.id_khach_hang = nv.id_khach_hang
+            LEFT JOIN chinhanh c ON nv.id_chi_nhanh = c.id_chi_nhanh
+            WHERE k.id_khach_hang = $1 AND k.da_xoa = false
+        """
+        db_uuid = uuid.UUID(id_khach_hang) if isinstance(id_khach_hang, str) else id_khach_hang
+        return await get_pool().fetchrow(sql, db_uuid)
+
+    async def update_staff_profile(
+        self,
+        id_khach_hang: str,
+        ho_ten: str,
+        so_dien_thoai: str,
+        cccd: str | None = None,
+        dia_chi: str | None = None,
+        gioi_tinh: str | None = None,
+        ngay_sinh: str | None = None
+    ):
+        sql = """
+            UPDATE khachhang
+            SET
+                ho_ten = $2,
+                so_dien_thoai = $3,
+                cccd = COALESCE($4, cccd),
+                dia_chi = COALESCE($5, dia_chi),
+                gioi_tinh = COALESCE($6, gioi_tinh),
+                ngay_sinh = CASE WHEN $7::text IS NOT NULL AND $7::text != '' THEN $7::date ELSE ngay_sinh END,
+                cap_nhat = CURRENT_TIMESTAMP
+            WHERE id_khach_hang = $1 AND da_xoa = false
+            RETURNING id_khach_hang, ho_ten, so_dien_thoai, cccd, dia_chi, gioi_tinh, ngay_sinh, email
+        """
+        db_uuid = uuid.UUID(id_khach_hang) if isinstance(id_khach_hang, str) else id_khach_hang
+        return await get_pool().fetchrow(sql, db_uuid, ho_ten, so_dien_thoai, cccd, dia_chi, gioi_tinh, ngay_sinh)
+
 
