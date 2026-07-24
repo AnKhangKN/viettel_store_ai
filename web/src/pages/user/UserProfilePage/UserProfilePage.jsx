@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setCredentials } from '../../../features/auth/authSlice';
 import { updateProfile, changePassword } from '../../../api/user/user.api';
-import { User, Phone, MapPin, CreditCard, Mail, Edit2, Check, X, Loader2, Lock, KeyRound } from 'lucide-react';
+import { User, Phone, MapPin, CreditCard, Mail, Edit2, Check, X, Loader2, Lock, KeyRound, ShieldCheck, Zap, Sparkles } from 'lucide-react';
 
 const UserProfilePage = () => {
   const dispatch = useDispatch();
@@ -110,67 +110,76 @@ const UserProfilePage = () => {
   };
 
   return (
-    <div className="bg-[#f4f5f7] py-8 pb-16">
+    <div className="bg-slate-50 min-h-screen py-10 pb-20 text-slate-800 font-sans antialiased">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header Title */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-black text-gray-900">Hồ sơ cá nhân</h1>
-          <p className="text-gray-500 mt-2">Quản lý thông tin cá nhân và bảo mật tài khoản của bạn</p>
+        <div className="mb-8 text-center md:text-left">
+          <span className="inline-flex items-center gap-1.5 bg-red-50 text-[#EE0033] border border-red-100 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider mb-2">
+            <ShieldCheck className="w-3.5 h-3.5" /> Quản lý tài khoản
+          </span>
+          <h1 className="text-3xl font-black text-slate-900">HỒ SƠ CÁ NHÂN</h1>
+          <p className="text-slate-500 text-xs mt-1">Cập nhật thông tin chính chủ và bảo mật tài khoản của bạn</p>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden border border-gray-100">
+        <div className="bg-white rounded-3xl shadow-xs overflow-hidden border border-slate-200">
           <div className="grid grid-cols-1 md:grid-cols-3">
             
-            {/* Left Sidebar - Profile Overview */}
-            <div className="bg-gradient-to-br from-red-50 to-white p-8 border-r border-gray-100 flex flex-col items-center justify-center md:col-span-1">
-              <div className="relative group">
-                <div className="w-32 h-32 rounded-full bg-gradient-to-r from-[#EE0033] to-[#A00022] p-1 shadow-[0_8px_20px_rgba(238,0,51,0.25)]">
-                  <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden border-2 border-white">
-                    <User size={48} className="text-[#EE0033]" />
+            {/* Left Sidebar - Profile Avatar Overview */}
+            <div className="bg-gradient-to-br from-red-50 via-white to-orange-50/40 p-8 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col items-center justify-center text-center">
+              <div className="relative group mb-4">
+                <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-[#EE0033] to-[#A00022] p-1 shadow-md">
+                  <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden border-2 border-white text-[#EE0033] font-black text-4xl">
+                    {formData.ho_ten ? formData.ho_ten.charAt(0).toUpperCase() : <User size={40} />}
                   </div>
                 </div>
-                <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all cursor-pointer">
-                  <Edit2 size={24} className="text-white" />
-                </div>
               </div>
-              <h2 className="mt-6 text-xl font-bold text-gray-900 text-center">{formData.ho_ten || 'Khách hàng'}</h2>
-              <span className="mt-2 bg-red-100 text-[#EE0033] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                Thành viên Viettel
-              </span>
+
+              <h2 className="text-lg font-black text-slate-900">{formData.ho_ten || 'Khách hàng Viettel'}</h2>
+              <p className="text-xs text-slate-400 mt-0.5">{formData.email || 'Chưa cập nhật email'}</p>
+              
+              <div className="mt-3 flex items-center gap-1.5">
+                <span className="bg-[#EE0033] text-white text-[10px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider shadow-2xs">
+                  Thành viên Viettel
+                </span>
+              </div>
             </div>
 
             {/* Right Content - Form */}
-            <div className="p-8 md:col-span-2">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <User className="text-[#EE0033]" size={24} />
-                  Thông tin liên hệ
+            <div className="p-6 sm:p-8 md:col-span-2">
+              
+              <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                  <User className="text-[#EE0033] w-5 h-5" />
+                  Thông tin cá nhân
                 </h3>
                 {!isEditing && (
                   <button 
                     onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-2 text-sm font-semibold text-[#EE0033] hover:bg-red-50 px-4 py-2 rounded-xl transition-colors"
+                    className="flex items-center gap-1.5 text-xs font-extrabold text-[#EE0033] hover:bg-red-50 px-3.5 py-1.5 rounded-xl border border-red-100 transition cursor-pointer"
                   >
-                    <Edit2 size={16} />
+                    <Edit2 size={14} />
                     Chỉnh sửa
                   </button>
                 )}
               </div>
 
               {message.text && (
-                <div className={`mb-6 p-4 rounded-xl text-sm font-medium flex items-center gap-2 ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-[#EE0033] border border-red-200'}`}>
-                  {message.type === 'success' ? <Check size={18} /> : <X size={18} />}
+                <div className={`mb-5 p-3.5 rounded-xl text-xs font-bold flex items-center gap-2 ${
+                  message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
+                }`}>
+                  {message.type === 'success' ? <Check size={16} /> : <X size={16} />}
                   {message.text}
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  
                   {/* Họ và tên */}
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <User size={14} className="text-gray-400" /> Họ và tên
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <User size={13} className="text-slate-400" /> Họ và tên
                     </label>
                     <input
                       type="text"
@@ -179,14 +188,14 @@ const UserProfilePage = () => {
                       onChange={handleInputChange}
                       disabled={!isEditing}
                       required
-                      className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#EE0033]/20 focus:border-[#EE0033] focus:bg-white transition-all disabled:opacity-70 disabled:cursor-not-allowed outline-none"
+                      className="w-full bg-slate-50 border border-slate-300 text-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-[#EE0033] focus:bg-white transition disabled:opacity-75 outline-none"
                     />
                   </div>
 
                   {/* Số điện thoại */}
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <Phone size={14} className="text-gray-400" /> Số điện thoại
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <Phone size={13} className="text-slate-400" /> Số điện thoại
                     </label>
                     <input
                       type="tel"
@@ -195,14 +204,14 @@ const UserProfilePage = () => {
                       onChange={handleInputChange}
                       disabled={!isEditing}
                       required
-                      className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#EE0033]/20 focus:border-[#EE0033] focus:bg-white transition-all disabled:opacity-70 disabled:cursor-not-allowed outline-none"
+                      className="w-full bg-slate-50 border border-slate-300 text-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-[#EE0033] focus:bg-white transition disabled:opacity-75 outline-none"
                     />
                   </div>
 
                   {/* Email */}
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <Mail size={14} className="text-gray-400" /> Email
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <Mail size={13} className="text-slate-400" /> Email liên hệ
                     </label>
                     <input
                       type="email"
@@ -211,14 +220,14 @@ const UserProfilePage = () => {
                       onChange={handleInputChange}
                       disabled={!isEditing}
                       required
-                      className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#EE0033]/20 focus:border-[#EE0033] focus:bg-white transition-all disabled:opacity-70 disabled:cursor-not-allowed outline-none"
+                      className="w-full bg-slate-50 border border-slate-300 text-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-[#EE0033] focus:bg-white transition disabled:opacity-75 outline-none"
                     />
                   </div>
 
                   {/* CCCD */}
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <CreditCard size={14} className="text-gray-400" /> Số CCCD/CMND
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <CreditCard size={13} className="text-slate-400" /> Số CCCD / CMND
                     </label>
                     <input
                       type="text"
@@ -226,29 +235,29 @@ const UserProfilePage = () => {
                       value={formData.cccd}
                       onChange={handleInputChange}
                       disabled={!isEditing}
-                      className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#EE0033]/20 focus:border-[#EE0033] focus:bg-white transition-all disabled:opacity-70 disabled:cursor-not-allowed outline-none"
+                      className="w-full bg-slate-50 border border-slate-300 text-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-[#EE0033] focus:bg-white transition disabled:opacity-75 outline-none"
                     />
                   </div>
 
                   {/* Địa chỉ */}
-                  <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <MapPin size={14} className="text-gray-400" /> Địa chỉ liên hệ
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <MapPin size={13} className="text-slate-400" /> Địa chỉ thường trú
                     </label>
                     <textarea
                       name="dia_chi"
                       value={formData.dia_chi}
                       onChange={handleInputChange}
                       disabled={!isEditing}
-                      rows="3"
-                      className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#EE0033]/20 focus:border-[#EE0033] focus:bg-white transition-all disabled:opacity-70 disabled:cursor-not-allowed outline-none resize-none"
+                      rows="2"
+                      className="w-full bg-slate-50 border border-slate-300 text-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-[#EE0033] focus:bg-white transition disabled:opacity-75 outline-none resize-none"
                     ></textarea>
                   </div>
+
                 </div>
 
-                {/* Actions */}
                 {isEditing && (
-                  <div className="pt-4 flex gap-4 justify-end border-t border-gray-100">
+                  <div className="pt-4 flex gap-3 justify-end border-t border-slate-100">
                     <button
                       type="button"
                       onClick={() => {
@@ -262,7 +271,7 @@ const UserProfilePage = () => {
                         });
                         setMessage({ text: '', type: '' });
                       }}
-                      className="px-6 py-2.5 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+                      className="px-5 py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
                       disabled={isLoading}
                     >
                       Hủy bỏ
@@ -270,11 +279,11 @@ const UserProfilePage = () => {
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="bg-[#EE0033] text-white font-bold px-8 py-2.5 rounded-xl shadow-[0_4px_0_#A00022] hover:shadow-[0_6px_0_#A00022] hover:-translate-y-0.5 active:shadow-[0_0px_0_#A00022] active:translate-y-1 transition-all duration-200 flex items-center justify-center gap-2"
+                      className="bg-[#EE0033] hover:bg-red-700 text-white font-extrabold px-6 py-2 rounded-xl text-xs shadow-md transition cursor-pointer flex items-center gap-2"
                     >
                       {isLoading ? (
                         <>
-                          <Loader2 size={18} className="animate-spin" /> Đang lưu...
+                          <Loader2 size={14} className="animate-spin" /> Đang cập nhật...
                         </>
                       ) : (
                         'Lưu thay đổi'
@@ -284,28 +293,29 @@ const UserProfilePage = () => {
                 )}
               </form>
 
-              {/* Divider */}
-              <div className="my-8 h-px bg-gray-100"></div>
+              <div className="my-8 h-px bg-slate-100"></div>
 
               {/* Change Password Section */}
               <div>
-                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-6">
-                  <Lock className="text-[#EE0033]" size={24} />
-                  Bảo mật & Đổi mật khẩu
+                <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2 mb-4">
+                  <Lock className="text-[#EE0033] w-5 h-5" />
+                  Đổi mật khẩu tài khoản
                 </h3>
 
                 {passMessage.text && (
-                  <div className={`mb-6 p-4 rounded-xl text-sm font-medium flex items-center gap-2 ${passMessage.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-[#EE0033] border border-red-200'}`}>
-                    {passMessage.type === 'success' ? <Check size={18} /> : <X size={18} />}
+                  <div className={`mb-4 p-3.5 rounded-xl text-xs font-bold flex items-center gap-2 ${
+                    passMessage.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
+                  }`}>
+                    {passMessage.type === 'success' ? <Check size={16} /> : <X size={16} />}
                     {passMessage.text}
                   </div>
                 )}
 
-                <form onSubmit={handlePasswordSubmit} className="space-y-5">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                        <KeyRound size={14} className="text-gray-400" /> Mật khẩu hiện tại
+                <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                        <KeyRound size={12} className="text-slate-400" /> Mật khẩu cũ
                       </label>
                       <input
                         type="password"
@@ -313,13 +323,13 @@ const UserProfilePage = () => {
                         onChange={(e) => setPassData(prev => ({ ...prev, mat_khau_cu: e.target.value }))}
                         required
                         placeholder="••••••••"
-                        className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#EE0033]/20 focus:border-[#EE0033] focus:bg-white transition-all outline-none"
+                        className="w-full bg-slate-50 border border-slate-300 text-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-[#EE0033] focus:bg-white outline-none"
                       />
                     </div>
 
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                        <Lock size={14} className="text-gray-400" /> Mật khẩu mới
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                        <Lock size={12} className="text-slate-400" /> Mật khẩu mới
                       </label>
                       <input
                         type="password"
@@ -327,13 +337,13 @@ const UserProfilePage = () => {
                         onChange={(e) => setPassData(prev => ({ ...prev, mat_khau_moi: e.target.value }))}
                         required
                         placeholder="••••••••"
-                        className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#EE0033]/20 focus:border-[#EE0033] focus:bg-white transition-all outline-none"
+                        className="w-full bg-slate-50 border border-slate-300 text-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-[#EE0033] focus:bg-white outline-none"
                       />
                     </div>
 
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                        <Lock size={14} className="text-gray-400" /> Xác nhận mật khẩu mới
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                        <Lock size={12} className="text-slate-400" /> Xác nhận mật khẩu
                       </label>
                       <input
                         type="password"
@@ -341,7 +351,7 @@ const UserProfilePage = () => {
                         onChange={(e) => setPassData(prev => ({ ...prev, xac_nhan_mat_khau: e.target.value }))}
                         required
                         placeholder="••••••••"
-                        className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#EE0033]/20 focus:border-[#EE0033] focus:bg-white transition-all outline-none"
+                        className="w-full bg-slate-50 border border-slate-300 text-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-[#EE0033] focus:bg-white outline-none"
                       />
                     </div>
                   </div>
@@ -350,11 +360,11 @@ const UserProfilePage = () => {
                     <button
                       type="submit"
                       disabled={isPassLoading}
-                      className="bg-gray-900 text-white font-bold px-6 py-2.5 rounded-xl hover:bg-gray-800 transition-colors flex items-center gap-2 text-sm cursor-pointer disabled:opacity-50"
+                      className="bg-slate-900 hover:bg-black text-white font-extrabold px-6 py-2.5 rounded-xl text-xs transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
                     >
                       {isPassLoading ? (
                         <>
-                          <Loader2 size={16} className="animate-spin" /> Đang xử lý...
+                          <Loader2 size={14} className="animate-spin" /> Đang lưu mật khẩu...
                         </>
                       ) : (
                         'Đổi mật khẩu'

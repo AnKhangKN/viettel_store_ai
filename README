@@ -48,3 +48,14 @@ D:\viettel_store_ai>
 - git add .
 - git commit -m 'ghi gì cũng đc'
 - git push origin main
+
+Trước khi làm nhớ 
+git pull origin main
+
+- Viết code xong
+
+git add .
+git commit -m 'ghi gì cũng đc'
+git push origin main
+
+nhắn lên nhóm đã làm gì push lên ch

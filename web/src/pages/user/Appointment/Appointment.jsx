@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getAllBranches } from "../../../api/branch/branch.api";
 import { getQueueServices, createQueueTicket } from "../../../api/queue/queue.api";
-import { MapPin, Calendar, Clock, Phone, User, Loader2, CheckCircle2, AlertCircle, Monitor, Sparkles } from "lucide-react";
+import { MapPin, Calendar, Clock, Phone, User, Loader2, CheckCircle2, AlertCircle, Monitor, Sparkles, QrCode, ArrowRight, ShieldCheck } from "lucide-react";
 
 const Appointment = () => {
   const [branches, setBranches] = useState([]);
@@ -19,7 +19,6 @@ const Appointment = () => {
 
   const [result, setResult] = useState(null);
 
-  // Load chi nhánh và dịch vụ khi mở trang
   useEffect(() => {
     const loadData = async () => {
       setDataLoading(true);
@@ -31,12 +30,10 @@ const Appointment = () => {
         ]);
 
         if (branchRes?.success && branchRes?.data) {
-          // Chỉ lấy các chi nhánh đang hoạt động
           const activeBranches = branchRes.data.filter(b => b.trang_thai === "HoatDong");
           setBranches(activeBranches);
         }
         if (serviceRes?.success && serviceRes?.data) {
-          // Chỉ lấy dịch vụ đang hoạt động
           const activeServices = serviceRes.data.filter(s => s.trang_thai === "HoatDong");
           setServices(activeServices);
         }
@@ -51,47 +48,27 @@ const Appointment = () => {
     loadData();
   }, []);
 
-  // Xử lý nhập liệu
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     if (name === "soDienThoai") {
-      // Chỉ cho nhập số và tối đa 10 ký tự
       const phone = value.replace(/[^0-9]/g, "").slice(0, 10);
-      setForm((prev) => ({
-        ...prev,
-        soDienThoai: phone,
-      }));
+      setForm((prev) => ({ ...prev, soDienThoai: phone }));
     } else {
-      setForm((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      setForm((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Kiểm tra dữ liệu trống
-    if (
-      form.hoTen.trim() === "" ||
-      form.soDienThoai.trim() === "" ||
-      form.idChiNhanh === "" ||
-      form.idLoaiGiaoDich === ""
-    ) {
-      alert("Vui lòng nhập và chọn đầy đủ thông tin!");
+    if (!form.hoTen.trim() || !form.soDienThoai.trim() || !form.idChiNhanh || !form.idLoaiGiaoDich) {
+      alert("Vui lòng điền và chọn đầy đủ thông tin yêu cầu!");
       return;
     }
 
-    // Kiểm tra số điện thoại
     const phoneRegex = /^0\d{9}$/;
     if (!phoneRegex.test(form.soDienThoai)) {
-      alert("Số điện thoại không hợp lệ!\nPhải bắt đầu bằng số 0 và gồm đúng 10 chữ số.");
-      setForm((prev) => ({
-        ...prev,
-        soDienThoai: "",
-      }));
+      alert("Số điện thoại không hợp lệ! Vui lòng nhập đúng 10 chữ số bắt đầu bằng số 0.");
       return;
     }
 
@@ -106,19 +83,13 @@ const Appointment = () => {
 
       if (res?.success && res?.data) {
         setResult(res.data);
-        // Reset form
-        setForm({
-          hoTen: "",
-          soDienThoai: "",
-          idChiNhanh: "",
-          idLoaiGiaoDich: "",
-        });
+        setForm({ hoTen: "", soDienThoai: "", idChiNhanh: "", idLoaiGiaoDich: "" });
       } else {
-        alert(res?.message || "Đăng ký thất bại. Vui lòng thử lại.");
+        alert(res?.message || "Đăng ký không thành công. Vui lòng thử lại.");
       }
     } catch (err) {
       console.error(err);
-      const errMsg = err?.response?.data?.message || "Đã có lỗi xảy ra trong quá trình đăng ký.";
+      const errMsg = err?.response?.data?.message || "Đã xảy ra lỗi khi khởi tạo phiếu hàng đợi.";
       alert(errMsg);
     } finally {
       setSubmitLoading(false);
@@ -127,210 +98,226 @@ const Appointment = () => {
 
   if (dataLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center gap-3 py-10">
-        <Loader2 className="w-12 h-12 text-[#EE0033] animate-spin" />
-        <p className="text-gray-500 font-semibold">Đang chuẩn bị thông tin dịch vụ quầy...</p>
+      <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center gap-3 py-10">
+        <Loader2 className="w-10 h-10 text-[#EE0033] animate-spin mb-2" />
+        <p className="text-slate-500 font-bold text-xs">Đang tải danh sách dịch vụ quầy Viettel...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-10 relative overflow-hidden">
-        
-        {/* Background decorative elements */}
-        <div className="absolute top-0 right-0 w-40 h-40 bg-red-50 rounded-full blur-3xl -z-10 translate-x-12 -translate-y-12"></div>
-        <div className="absolute bottom-0 left-0 w-40 h-40 bg-red-50/50 rounded-full blur-3xl -z-10 -translate-x-12 translate-y-12"></div>
-
-        <h2 className="text-center text-3xl font-extrabold text-[#EE0033] tracking-tight mb-2">
-          Đăng ký giao dịch tại quầy
-        </h2>
-        <p className="text-center text-gray-500 text-sm mb-8">
-          Tiết kiệm thời gian chờ đợi. Lấy số thứ tự trực tuyến trước khi đến cửa hàng Viettel Store.
+    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8 pb-20">
+      
+      {/* HERO SECTION */}
+      <div className="max-w-3xl mx-auto text-center mb-8">
+        <span className="inline-flex items-center gap-1.5 bg-red-50 text-[#EE0033] border border-red-100 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider mb-2">
+          <Clock className="w-3.5 h-3.5" /> Hàng Đợi Thông Minh AI
+        </span>
+        <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-2">LẤY SỐ THỨ TỰ TẠI QUẦY</h1>
+        <p className="text-slate-500 text-xs sm:text-sm max-w-lg mx-auto">
+          Chủ động đặt số thứ tự trước khi đến cửa hàng Viettel Store. Tiết kiệm thời gian, không lo phải xếp hàng chờ đợi!
         </p>
-
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 text-red-800">
-            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
-            <span className="text-sm font-semibold">{error}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          
-          {/* Họ và tên */}
-          <div className="space-y-1.5">
-            <label className="block text-sm font-bold text-gray-700 flex items-center gap-2">
-              <User className="w-4 h-4 text-gray-400" />
-              <span>Họ và tên *</span>
-            </label>
-            <input
-              type="text"
-              name="hoTen"
-              required
-              value={form.hoTen}
-              onChange={handleChange}
-              placeholder="Nhập họ và tên đầy đủ"
-              className="w-full h-12 px-4 border border-gray-300 rounded-2xl focus:border-[#EE0033] focus:ring-1 focus:ring-[#EE0033] outline-none text-sm transition-all shadow-sm"
-            />
-          </div>
-
-          {/* Số điện thoại */}
-          <div className="space-y-1.5">
-            <label className="block text-sm font-bold text-gray-700 flex items-center gap-2">
-              <Phone className="w-4 h-4 text-gray-400" />
-              <span>Số điện thoại liên hệ *</span>
-            </label>
-            <input
-              type="text"
-              name="soDienThoai"
-              required
-              value={form.soDienThoai}
-              onChange={handleChange}
-              maxLength={10}
-              placeholder="Nhập số điện thoại (ví dụ: 098...)"
-              className="w-full h-12 px-4 border border-gray-300 rounded-2xl focus:border-[#EE0033] focus:ring-1 focus:ring-[#EE0033] outline-none text-sm transition-all shadow-sm"
-            />
-          </div>
-
-          {/* Chọn cửa hàng */}
-          <div className="space-y-1.5">
-            <label className="block text-sm font-bold text-gray-700 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-gray-400" />
-              <span>Chọn cửa hàng Viettel Store *</span>
-            </label>
-            <select
-              name="idChiNhanh"
-              required
-              value={form.idChiNhanh}
-              onChange={handleChange}
-              className="w-full h-12 px-4 border border-gray-300 rounded-2xl focus:border-[#EE0033] focus:ring-1 focus:ring-[#EE0033] outline-none text-sm bg-white transition-all shadow-sm cursor-pointer"
-            >
-              <option value="">-- Chọn chi nhánh gần bạn nhất --</option>
-              {branches.map((b) => (
-                <option key={b.id_chi_nhanh} value={b.id_chi_nhanh}>
-                  {b.ten_chi_nhanh} ({b.dia_chi})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Chọn loại dịch vụ */}
-          <div className="space-y-1.5">
-            <label className="block text-sm font-bold text-gray-700 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-gray-400" />
-              <span>Chọn loại dịch vụ cần giao dịch *</span>
-            </label>
-            <select
-              name="idLoaiGiaoDich"
-              required
-              value={form.idLoaiGiaoDich}
-              onChange={handleChange}
-              className="w-full h-12 px-4 border border-gray-300 rounded-2xl focus:border-[#EE0033] focus:ring-1 focus:ring-[#EE0033] outline-none text-sm bg-white transition-all shadow-sm cursor-pointer"
-            >
-              <option value="">-- Chọn dịch vụ cần thực hiện --</option>
-              {services.map((s) => (
-                <option key={s.id_loai_giao_dich} value={s.id_loai_giao_dich}>
-                  {s.ten_giao_dich} (Xử lý ~{s.thoi_gian_xu_ly_trung_binh} phút)
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Nút Đăng ký */}
-          <button
-            type="submit"
-            disabled={submitLoading}
-            className="w-full h-12 bg-gradient-to-r from-[#EE0033] to-[#A00022] hover:opacity-95 text-white font-bold rounded-2xl transition-all duration-250 cursor-pointer shadow-md disabled:opacity-75 flex justify-center items-center gap-2 text-base mt-2"
-          >
-            {submitLoading && <Loader2 className="w-5 h-5 animate-spin" />}
-            <span>Đăng ký lấy số thứ tự</span>
-          </button>
-        </form>
-
-        {/* Kết quả đăng ký lấy số thành công */}
-        {result && (
-          <div className="mt-10 bg-gradient-to-br from-green-50 to-white border-2 border-dashed border-green-500 rounded-3xl p-6 sm:p-8 text-center shadow-lg relative overflow-hidden animate-scale-up">
-            
-            {/* Success Icon */}
-            <div className="flex justify-center mb-3">
-              <div className="bg-green-100 p-2 rounded-full text-green-600">
-                <CheckCircle2 className="w-10 h-10" />
-              </div>
-            </div>
-
-            <h3 className="text-green-700 text-2xl font-black mb-1">
-              Đăng ký thành công!
-            </h3>
-            <p className="text-gray-500 text-xs mb-6">
-              Vui lòng chụp ảnh màn hình này hoặc lưu thông tin số thứ tự khi đến quầy.
-            </p>
-
-            <div className="bg-white border border-green-100 rounded-2xl p-6 shadow-sm max-w-md mx-auto space-y-4">
-              
-              <div>
-                <div className="text-gray-400 text-sm font-medium">SỐ THỨ TỰ CỦA BẠN</div>
-                <div className="text-[#EE0033] text-5xl sm:text-6xl font-black tracking-widest my-2 select-all">
-                  {result.so_thu_tu}
-                </div>
-              </div>
-
-              {/* Thông tin Quầy phân bổ tối ưu */}
-              {result.quay_du_kien && (
-                <div className="bg-red-50 border border-red-100 rounded-2xl p-3.5 flex items-center justify-between text-left">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-[#EE0033] text-white flex items-center justify-center font-bold shrink-0">
-                      <Monitor className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider block">QUẦY ĐIỀU PHỐI TỐI ƯU</span>
-                      <span className="text-sm font-black text-gray-900">{result.quay_du_kien}</span>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-extrabold text-[#EE0033] bg-white px-2.5 py-1 rounded-full border border-red-200 flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" />
-                    Tối ưu nhất
-                  </span>
-                </div>
-              )}
-
-              <div className="border-t border-gray-100 pt-4 flex flex-col items-center gap-1.5 text-sm text-gray-700">
-                <div className="flex items-center gap-1.5 font-bold text-gray-800">
-                  <Clock className="w-4 h-4 text-blue-500" />
-                  <span>Thời gian chờ tối ưu: <span className="text-[#EE0033]">{result.so_phut_cho} phút</span></span>
-                </div>
-                <p className="text-xs text-gray-400">
-                  Dự kiến phục vụ lúc: {new Date(result.thoi_gian_du_kien).toLocaleTimeString("vi-VN", {hour: '2-digit', minute:'2-digit'})}
-                </p>
-              </div>
-
-              <div className="border-t border-gray-100 pt-4 text-xs text-left space-y-2 text-gray-600">
-                <div>
-                  <span className="font-bold text-gray-700">Khách hàng:</span> {result.khach_hang.ho_ten} ({result.khach_hang.so_dien_thoai})
-                </div>
-                <div>
-                  <span className="font-bold text-gray-700">Dịch vụ:</span> {result.dich_vu.ten_giao_dich}
-                </div>
-                <div>
-                  <span className="font-bold text-gray-700">Cửa hàng:</span> {result.chi_nhanh.ten_chi_nhanh}
-                </div>
-                <div className="text-gray-400 flex items-start gap-1">
-                  <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                  <span>{result.chi_nhanh.dia_chi}</span>
-                </div>
-              </div>
-
-            </div>
-
-            <button
-              onClick={() => setResult(null)}
-              className="mt-6 bg-[#EE0033] hover:bg-opacity-95 text-white font-bold text-sm px-6 py-2.5 rounded-xl transition-all duration-200 cursor-pointer shadow-sm"
-            >
-              Đăng ký lượt mới
-            </button>
-          </div>
-        )}
       </div>
+
+      <div className="max-w-3xl mx-auto">
+        
+        {/* CARD CONTAINER */}
+        <div className="bg-white rounded-3xl shadow-xs border border-slate-200 p-6 sm:p-10 relative overflow-hidden">
+          
+          {error && (
+            <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3 text-rose-800 text-xs font-semibold">
+              <AlertCircle className="w-4 h-4 text-rose-600 mt-0.5 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {!result ? (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              
+              {/* Form step header */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                
+                {/* Họ và tên */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-[#EE0033]" />
+                    <span>Họ và tên người lấy số *</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="hoTen"
+                    required
+                    value={form.hoTen}
+                    onChange={handleChange}
+                    placeholder="Nhập họ tên đầy đủ..."
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#EE0033] focus:bg-white transition"
+                  />
+                </div>
+
+                {/* Số điện thoại */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-[#EE0033]" />
+                    <span>Số điện thoại nhận tin nhắn *</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="soDienThoai"
+                    required
+                    value={form.soDienThoai}
+                    onChange={handleChange}
+                    maxLength={10}
+                    placeholder="098x xxx xxx"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#EE0033] focus:bg-white transition"
+                  />
+                </div>
+
+              </div>
+
+              {/* Chọn cửa hàng */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-[#EE0033]" />
+                  <span>Chọn cửa hàng Viettel Store giao dịch *</span>
+                </label>
+                <select
+                  name="idChiNhanh"
+                  required
+                  value={form.idChiNhanh}
+                  onChange={handleChange}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#EE0033] transition cursor-pointer"
+                >
+                  <option value="">-- Chọn cửa hàng Viettel gần bạn --</option>
+                  {branches.map((b) => (
+                    <option key={b.id_chi_nhanh} value={b.id_chi_nhanh}>
+                      {b.ten_chi_nhanh} — {b.dia_chi}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Chọn loại dịch vụ */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-[#EE0033]" />
+                  <span>Nhu cầu dịch vụ tại quầy *</span>
+                </label>
+                <select
+                  name="idLoaiGiaoDich"
+                  required
+                  value={form.idLoaiGiaoDich}
+                  onChange={handleChange}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#EE0033] transition cursor-pointer"
+                >
+                  <option value="">-- Chọn loại thủ tục cần thực hiện --</option>
+                  {services.map((s) => (
+                    <option key={s.id_loai_giao_dich} value={s.id_loai_giao_dich}>
+                      {s.ten_giao_dich} (Thời gian xử lý ~{s.thoi_gian_xu_ly_trung_binh} phút)
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={submitLoading}
+                className="w-full bg-[#EE0033] hover:bg-red-700 text-white font-extrabold py-3.5 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+              >
+                {submitLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Đang xử lý cấp số thứ tự...
+                  </>
+                ) : (
+                  <>
+                    <span>Đăng ký & Lấy phiếu thứ tự</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+
+              <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400 pt-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                <span>Hệ thống tự động điều phối số thứ tự thông minh tới quầy trống</span>
+              </div>
+
+            </form>
+          ) : (
+            /* TICKET DIGITAL DISPLAY CARD */
+            <div className="bg-gradient-to-br from-red-50/50 via-white to-orange-50/50 border-2 border-red-200 rounded-3xl p-6 sm:p-8 text-center relative overflow-hidden animate-in fade-in zoom-in duration-200">
+              
+              <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <CheckCircle2 className="w-8 h-8" />
+              </div>
+
+              <h3 className="text-2xl font-black text-slate-900 mb-1">CẤP SỐ THỨ TỰ THÀNH CÔNG!</h3>
+              <p className="text-xs text-slate-500 mb-6">Phiếu điện tử của bạn đã được khởi tạo trên hệ thống Viettel Store.</p>
+
+              {/* Digital Ticket Box */}
+              <div className="bg-white rounded-3xl border-2 border-red-100 shadow-md p-6 max-w-md mx-auto space-y-4">
+                
+                <div>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">MÃ SỐ THỨ TỰ CỦA BẠN</span>
+                  <div className="text-5xl sm:text-6xl font-black text-[#EE0033] tracking-widest my-2 select-all drop-shadow-xs">
+                    {result.so_thu_tu}
+                  </div>
+                </div>
+
+                {/* Quầy dự kiến */}
+                {result.quay_du_kien && (
+                  <div className="bg-red-50 border border-red-100 rounded-2xl p-3.5 flex items-center justify-between text-left">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-[#EE0033] text-white flex items-center justify-center font-bold shrink-0">
+                        <Monitor className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">QUẦY ĐÃ ĐIỀU PHỐI</span>
+                        <span className="text-sm font-black text-slate-900">{result.quay_du_kien}</span>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-extrabold text-[#EE0033] bg-white px-2.5 py-1 rounded-full border border-red-200 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-amber-500" /> Tự động
+                    </span>
+                  </div>
+                )}
+
+                <div className="border-t border-slate-100 pt-3 text-xs space-y-1.5">
+                  <div className="flex justify-between items-center text-slate-600">
+                    <span>Thời gian chờ dự kiến:</span>
+                    <span className="font-extrabold text-[#EE0033]">{result.so_phut_cho} phút</span>
+                  </div>
+                  <div className="flex justify-between items-center text-slate-600">
+                    <span>Dự kiến phục vụ lúc:</span>
+                    <span className="font-bold text-slate-800">
+                      {new Date(result.thoi_gian_du_kien).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-100 pt-3 text-xs text-left space-y-1.5 text-slate-600 bg-slate-50 p-3 rounded-xl">
+                  <p><strong className="text-slate-800">Khách hàng:</strong> {result.khach_hang.ho_ten} ({result.khach_hang.so_dien_thoai})</p>
+                  <p><strong className="text-slate-800">Loại dịch vụ:</strong> {result.dich_vu.ten_giao_dich}</p>
+                  <p><strong className="text-slate-800">Chi nhánh:</strong> {result.chi_nhanh.ten_chi_nhanh}</p>
+                  <p className="text-[11px] text-slate-400">{result.chi_nhanh.dia_chi}</p>
+                </div>
+
+              </div>
+
+              <button
+                onClick={() => setResult(null)}
+                className="mt-6 bg-[#EE0033] hover:bg-red-700 text-white font-extrabold text-xs px-6 py-3 rounded-xl transition shadow-xs cursor-pointer"
+              >
+                Lấy số lượt tiếp theo
+              </button>
+
+            </div>
+          )}
+
+        </div>
+
+      </div>
+
     </div>
   );
 };

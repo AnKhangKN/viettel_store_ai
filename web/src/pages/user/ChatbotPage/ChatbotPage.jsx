@@ -9,31 +9,30 @@ import {
   Store,
   Compass,
   CheckCircle,
-  HelpCircle
+  HelpCircle,
+  MessageSquare,
+  Zap
 } from 'lucide-react';
 import { sendChatbotMessage } from '../../../api/chatbot/chatbot.api';
 import { getAllBranches } from '../../../api/branch/branch.api';
 
 export default function ChatbotPage() {
-  // State quản lý chi nhánh thật
   const [branches, setBranches] = useState([]);
   const [loadingBranches, setLoadingBranches] = useState(true);
 
-  // Các câu hỏi gợi ý có sẵn theo yêu cầu thiết kế
   const sampleQuestions = [
-    { label: 'Gói cước Data Viettel nào ưu đãi nhất?', type: 'goi_cuoc' },
-    { label: 'Cách đặt mua SIM số đẹp online & nhận tại cửa hàng?', type: 'mua_sim' },
-    { label: 'Cách đăng ký lấy số thứ tự giao dịch tại quầy?', type: 'so_thu_tu' },
+    { label: 'Gói cước Data 5G Viettel nào hot nhất?', type: 'goi_cuoc' },
+    { label: 'Hướng dẫn mua SIM số đẹp & nhận tại quầy?', type: 'mua_sim' },
+    { label: 'Cách đặt lịch lấy số thứ tự giao dịch online?', type: 'so_thu_tu' },
     { label: 'Thanh toán đơn hàng qua VNPay Sandbox như thế nào?', type: 'vnpay' },
-    { label: 'Tra cứu hotline & cửa hàng Viettel Store gần nhất?', type: 'cua_hang' }
+    { label: 'Tra cứu địa chỉ & hotline cửa hàng Viettel gần nhất?', type: 'cua_hang' }
   ];
 
-  // State quản lý lịch sử tin nhắn chat
   const [messages, setMessages] = useState([
     {
       id: 1,
       sender: 'ai',
-      text: 'Xin chào! Tôi là Trợ lý ảo Viettel AI. Bạn đang quan tâm đến thông tin gói cước tham khảo, cần đặt mua SIM số đẹp hay muốn lấy số thứ tự giao dịch online trước khi đến quầy?',
+      text: 'Xin chào! Tôi là Trợ lý AI Viettel. Bạn đang quan tâm đến gói cước Data 4G/5G, tìm SIM số đẹp hay cần lấy số thứ tự quầy giao dịch hôm nay?',
       time: 'Vừa xong'
     }
   ]);
@@ -41,7 +40,6 @@ export default function ChatbotPage() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Lấy danh sách chi nhánh thật khi component mount
   useEffect(() => {
     const fetchBranches = async () => {
       try {
@@ -58,23 +56,19 @@ export default function ChatbotPage() {
     fetchBranches();
   }, []);
 
-  // Tự động cuộn xuống tin nhắn mới nhất
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  // Thao tác gửi tin nhắn thật lên API
   const handleSend = async (text) => {
     if (!text.trim() || isTyping) return;
 
-    // 1. Thêm tin nhắn của User vào giao diện
     const userMsg = { id: Date.now(), sender: 'user', text, time: 'Vừa xong' };
     setMessages(prev => [...prev, userMsg]);
     setInputValue('');
     setIsTyping(true);
 
     try {
-      // 2. Định dạng lịch sử trò chuyện gửi lên API (bỏ tin nhắn chào mặc định ở đầu để Gemini ko lỗi)
       const formattedHistory = [];
       const historyMessages = messages.filter(m => m.id !== 1);
       
@@ -85,7 +79,6 @@ export default function ChatbotPage() {
         });
       }
 
-      // 3. Gọi API lấy phản hồi từ chatbot
       const res = await sendChatbotMessage(text, formattedHistory);
 
       if (res?.success && res?.data?.response) {
@@ -105,7 +98,7 @@ export default function ChatbotPage() {
       const errorMsg = {
         id: Date.now() + 1,
         sender: 'ai',
-        text: serverMessage || 'Rất tiếc, hệ thống chatbot đang bận hoặc gặp sự cố kết nối. Quý khách vui lòng thử lại sau ít phút hoặc liên hệ tổng đài miễn phí 1800 8098 nhé. ⚡',
+        text: serverMessage || 'Hệ thống AI hiện đang xử lý nhiều yêu cầu. Vui lòng thử lại sau ít phút hoặc liên hệ tổng đài 1800 8098 nhé. ⚡',
         time: 'Vừa xong'
       };
       setMessages(prev => [...prev, errorMsg]);
@@ -115,141 +108,113 @@ export default function ChatbotPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-184px)] bg-gray-50 text-gray-800 font-sans flex flex-col antialiased">
+    <div className="bg-slate-50 text-slate-800 font-sans min-h-[calc(100vh-140px)] py-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 h-[720px]">
 
-
-      {/* 2. CHAT WORKSPACE SECTION */}
-      <div className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 flex flex-col lg:flex-row gap-6 min-h-0">
-
-        {/* THANH PANEL GỢI Ý BÊN TRÁI (QUICK SUGGESTIONS) */}
-        <aside className="w-full lg:w-80 flex flex-col gap-4 flex-shrink-0 overflow-y-auto min-h-0 pr-2">
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-            <h2 className="text-sm font-black text-gray-900 flex items-center tracking-wide uppercase mb-3 text-[#EE0033]">
-              <HelpCircle className="w-4 h-4 mr-2" /> Câu hỏi thường gặp
+        {/* SIDEBAR BÊN TRÁI: GỢI Ý CÂU HỎI & CỬA HÀNG */}
+        <aside className="w-full lg:w-80 flex flex-col gap-4 flex-shrink-0 h-full">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-5 flex flex-col">
+            <h2 className="text-xs font-black text-[#EE0033] flex items-center gap-1.5 uppercase tracking-wider mb-3">
+              <Sparkles className="w-4 h-4 text-purple-600" /> Gợi ý câu hỏi nhanh
             </h2>
-            <p className="text-xs text-gray-400 mb-4 font-normal leading-relaxed">Chọn nhanh các câu hỏi chuẩn bị sẵn để kiểm tra năng lực phản hồi và tra cứu dữ liệu của hệ thống thông minh.</p>
-            <div className="space-y-2.5">
+            <p className="text-[11px] text-slate-500 mb-3 leading-relaxed">
+              Nhấp vào các chủ đề mẫu để thử nghiệm khả năng trả lời thông minh của Trợ lý AI:
+            </p>
+            <div className="space-y-2 overflow-y-auto pr-1 flex-1">
               {sampleQuestions.map((q, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleSend(q.label)}
-                  className="w-full text-left text-xs bg-gray-50 border border-gray-200 hover:border-purple-300 hover:bg-purple-50/50 p-3 rounded-xl transition-all font-medium text-gray-700 hover:text-purple-700 flex items-start gap-2 group"
+                  className="w-full text-left text-xs bg-slate-50 border border-slate-200 hover:border-purple-300 hover:bg-purple-50/50 p-3 rounded-2xl transition-all font-semibold text-slate-700 hover:text-purple-700 flex items-start gap-2 group cursor-pointer"
                 >
-                  <span className="bg-gray-200 group-hover:bg-purple-200 text-gray-500 group-hover:text-purple-700 w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-[10px]">{idx + 1}</span>
-                  <span className="flex-1 leading-normal">{q.label}</span>
+                  <span className="bg-slate-200 group-hover:bg-purple-200 text-slate-600 group-hover:text-purple-700 w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-[10px] mt-0.5">
+                    {idx + 1}
+                  </span>
+                  <span className="leading-snug">{q.label}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* CHI NHÁNH CỬA HÀNG THỰC TẾ */}
-          <div className="bg-gradient-to-br from-gray-900 to-slate-800 rounded-2xl p-5 text-white shadow-md flex-1 min-h-[220px] flex flex-col">
-            <h3 className="text-xs font-bold tracking-widest text-gray-400 uppercase flex items-center mb-3">
-              <Store className="w-4 h-4 mr-2 text-red-400" /> Hệ thống cửa hàng
+          <div className="bg-slate-900 rounded-3xl p-5 text-white shadow-xs flex-1 flex flex-col overflow-hidden border border-slate-800">
+            <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-2 mb-3">
+              <Store className="w-4 h-4 text-red-400" /> Điểm giao dịch Viettel
             </h3>
             {loadingBranches ? (
-              <div className="flex-1 flex items-center justify-center text-xs text-gray-400">
-                Đang tải danh sách chi nhánh...
+              <div className="flex-1 flex items-center justify-center text-xs text-slate-500">
+                Đang tải hệ thống cửa hàng...
               </div>
             ) : branches.length > 0 ? (
-              <div className="space-y-2.5 overflow-y-auto max-h-[280px] pr-1">
+              <div className="space-y-2.5 overflow-y-auto pr-1 flex-1">
                 {branches.map((b) => (
-                  <div key={b.id_chi_nhanh} className="bg-white/5 p-3 rounded-xl border border-white/10 text-[11px] leading-relaxed">
-                    <p className="font-bold text-gray-200 text-xs">{b.ten_chi_nhanh}</p>
-                    <p className="text-gray-400 mt-1">📍 {b.dia_chi}</p>
-                    <p className="text-red-300 font-semibold mt-1">📞 Hotline: {b.so_hotline}</p>
+                  <div key={b.id_chi_nhanh} className="bg-slate-800/80 p-3 rounded-2xl border border-slate-700/60 text-xs">
+                    <p className="font-extrabold text-slate-200">{b.ten_chi_nhanh}</p>
+                    <p className="text-slate-400 text-[11px] mt-1 line-clamp-2">📍 {b.dia_chi}</p>
+                    <p className="text-red-400 font-bold mt-1 text-[11px]">Hotline: {b.so_hotline}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="flex-1 flex items-center justify-center text-xs text-gray-400">
-                Không có dữ liệu chi nhánh.
+              <div className="flex-1 flex items-center justify-center text-xs text-slate-500">
+                Chưa có dữ liệu cửa hàng.
               </div>
             )}
           </div>
         </aside>
 
-        {/* KHÔNG GIAN KHUNG CHAT CHÍNH (MAIN INTERACTION CHATBOX) */}
-        <main className="flex-1 bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col overflow-hidden relative min-h-[500px] lg:min-h-0">
+        {/* CHAT MAIN BOX */}
+        <main className="flex-1 bg-white rounded-3xl border border-slate-200 shadow-xs flex flex-col overflow-hidden h-full">
 
-          {/* Header thanh Chat */}
-          <div className="bg-gradient-to-r from-purple-700 to-indigo-700 px-6 py-4 flex items-center justify-between text-white shadow-sm flex-shrink-0">
-            <div className="flex items-center space-x-3">
-              <div className="bg-white/10 p-2 rounded-xl border border-white/20">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-purple-700 via-indigo-700 to-purple-800 px-6 py-4 flex items-center justify-between text-white flex-shrink-0 shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="bg-white/15 p-2 rounded-2xl border border-white/20 backdrop-blur-md">
                 <Bot className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-black text-sm tracking-wide">Trợ lý Viettel AI thế hệ mới</h3>
-                <p className="text-[11px] text-purple-200 flex items-center mt-0.5 font-normal">
-                  <span className="h-2 w-2 bg-green-400 rounded-full inline-block mr-1.5 animate-pulse"></span>
-                  Trực tuyến tự động • Kết nối cơ sở dữ liệu
+                <h3 className="font-extrabold text-sm tracking-wide">Trợ Lý Ảo Viettel AI (Gemini 2026)</h3>
+                <p className="text-[11px] text-purple-200 flex items-center gap-1.5 mt-0.5">
+                  <span className="h-2 w-2 bg-emerald-400 rounded-full inline-block animate-pulse"></span>
+                  Trực tuyến 24/7 • Kết nối dữ liệu gói cước & SIM
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Vùng nội dung tin nhắn (Scrollable list) */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-gray-50/50">
+          {/* Chat Messages List */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/50">
             {messages.map((msg) => (
               <div
                 key={msg.id}
                 className={`flex items-start gap-3 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
               >
-                {/* Avatar */}
-                <div className={`p-2 rounded-xl flex-shrink-0 shadow-sm ${msg.sender === 'user' ? 'bg-[#EE0033] text-white' : 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white'
-                  }`}>
+                <div className={`p-2.5 rounded-2xl flex-shrink-0 shadow-2xs ${
+                  msg.sender === 'user' ? 'bg-[#EE0033] text-white' : 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white'
+                }`}>
                   {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                 </div>
 
-                {/* Bong bóng hội thoại */}
-                <div className="max-w-[85%] sm:max-w-[70%]">
-                  <div className={`p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-line shadow-sm border ${msg.sender === 'user'
-                    ? 'bg-white text-gray-800 border-red-100 rounded-tr-none'
-                    : 'bg-white text-gray-800 border-purple-100 rounded-tl-none'
-                    }`}>
+                <div className="max-w-[85%] sm:max-w-[75%]">
+                  <div className={`p-4 rounded-3xl text-xs sm:text-sm leading-relaxed whitespace-pre-line shadow-2xs border ${
+                    msg.sender === 'user'
+                      ? 'bg-white text-slate-800 border-red-100 rounded-tr-none'
+                      : 'bg-white text-slate-800 border-purple-100 rounded-tl-none'
+                  }`}>
                     {msg.text}
-
-                    {/* RENDERING CARD GÓI CƯỚC NẾU AI TRA CỨU RA DỮ LIỆU */}
-                    {msg.customCard && (
-                      <div className="mt-4 bg-gradient-to-br from-purple-50 to-indigo-50/30 rounded-xl border border-purple-100 p-4 shadow-inner text-gray-800">
-                        <div className="flex justify-between items-start mb-2.5">
-                          <span className="bg-purple-600 text-white font-black px-2.5 py-0.5 rounded-md text-xs tracking-wide">
-                            {msg.customCard.tenGoi}
-                          </span>
-                          <span className="font-black text-purple-700 text-base">{msg.customCard.giaTien}</span>
-                        </div>
-                        <div className="text-xs space-y-1 text-gray-600 font-normal">
-                          <p>• **Dung lượng:** {msg.customCard.dungLuong}</p>
-                          <p>• **Thời hạn:** {msg.customCard.thoiHan}</p>
-                          <p className="text-gray-500 text-[11px] italic mt-1.5 border-t border-purple-100 pt-1.5 leading-normal">{msg.customCard.moTa}</p>
-                        </div>
-                        <button className="w-full mt-3 bg-purple-600 hover:bg-purple-700 text-white font-bold py-1.5 rounded-lg text-xs transition shadow-sm">
-                          Đăng ký gói này ngay
-                        </button>
-                      </div>
-                    )}
-
-                    {/* ACTION BUTTON DÀNH CHO HƯỚNG DẪN ĐĂNG KÝ */}
-                    {msg.hasAction && (
-                      <div className="mt-3">
-                        <button className="bg-[#EE0033] hover:bg-[#CC002D] text-white text-xs font-bold py-2 px-4 rounded-xl transition shadow-md flex items-center">
-                          <CheckCircle className="w-4 h-4 mr-1.5" /> Đăng ký gói cước trực tuyến
-                        </button>
-                      </div>
-                    )}
                   </div>
-                  <span className="text-[10px] text-gray-400 mt-1 block px-1">{msg.time}</span>
+                  <span className="text-[10px] text-slate-400 mt-1 block px-2">{msg.time}</span>
                 </div>
               </div>
             ))}
+
             {isTyping && (
               <div className="flex items-start gap-3">
-                <div className="p-2 rounded-xl flex-shrink-0 shadow-sm bg-gradient-to-br from-purple-600 to-indigo-600 text-white">
+                <div className="p-2.5 rounded-2xl flex-shrink-0 bg-gradient-to-br from-purple-600 to-indigo-600 text-white">
                   <Bot className="w-4 h-4" />
                 </div>
-                <div className="max-w-[85%] sm:max-w-[70%] bg-white text-gray-800 border border-purple-100 p-4 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-2">
-                  <span className="text-xs text-gray-400">Trợ lý ảo đang trả lời...</span>
-                  <div className="flex gap-1.5 items-center">
+                <div className="bg-white text-slate-800 border border-purple-100 p-3.5 rounded-3xl rounded-tl-none shadow-2xs flex items-center gap-2">
+                  <span className="text-xs text-slate-400 font-medium">Trợ lý AI đang suy nghĩ...</span>
+                  <div className="flex gap-1 items-center">
                     <span className="w-1.5 h-1.5 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
                     <span className="w-1.5 h-1.5 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
                     <span className="w-1.5 h-1.5 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
@@ -260,26 +225,27 @@ export default function ChatbotPage() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Ô nhập tin nhắn cố định chân trang (Footer input bar) */}
-          <div className="p-4 border-t border-gray-200 bg-white flex-shrink-0">
+          {/* Footer Input Bar */}
+          <div className="p-4 border-t border-slate-200 bg-white flex-shrink-0">
             <form
               onSubmit={(e) => { e.preventDefault(); handleSend(inputValue); }}
-              className="flex items-center gap-3 bg-gray-50 border border-gray-300 rounded-xl px-4 py-2 focus-within:ring-2 focus-within:ring-purple-600 focus-within:bg-white transition-all"
+              className="flex items-center gap-2 bg-slate-50 border border-slate-300 rounded-2xl px-4 py-2 focus-within:ring-2 focus-within:ring-purple-600 focus-within:bg-white transition-all"
             >
               <input
                 type="text"
-                placeholder="Nhập câu hỏi tra cứu dữ liệu (Ví dụ: Gói cước sinh viên)..."
+                placeholder="Nhập nội dung bạn cần hỏi Trợ lý AI Viettel..."
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                className="flex-1 bg-transparent border-none text-sm focus:outline-none py-1.5 text-gray-800 placeholder-gray-400"
+                className="flex-1 bg-transparent border-none text-xs sm:text-sm focus:outline-none py-1.5 text-slate-800 placeholder-slate-400"
               />
               <button
                 type="submit"
                 disabled={!inputValue.trim()}
-                className={`p-2.5 rounded-xl transition-all shadow-sm ${inputValue.trim()
-                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:opacity-90'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  }`}
+                className={`p-2.5 rounded-xl transition-all shadow-2xs cursor-pointer ${
+                  inputValue.trim()
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:opacity-90'
+                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                }`}
               >
                 <Send className="w-4 h-4" />
               </button>
@@ -289,12 +255,6 @@ export default function ChatbotPage() {
         </main>
 
       </div>
-
-      {/* FOOTER ĐỒNG BỘ THƯƠNG HIỆU */}
-      <footer className="bg-gray-900 text-gray-500 text-xs text-center py-4 flex-shrink-0 border-t border-gray-800">
-        © 2026 Viettel AI System - Tích hợp hệ thống quản lý cơ sở dữ liệu viễn thông toàn diện.
-      </footer>
-
     </div>
   );
 }

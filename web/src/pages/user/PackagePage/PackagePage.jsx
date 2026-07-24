@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Search,
   Filter,
-  MessageSquare,
   Loader2,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  Sparkles,
+  Zap,
+  CheckCircle2,
+  ChevronRight,
+  ArrowRight
 } from 'lucide-react';
 import { getAllPackages } from '../../../api/package/package.api';
 
@@ -76,45 +80,71 @@ export default function PackagePage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans antialiased">
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased pb-16">
 
-      {/* TIÊU ĐỀ TRANG */}
-      <section className="bg-gradient-to-r from-gray-900 to-slate-800 text-white py-12 px-4 shadow-inner">
-        <div className="max-w-7xl mx-auto text-center md:text-left">
-          <h1 className="text-3xl md:text-4xl font-black tracking-tight">DANH SÁCH GÓI CƯỚC VIETTEL</h1>
-          <p className="text-gray-400 text-base mt-2 font-light">Tìm kiếm và lựa chọn gói cước Data, Thoại, Combo phù hợp nhất với nhu cầu sử dụng của bạn.</p>
+      {/* TIÊU ĐỀ TRANG (HERO HEADER) */}
+      <section className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-14 px-4 shadow-md relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="max-w-7xl mx-auto text-center md:text-left relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <span className="inline-flex items-center gap-1.5 bg-red-500/20 text-[#EE0033] border border-red-500/30 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider mb-3">
+              <Zap className="w-3.5 h-3.5" /> Ưu đãi Data 4G / 5G
+            </span>
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight drop-shadow-sm">DANH SÁCH GÓI CƯỚC VIETTEL</h1>
+            <p className="text-slate-400 text-sm mt-2 font-normal max-w-2xl leading-relaxed">
+              Khám phá và đăng ký các gói cước Data tốc độ cao, Gọi thoại miễn phí với ưu đãi hấp dẫn nhất dành cho bạn.
+            </p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 flex items-center gap-4 self-center md:self-auto">
+            <div className="w-12 h-12 rounded-xl bg-[#EE0033] text-white flex items-center justify-center font-black text-xl shadow-md">
+              5G
+            </div>
+            <div className="text-left text-xs">
+              <p className="font-extrabold text-white">Trải nghiệm tốc độ 5G</p>
+              <p className="text-slate-300">Không giới hạn dung lượng truy cập</p>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* BỘ LỌC VÀ TÌM KIẾM */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col lg:flex-row gap-4 items-center justify-between">
 
           {/* Ô Tìm Kiếm */}
-          <div className="relative w-full md:w-96">
+          <div className="relative w-full lg:w-96">
             <input
               type="text"
-              placeholder="Tìm kiếm theo tên gói cước..."
+              placeholder="Tìm kiếm theo tên gói cước (VD: SD90, 5G150...)"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-300 rounded-xl py-3 pl-11 pr-4 text-base focus:outline-none focus:ring-2 focus:ring-[#EE0033] focus:bg-white transition-all"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-11 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#EE0033] focus:bg-white transition-all"
             />
-            <Search className="w-5 h-5 text-gray-400 absolute left-3.5 top-3.5" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-3 text-xs font-bold text-slate-400 hover:text-slate-600 bg-slate-200 w-5 h-5 rounded-full flex items-center justify-center"
+              >
+                ✕
+              </button>
+            )}
           </div>
 
           {/* Bộ Lọc Khoảng Giá */}
-          <div className="w-full md:w-auto flex flex-wrap items-center gap-2">
-            <span className="text-base font-bold text-gray-500 mr-2 flex items-center">
-              <Filter className="w-4 h-4 mr-1" /> Khoảng giá:
+          <div className="w-full lg:w-auto flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold text-slate-500 mr-1 flex items-center gap-1">
+              <Filter className="w-3.5 h-3.5 text-[#EE0033]" /> Giá cước:
             </span>
             {priceRanges.map((range) => (
               <button
                 key={range.label}
                 onClick={() => setSelectedRange(range.label)}
-                className={`px-5 py-2 rounded-xl text-base font-semibold transition-all ${
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   selectedRange === range.label
                     ? 'bg-[#EE0033] text-white shadow-md'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
                 {range.label}
@@ -126,49 +156,55 @@ export default function PackagePage() {
       </section>
 
       {/* GRID GÓI CƯỚC */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        {/* Trạng thái loading */}
+        {/* Loading State */}
         {loading && (
-          <div className="flex flex-col items-center justify-center py-24 text-gray-400">
+          <div className="flex flex-col items-center justify-center py-24 text-slate-400">
             <Loader2 className="w-10 h-10 animate-spin text-[#EE0033] mb-4" />
-            <p className="text-base font-medium">Đang tải danh sách gói cước...</p>
+            <p className="text-sm font-bold">Đang tải danh sách gói cước Viettel...</p>
           </div>
         )}
 
-        {/* Trạng thái lỗi */}
+        {/* Error State */}
         {!loading && error && (
-          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-red-100 shadow-sm max-w-xl mx-auto">
-            <AlertCircle className="w-12 h-12 text-red-400 mb-3" />
-            <p className="text-gray-700 font-semibold text-base">{error}</p>
+          <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-red-100 shadow-sm max-w-xl mx-auto text-center px-6">
+            <AlertCircle className="w-12 h-12 text-rose-500 mb-3" />
+            <p className="text-slate-800 font-bold text-base mb-1">{error}</p>
+            <p className="text-xs text-slate-500 mb-4">Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại kết nối mạng.</p>
             <button
               onClick={fetchPackages}
-              className="mt-4 flex items-center gap-2 px-5 py-2.5 bg-[#EE0033] text-white rounded-xl text-base font-bold hover:bg-red-700 transition"
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#EE0033] text-white rounded-xl text-xs font-bold hover:bg-red-700 transition shadow-sm cursor-pointer"
             >
               <RefreshCw className="w-4 h-4" /> Thử lại
             </button>
           </div>
         )}
 
-        {/* Danh sách gói cước */}
+        {/* Package Grid */}
         {!loading && !error && (
           filteredPackages.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredPackages.map((pkg) => (
                 <div
                   key={pkg.id_goi}
-                  className="bg-white rounded-2xl border border-gray-200/90 shadow-sm hover:shadow-xl hover:border-red-200 transition-all duration-300 flex flex-col justify-between overflow-hidden"
+                  className="bg-white rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-xl hover:border-red-200 transition-all duration-300 flex flex-col justify-between overflow-hidden group"
                 >
                   <div className="p-6">
-                    {/* Tên Gói & Giá */}
-                    <div className="flex justify-between items-start mb-4 pb-4 border-b border-gray-100">
+                    {/* Header Card */}
+                    <div className="flex justify-between items-start mb-4 pb-4 border-b border-slate-100">
                       <div>
-                        <h3 className="text-xl font-black tracking-wide text-gray-900">{pkg.ten_goi}</h3>
+                        <div className="flex items-center gap-2">
+                          <span className="bg-red-50 text-[#EE0033] font-black px-3 py-1 rounded-lg text-lg tracking-wide border border-red-100">
+                            {pkg.ten_goi}
+                          </span>
+                          <span className="bg-amber-100 text-amber-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">HOT</span>
+                        </div>
                         {pkg.trang_thai && (
-                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full mt-1 inline-block ${
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full mt-2 inline-block ${
                             pkg.trang_thai === 'DangApDung'
-                              ? 'bg-green-50 text-green-600 border border-green-200'
-                              : 'bg-gray-100 text-gray-400 border border-gray-200'
+                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                              : 'bg-slate-100 text-slate-400 border border-slate-200'
                           }`}>
                             {pkg.trang_thai === 'DangApDung' ? '● Đang áp dụng' : '○ Ngưng áp dụng'}
                           </span>
@@ -176,52 +212,56 @@ export default function PackagePage() {
                       </div>
                       <div className="text-right">
                         <span className="text-2xl font-black text-[#EE0033]">{formatPrice(pkg.gia_cuoc)}</span>
-                        <span className="text-base text-gray-400 block font-medium">/ {pkg.thoi_han_ngay || 30} ngày</span>
+                        <span className="text-xs text-slate-400 block font-medium">/ {pkg.thoi_han_ngay || 30} ngày</span>
                       </div>
                     </div>
 
-                    {/* Chi tiết */}
-                    <div className="space-y-2.5 my-4">
-                      <div className="flex items-center text-base">
-                        <span className="text-gray-400 font-medium w-28 flex-shrink-0">Dung lượng:</span>
-                        <span className="text-gray-900 font-bold bg-red-50 text-[#EE0033] px-2.5 py-0.5 rounded-md text-base border border-red-100">
+                    {/* Features & Data */}
+                    <div className="space-y-3 my-4 text-xs">
+                      <div className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <span className="text-slate-500 font-medium">Dung lượng tốc độ cao:</span>
+                        <span className="text-[#EE0033] font-extrabold text-sm bg-white px-2.5 py-1 rounded-lg shadow-2xs border border-red-100">
                           {formatData(pkg.dung_luong_gb)}
                         </span>
                       </div>
-                      <div className="flex items-center text-base">
-                        <span className="text-gray-400 font-medium w-28 flex-shrink-0">Thời hạn:</span>
-                        <span className="text-gray-900 font-semibold">{pkg.thoi_han_ngay || 30} ngày</span>
+                      
+                      <div className="flex items-center justify-between text-slate-600 px-1">
+                        <span className="text-slate-400">Thời hạn sử dụng:</span>
+                        <span className="font-bold text-slate-800">{pkg.thoi_han_ngay || 30} ngày</span>
                       </div>
+
                       {pkg.mo_ta && (
-                        <div className="flex items-start text-base mt-3 pt-2 border-t border-gray-50">
-                          <span className="text-gray-400 font-medium w-28 flex-shrink-0">Mô tả:</span>
-                          <p className="text-gray-600 text-base leading-relaxed font-normal">{pkg.mo_ta}</p>
+                        <div className="pt-2 border-t border-slate-100">
+                          <p className="text-slate-600 leading-relaxed line-clamp-2">{pkg.mo_ta}</p>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Nút Xem chi tiết */}
-                  <div className="p-4 md:p-6 pt-0 bg-gray-50/50 border-t border-gray-100">
+                  {/* Card Footer Button */}
+                  <div className="p-4 bg-slate-50/50 border-t border-slate-100">
                     <button
-                      translate="no"
                       onClick={() => navigate(`/package/${pkg.id_goi}`)}
-                      className="w-full bg-white border border-gray-300 hover:border-gray-400 text-gray-700 font-bold py-2.5 md:py-3 rounded-xl text-sm md:text-base hover:bg-gray-50 transition shadow-sm flex items-center justify-center whitespace-nowrap"
+                      className="w-full bg-white border-2 border-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs hover:border-[#EE0033] hover:text-[#EE0033] hover:bg-red-50/40 transition shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer"
                     >
-                      Xem chi tiết
+                      <span>Xem chi tiết & Đăng ký</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            /* Không tìm thấy */
-            <div className="text-center py-20 bg-white rounded-2xl border border-gray-200 shadow-sm max-w-xl mx-auto">
-              <p className="text-gray-400 font-medium text-lg">Không tìm thấy gói cước phù hợp</p>
-              <p className="text-gray-400 text-base mt-1">Vui lòng thử lại với từ khóa hoặc bộ lọc khoảng giá khác.</p>
+            /* Empty State */
+            <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-xs max-w-xl mx-auto px-6">
+              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+                <Search className="w-8 h-8" />
+              </div>
+              <p className="text-slate-800 font-bold text-base">Không tìm thấy gói cước nào phù hợp</p>
+              <p className="text-xs text-slate-500 mt-1">Vui lòng kiểm tra từ khóa tìm kiếm hoặc chọn lại bộ lọc khoảng giá.</p>
               <button
                 onClick={() => { setSearchTerm(''); setSelectedRange('Tất cả'); }}
-                className="mt-4 text-base font-bold text-[#EE0033] hover:underline"
+                className="mt-4 text-xs font-extrabold text-[#EE0033] hover:underline cursor-pointer"
               >
                 Xóa tất cả bộ lọc
               </button>
@@ -229,38 +269,6 @@ export default function PackagePage() {
           )
         )}
       </main>
-
-      {/* FOOTER */}
-      <footer className="bg-gray-900 text-gray-400 pt-12 pb-6 border-t border-gray-800 mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-gray-800">
-          <div>
-            <span className="text-2xl font-black tracking-wider text-white">viettel</span>
-            <p className="mt-4 text-base text-gray-400 leading-relaxed">Tập đoàn Công nghiệp - Viễn thông Quân đội.<br />Cơ quan chủ quản: Bộ Quốc phòng.</p>
-          </div>
-          <div>
-            <h4 className="text-white font-bold mb-4">Thông tin liên hệ</h4>
-            <ul className="space-y-2 text-base">
-              <li>Chăm sóc khách hàng di động: <span className="text-white font-semibold">1800 8098</span></li>
-              <li>Hỗ trợ Internet cáp quang: <span className="text-white font-semibold">1800 8168</span></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-white font-bold mb-4">Ứng dụng hỗ trợ</h4>
-            <div className="text-base text-gray-400">Tải ngay MyViettel trên App Store hoặc Google Play để cập nhật nhanh chóng các biến động tài khoản.</div>
-          </div>
-        </div>
-        <p className="text-center text-base text-gray-500 pt-6">© 2026 Viettel Telecom. All rights reserved.</p>
-      </footer>
-
-      {/* AI CHATBOT FLOAT BUTTON */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <button className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white p-4 rounded-full shadow-2xl flex items-center justify-center group relative">
-          <MessageSquare className="w-6 h-6" />
-          <span className="absolute right-14 bg-gray-900 text-white text-base font-semibold px-4 py-1.5 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-md pointer-events-none">
-            Hỏi AI Viettel ngay! ✨
-          </span>
-        </button>
-      </div>
 
     </div>
   );

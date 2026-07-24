@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Search, Phone, ChevronRight } from 'lucide-react';
+import { MapPin, Search, Phone, ChevronRight, Store, Sparkles, Navigation } from 'lucide-react';
 
 const storeData = [
   { 
@@ -43,35 +43,7 @@ const storeData = [
     address: 'Số 246 Tô Hiệu, Phường Trại Cau, Quận Lê Chân, Hải Phòng', 
     phone: '1800 8128',
     mapUrl: 'https://www.google.com/maps?q=Viettel+Store+Tô+Hiệu+Hải+Phòng&output=embed'
-  },
-  { 
-    id: 7, 
-    name: 'Viettel Store - Thái Nguyên', 
-    address: 'Số 69 Thái Nguyên, Phường Phước Tân, TP. Nha Trang, Khánh Hòa', 
-    phone: '1800 8129',
-    mapUrl: 'https://www.google.com/maps?q=Viettel+Store+Thái+Nguyên+Nha+Trang&output=embed'
-  },
-  { 
-    id: 8, 
-    name: 'Viettel Store - Ba Cu', 
-    address: 'Số 120 Ba Cu, Phường 3, TP. Vũng Tàu, Bà Rịa - Vũng Tàu', 
-    phone: '1800 8130',
-    mapUrl: 'https://www.google.com/maps?q=Viettel+Store+Ba+Cu+Vũng+Tàu&output=embed'
-  },
-  { 
-    id: 9, 
-    name: 'Viettel Store - Phan Chu Trinh', 
-    address: 'Số 45 Phan Chu Trinh, Phường Thắng Lợi, TP. Buôn Ma Thuột, Đắk Lắk', 
-    phone: '1800 8131',
-    mapUrl: 'https://www.google.com/maps?q=Viettel+Store+Phan+Chu+Trinh+Buôn+Ma+Thuột&output=embed'
-  },
-  { 
-    id: 10, 
-    name: 'Viettel Store - Minh Khai', 
-    address: 'Số 15 Minh Khai, Phường Lê Mao, TP. Vinh, Nghệ An', 
-    phone: '1800 8132',
-    mapUrl: 'https://www.google.com/maps?q=Viettel+Store+Minh+Khai+Vinh+Nghệ+An&output=embed'
-  },
+  }
 ];
 
 const StoreLocatorPage = () => {
@@ -84,87 +56,104 @@ const StoreLocatorPage = () => {
   );
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-20">
-      <div className="bg-blue-600 text-white py-12 px-4 text-center">
-        <h1 className="text-3xl font-extrabold mb-2">Tìm kiếm cửa hàng Viettel</h1>
-        <p className="text-blue-100">Hệ thống hơn 300 siêu thị rộng khắp 63 tỉnh thành</p>
-      </div>
+    <div className="bg-slate-50 min-h-screen pb-16 text-slate-800 font-sans antialiased">
+      
+      {/* Hero Header */}
+      <section className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-12 px-4 shadow-md relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="max-w-7xl mx-auto text-center md:text-left relative z-10">
+          <span className="inline-flex items-center gap-1.5 bg-red-500/20 text-[#EE0033] border border-red-500/30 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider mb-2">
+            <Store className="w-3.5 h-3.5" /> Hệ Thống Siêu Thị Viettel Store
+          </span>
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight drop-shadow-sm">TÌM KIẾM CỬA HÀNG VIETTEL</h1>
+          <p className="text-slate-400 text-sm mt-1 font-normal max-w-xl">
+            Mạng lưới hơn 300 siêu thị viễn thông phủ rộng 63 tỉnh thành trên toàn quốc.
+          </p>
+        </div>
+      </section>
 
-      <div className="max-w-7xl mx-auto px-4 mt-8 flex flex-col lg:flex-row gap-6">
-        {/* Sidebar */}
-        <div className="w-full lg:w-1/3 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-[700px]">
-          <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 flex flex-col lg:flex-row gap-6">
+        
+        {/* Sidebar List */}
+        <div className="w-full lg:w-96 bg-white rounded-3xl shadow-xs border border-slate-200 p-5 flex flex-col h-[650px]">
+          <div className="relative mb-4">
+            <Search className="absolute left-3.5 top-3.5 text-slate-400 w-4 h-4" />
             <input 
               type="text" 
-              placeholder="Nhập tỉnh/thành phố, quận/huyện..." 
+              placeholder="Tìm theo tỉnh/thành, quận/huyện..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-10 pr-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
             />
           </div>
           
-          <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
             {filteredStores.length > 0 ? (
               filteredStores.map((store) => (
                 <div 
                   key={store.id} 
                   onClick={() => setSelectedStore(store)}
-                  className={`p-4 border rounded-xl cursor-pointer transition-all duration-200 ${
+                  className={`p-3.5 border rounded-2xl cursor-pointer transition-all ${
                     selectedStore.id === store.id 
-                      ? 'border-blue-500 bg-blue-50 shadow-sm' 
-                      : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                      ? 'border-[#EE0033] bg-red-50/40 shadow-xs' 
+                      : 'border-slate-200 hover:border-red-200 hover:bg-slate-50'
                   }`}
                 >
                   <div className="flex justify-between items-start">
-                    <h3 className={`font-bold mb-2 text-lg ${selectedStore.id === store.id ? 'text-blue-700' : 'text-gray-900'}`}>
+                    <h3 className={`font-extrabold text-xs mb-1.5 ${selectedStore.id === store.id ? 'text-[#EE0033]' : 'text-slate-900'}`}>
                       {store.name}
                     </h3>
-                    {selectedStore.id === store.id && <ChevronRight className="w-5 h-5 text-blue-500 flex-shrink-0" />}
+                    {selectedStore.id === store.id && <ChevronRight className="w-4 h-4 text-[#EE0033] flex-shrink-0" />}
                   </div>
-                  <p className="text-gray-600 text-sm mb-2 flex items-start">
-                    <MapPin className={`w-4 h-4 mr-2 flex-shrink-0 mt-0.5 ${selectedStore.id === store.id ? 'text-blue-600' : 'text-gray-400'}`} />
+                  <p className="text-slate-600 text-[11px] mb-1.5 flex items-start leading-relaxed">
+                    <MapPin className={`w-3.5 h-3.5 mr-1.5 flex-shrink-0 mt-0.5 ${selectedStore.id === store.id ? 'text-[#EE0033]' : 'text-slate-400'}`} />
                     {store.address}
                   </p>
-                  <p className="text-gray-600 text-sm flex items-center font-medium">
-                    <Phone className={`w-4 h-4 mr-2 ${selectedStore.id === store.id ? 'text-blue-600' : 'text-gray-400'}`} />
-                    {store.phone}
+                  <p className="text-slate-600 text-[11px] flex items-center font-bold">
+                    <Phone className={`w-3.5 h-3.5 mr-1.5 ${selectedStore.id === store.id ? 'text-[#EE0033]' : 'text-slate-400'}`} />
+                    Hotline: {store.phone}
                   </p>
                 </div>
               ))
             ) : (
-              <div className="text-center text-gray-500 py-10">
-                Không tìm thấy cửa hàng nào phù hợp với tìm kiếm của bạn.
+              <div className="text-center text-slate-400 text-xs py-10">
+                Không tìm thấy chi nhánh phù hợp.
               </div>
             )}
           </div>
         </div>
 
-        {/* Map Area */}
-        <div className="w-full lg:w-2/3 bg-gray-200 rounded-2xl overflow-hidden h-[700px] border border-gray-200 shadow-sm flex flex-col">
-          <div className="bg-white p-4 border-b border-gray-200 flex justify-between items-center">
+        {/* Map Display */}
+        <div className="flex-1 bg-white rounded-3xl overflow-hidden h-[650px] border border-slate-200 shadow-xs flex flex-col">
+          <div className="bg-slate-900 text-white p-4 flex justify-between items-center border-b border-slate-800">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">{selectedStore.name}</h2>
-              <p className="text-gray-600 text-sm">{selectedStore.address}</p>
+              <h2 className="text-base font-black flex items-center gap-2">
+                <Navigation className="w-4 h-4 text-yellow-400" />
+                {selectedStore.name}
+              </h2>
+              <p className="text-slate-400 text-xs truncate max-w-lg mt-0.5">{selectedStore.address}</p>
             </div>
-            <a href={`tel:${selectedStore.phone.replace(/\s+/g, '')}`} className="bg-blue-100 text-blue-700 hover:bg-blue-200 font-semibold py-2 px-4 rounded-lg flex items-center transition-colors">
-              <Phone className="w-4 h-4 mr-2" /> Gọi ngay
+            <a 
+              href={`tel:${selectedStore.phone.replace(/\s+/g, '')}`} 
+              className="bg-[#EE0033] hover:bg-red-700 text-white font-extrabold py-2 px-4 rounded-xl text-xs flex items-center gap-1.5 transition shadow-xs"
+            >
+              <Phone className="w-3.5 h-3.5" /> Gọi ngay
             </a>
           </div>
-          <div className="flex-1 w-full h-full relative">
+          <div className="flex-1 w-full h-full relative bg-slate-100">
             <iframe
-              title="Google Map"
+              title="Google Map Store"
               width="100%"
               height="100%"
               style={{ border: 0 }}
               loading="lazy"
               allowFullScreen
-              referrerPolicy="no-referrer-when-downgrade"
               src={selectedStore.mapUrl}
               className="absolute inset-0"
             ></iframe>
           </div>
         </div>
+
       </div>
     </div>
   );
