@@ -8,6 +8,7 @@ from app.core.security import hash_password, verify_password
 from app.modules.auth.repositories.auth_repository import AuthRepository
 from app.modules.auth.schemas.register_request import RegisterRequest
 from app.modules.auth.schemas.login_request import LoginRequest
+from app.modules.auth.schemas.google_login_request import GoogleLoginRequest
 
 
 class AuthService:
@@ -96,7 +97,9 @@ class AuthService:
             "data": {
                 "user": {
                     "id": user_id,
-                    "name": user["ho_ten"]
+                    "name": user["ho_ten"],
+                    "email": user["email"],
+                    "anh_dai_dien": user["anh_dai_dien"] if "anh_dai_dien" in user else None
                 },
                 "accessToken": access_token,
                 "refreshToken": refresh_token
@@ -143,7 +146,8 @@ class AuthService:
                 "phone": user["so_dien_thoai"],
                 "role": user["vai_tro"],
                 "cccd": user["cccd"],
-                "dia_chi": user["dia_chi"]
+                "dia_chi": user["dia_chi"],
+                "anh_dai_dien": user["anh_dai_dien"] if "anh_dai_dien" in user else None
             }
         }
 
@@ -171,5 +175,126 @@ class AuthService:
                 "accessToken": new_access_token
             }
         }
+
+    async def google_login(self, body: GoogleLoginRequest, response: Response):
+        google_id = None
+        email = None
+        name = None
+        picture = None
+
+        if body.id_token:
+            if not Config.GOOGLE_CLIENT_ID:
+                raise AppException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    message="Google Client ID chưa được cấu hình trên hệ thống"
+                )
+            try:
+                from google.oauth2 import id_token
+                from google.auth.transport import requests
+                id_info = id_token.verify_oauth2_token(
+                    body.id_token,
+                    requests.Request(),
+                    Config.GOOGLE_CLIENT_ID
+                )
+                google_id = id_info.get("sub")
+                email = id_info.get("email")
+                name = id_info.get("name") or (email.split("@")[0] if email else "Google User")
+                picture = id_info.get("picture")
+            except Exception as e:
+                raise AppException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    message=f"Xác thực Google ID Token thất bại: {str(e)}"
+                )
+        elif body.access_token:
+            import httpx
+            try:
+                async with httpx.AsyncClient() as client:
+                    res = await client.get(
+                        "https://www.googleapis.com/oauth2/v3/userinfo",
+                        headers={"Authorization": f"Bearer {body.access_token}"}
+                    )
+                    if res.status_code != 200:
+                        raise Exception("Google UserInfo API trả về lỗi")
+                    user_info = res.json()
+                    google_id = user_info.get("sub")
+                    email = user_info.get("email")
+                    name = user_info.get("name") or (email.split("@")[0] if email else "Google User")
+                    picture = user_info.get("picture")
+            except Exception as e:
+                raise AppException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    message=f"Xác thực Google Access Token thất bại: {str(e)}"
+                )
+        else:
+            raise AppException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message="Cần cung cấp id_token hoặc access_token"
+            )
+
+        if not google_id or not email:
+            raise AppException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message="Thông tin tài khoản Google không hợp lệ (thiếu email hoặc id)"
+            )
+
+        # 1. Tìm theo google_id
+        user = await self.repository.find_by_google_id(google_id)
+
+        # 2. Nếu chưa tìm thấy theo google_id, tìm theo email
+        if user is None:
+            user = await self.repository.find_by_email(email)
+            if user:
+                # Đã có tài khoản truyền thống -> liên kết google_id
+                await self.repository.link_google_id(
+                    id_khach_hang=str(user["id_khach_hang"]),
+                    google_id=google_id,
+                    anh_dai_dien=picture
+                )
+            else:
+                # Chưa có tài khoản -> tạo tài khoản mới từ Google
+                new_id = generate_uuid7()
+                random_pass = hash_password(generate_uuid7())
+                user = await self.repository.create_google_user(
+                    id_khach_hang=new_id,
+                    ten_dang_nhap=email,
+                    mat_khau=random_pass,
+                    ho_ten=name,
+                    email=email,
+                    google_id=google_id,
+                    anh_dai_dien=picture
+                )
+
+        payload = {
+            "id_khach_hang": str(user["id_khach_hang"]),
+            "quyen": user["vai_tro"] if "vai_tro" in user and user["vai_tro"] else "user"
+        }
+
+        access_token = jwt_handler.create_access_token(payload)
+        refresh_token = jwt_handler.create_refresh_token(payload)
+
+        is_production = Config.APP_ENV == "production"
+        response.set_cookie(
+            key="refreshToken",
+            value=refresh_token,
+            httponly=True,
+            secure=is_production,
+            samesite="lax" if not is_production else "none",
+            max_age=7 * 24 * 60 * 60
+        )
+
+        return {
+            "success": True,
+            "data": {
+                "user": {
+                    "id": str(user["id_khach_hang"]),
+                    "name": user["ho_ten"],
+                    "email": user["email"],
+                    "anh_dai_dien": user["anh_dai_dien"] if "anh_dai_dien" in user else None
+                },
+                "accessToken": access_token,
+                "refreshToken": refresh_token
+            }
+        }
+
 
     

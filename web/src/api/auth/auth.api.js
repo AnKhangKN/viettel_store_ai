@@ -34,3 +34,18 @@ export const register = async (name, phone, email, password) => {
         throw error;
     }
 };
+
+export const googleLogin = async ({ idToken, accessToken }) => {
+    try {
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/google-login`, { 
+            id_token: idToken,
+            access_token: accessToken 
+        }, {
+            withCredentials: true,
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Google login error:", error);
+        throw error;
+    }
+};

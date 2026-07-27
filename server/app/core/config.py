@@ -42,5 +42,7 @@ class Config:
     VNPAY_RETURN_URL = os.getenv("VNPAY_RETURN_URL")
     VNPAY_API_URL = os.getenv("VNPAY_API_URL")
 
+    GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+
 
 config = Config()

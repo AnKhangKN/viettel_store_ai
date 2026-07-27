@@ -168,7 +168,7 @@ export default function HomePage() {
             </div>
           );
         })}
-        
+
         <div className="max-w-7xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
             <div className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-bold tracking-[0.2em] uppercase px-5 py-2.5 rounded-full backdrop-blur-md border border-white/20 shadow-2xl">
@@ -178,18 +178,18 @@ export default function HomePage() {
               </span>
               Tiên phong công nghệ 2026
             </div>
-            
+
             <h1 className="text-5xl sm:text-6xl md:text-7xl font-black leading-[1.1] tracking-tighter drop-shadow-2xl">
               KẾT NỐI <br className="hidden sm:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-pink-500 to-purple-500 animate-gradient">
                 TƯƠNG LAI
               </span>
             </h1>
-            
+
             <p className="text-lg sm:text-xl text-slate-300 font-medium max-w-2xl mx-auto lg:mx-0 leading-relaxed">
               Trải nghiệm viễn thông không giới hạn với hạ tầng mạng 5G siêu tốc độ. Đăng ký ngay để nhận đặc quyền Data khủng.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start">
               <Link to="/package" className="h-14 bg-white font-black px-8 rounded-2xl shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group text-base" style={{ color: '#0f172a' }}>
                 Khám phá gói cước
@@ -207,17 +207,17 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-gradient-to-tr from-red-500 to-purple-600 rounded-[2.5rem] blur-2xl opacity-40"></div>
               <Link to="/package/5G150" className="block bg-white/10 backdrop-blur-xl p-8 rounded-[2.5rem] border-t border-l border-white/40 border-r border-b border-white/10 shadow-2xl relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                
+
                 <div className="flex justify-between items-start mb-12">
                   <Wifi className="w-10 h-10 text-white drop-shadow-md" />
                   <span className="bg-red-500/80 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">
                     HOT
                   </span>
                 </div>
-                
+
                 <h3 className="text-5xl font-black text-white drop-shadow-lg tracking-tighter mb-2">5G150</h3>
                 <p className="text-slate-300 font-medium mb-8">Trải nghiệm tốc độ ánh sáng</p>
-                
+
                 <div className="pt-6 border-t border-white/20 flex items-end justify-between">
                   <div>
                     <p className="text-3xl font-black text-white">150K</p>
@@ -251,7 +251,7 @@ export default function HomePage() {
               </div>
             </div>
           </Link>
-          
+
           {/* Bento Item 2 */}
           <Link to="/buysim" className="bg-white/90 backdrop-blur-xl border border-slate-200/60 p-8 rounded-[2rem] shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden relative">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -296,7 +296,7 @@ export default function HomePage() {
             <div key={pkg.maGoi} className="relative bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(238,0,51,0.12)] hover:-translate-y-2 transition-all duration-500 flex flex-col justify-between overflow-hidden group">
               {/* Animated Shimmer Line */}
               <div className="absolute top-0 left-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/60 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite] transform -skew-x-12 z-20 pointer-events-none"></div>
-              
+
               <div className="p-8 md:p-10 relative z-10">
                 <div className="flex justify-between items-center mb-8">
                   <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 shadow-sm">
@@ -304,7 +304,7 @@ export default function HomePage() {
                   </div>
                   <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">Gói Cước</span>
                 </div>
-                
+
                 <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">{pkg.tenGoi}</h3>
                 <div className="flex items-baseline gap-2 mb-6">
                   <span className="text-2xl font-black text-[#EE0033]">{pkg.giaTien}</span>
@@ -336,7 +336,7 @@ export default function HomePage() {
       {/* 4. FEATURES SECTION (FLOATING ICONS) */}
       <section className="bg-slate-900 py-24 relative overflow-hidden text-white">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-red-600/10 rounded-full blur-[100px] pointer-events-none"></div>
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-20">
             <h2 className="text-3xl md:text-5xl font-black tracking-tighter mb-4">Vì Sao Chọn Viettel?</h2>
@@ -367,7 +367,7 @@ export default function HomePage() {
       <section className="bg-slate-950 text-white py-24 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-600/10 rounded-full blur-[120px] pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none"></div>
-        
+
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-12">
             <span className="text-yellow-400 font-bold tracking-[0.2em] uppercase text-xs mb-3 inline-flex items-center justify-center gap-2 bg-yellow-400/10 px-4 py-1.5 rounded-full border border-yellow-400/20">

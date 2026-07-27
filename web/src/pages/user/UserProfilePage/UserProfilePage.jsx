@@ -109,6 +109,9 @@ const UserProfilePage = () => {
     }
   };
 
+  const avatarUrl = user?.anh_dai_dien || user?.avatar || user?.picture;
+  const [imageError, setImageError] = useState(false);
+
   return (
     <div className="bg-slate-50 min-h-screen py-10 pb-20 text-slate-800 font-sans antialiased">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -130,7 +133,18 @@ const UserProfilePage = () => {
               <div className="relative group mb-4">
                 <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-[#EE0033] to-[#A00022] p-1 shadow-md">
                   <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden border-2 border-white text-[#EE0033] font-black text-4xl">
-                    {formData.ho_ten ? formData.ho_ten.charAt(0).toUpperCase() : <User size={40} />}
+                    {avatarUrl && !imageError ? (
+                      <img 
+                        src={avatarUrl} 
+                        alt={formData.ho_ten} 
+                        className="w-full h-full object-cover rounded-full"
+                        onError={() => setImageError(true)}
+                      />
+                    ) : formData.ho_ten ? (
+                      formData.ho_ten.charAt(0).toUpperCase()
+                    ) : (
+                      <User size={40} />
+                    )}
                   </div>
                 </div>
               </div>

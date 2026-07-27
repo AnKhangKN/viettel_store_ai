@@ -157,8 +157,13 @@ const RegisterPage = () => {
                   </label>
                 </div>
 
+<<<<<<< HEAD
                 <button type="submit" disabled={loading} className="w-full min-h-[56px] flex items-center justify-center bg-[#EE0033] text-white font-black px-6 py-3 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:translate-y-1 active:shadow-[0_0px_0_#A00022] transition-all duration-200 text-lg mt-4 disabled:opacity-50 disabled:cursor-not-allowed whitespace-normal">
                   {loading ? 'Đang đăng ký...' : 'Tiếp Tục'}
+=======
+                <button type="submit" disabled={loading} className="w-full bg-[#EE0033] text-white font-black py-4 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:translate-y-1 active:shadow-[0_0px_0_#A00022] transition-all text-lg mt-4 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+                  {loading ? 'Đang đăng ký...' : 'Đăng Ký Tài Khoản'}
+>>>>>>> ac60cd7 (login with google)
                 </button>
               </form>
             </div>

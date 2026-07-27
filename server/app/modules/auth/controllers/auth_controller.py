@@ -1,6 +1,7 @@
 from fastapi import Response, Depends, Cookie
 from app.modules.auth.schemas.register_request import RegisterRequest
 from app.modules.auth.schemas.login_request import LoginRequest
+from app.modules.auth.schemas.google_login_request import GoogleLoginRequest
 from app.modules.auth.services.auth_service import AuthService
 from app.common.dependencies.user_dependency import get_current_user
 
@@ -17,6 +18,10 @@ class AuthController:
         result = await self.auth_service.login(body, response)
         return result
 
+    async def google_login(self, body: GoogleLoginRequest, response: Response):
+        result = await self.auth_service.google_login(body, response)
+        return result
+
     async def logout(self, response: Response):
         result = await self.auth_service.logout(response)
         return result
@@ -26,4 +31,5 @@ class AuthController:
 
     async def refresh_token(self, response: Response, refreshToken: str | None = Cookie(None, alias="refreshToken")):
         return await self.auth_service.refresh_token(refreshToken, response)
+
         

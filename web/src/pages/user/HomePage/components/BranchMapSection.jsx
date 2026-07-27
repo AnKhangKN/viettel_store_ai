@@ -1,8 +1,21 @@
 import React, { useState } from "react";
-import { Search, MapPin } from "lucide-react";
+import { Search, MapPin, MapPinOff } from "lucide-react";
 
 const BranchMapSection = ({ branchStores, selectedStore, setSelectedStore }) => {
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Hàm kiểm tra cấu trúc URL bản đồ hợp lệ (phải là URL http/https hợp lệ)
+  const isValidMapUrl = (url) => {
+    if (!url || typeof url !== "string") return false;
+    const trimmed = url.trim();
+    if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) return false;
+    try {
+      const parsed = new URL(trimmed);
+      return parsed.protocol === "http:" || parsed.protocol === "https:";
+    } catch {
+      return false;
+    }
+  };
 
   // Lọc chi nhánh theo truy vấn tìm kiếm
   const filteredBranches = branchStores.filter(
@@ -77,20 +90,29 @@ const BranchMapSection = ({ branchStores, selectedStore, setSelectedStore }) => 
           </div>
 
           {/* Map iframe */}
-          <div className="w-full lg:w-2/3 min-h-[400px] lg:min-h-full bg-gray-200 relative">
+          <div className="w-full lg:w-2/3 min-h-[400px] lg:min-h-full bg-slate-100 relative flex items-center justify-center">
             {selectedStore ? (
-              <iframe
-                key={selectedStore.name}
-                src={selectedStore.mapUrl}
-                className="absolute inset-0 w-full h-full"
-                style={{ border: 0 }}
-                allowFullScreen=""
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              ></iframe>
+              isValidMapUrl(selectedStore.mapUrl || selectedStore.map_url) ? (
+                <iframe
+                  key={selectedStore.name}
+                  src={selectedStore.mapUrl || selectedStore.map_url}
+                  className="absolute inset-0 w-full h-full border-0"
+                  allowFullScreen=""
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                ></iframe>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-8 text-center bg-slate-100/90 text-slate-500 w-full h-full">
+                  <MapPinOff className="w-12 h-12 text-slate-400 mb-3" />
+                  <p className="font-extrabold text-base text-slate-700">Chi nhánh chưa có bản đồ</p>
+                  <p className="text-xs text-slate-400 mt-1 max-w-sm">
+                    Địa chỉ: {selectedStore.address || selectedStore.dia_chi || selectedStore.name}
+                  </p>
+                </div>
+              )
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-gray-400 font-bold bg-gray-100 text-sm">
-                Đang tải bản đồ chi nhánh...
+              <div className="absolute inset-0 flex items-center justify-center text-slate-400 font-bold bg-slate-100 text-sm">
+                Vui lòng chọn chi nhánh để xem bản đồ...
               </div>
             )}
           </div>

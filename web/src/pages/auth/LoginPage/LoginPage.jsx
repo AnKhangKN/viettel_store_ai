@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
-import { login } from '../../../api/auth/auth.api';
+import { login, googleLogin } from '../../../api/auth/auth.api';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../../../features/auth/authSlice';
 import { decodeToken } from '../../../utils/jwt';
+import { useGoogleLogin } from '@react-oauth/google';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -14,6 +15,47 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleGoogleSuccess = async (tokenResponse) => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await googleLogin({ accessToken: tokenResponse.access_token });
+      if (res.success && res.data) {
+        const { accessToken, user } = res.data;
+        const decoded = decodeToken(accessToken);
+        const role = decoded?.quyen || 'user';
+
+        localStorage.removeItem("staff_active_booth");
+        dispatch(setCredentials({
+          accessToken,
+          user: { ...user, role }
+        }));
+
+        if (role === 'admin') {
+          navigate('/admin/dashboard');
+        } else if (role === 'staff') {
+          navigate('/staff/dashboard');
+        } else {
+          navigate('/');
+        }
+      } else {
+        setError(res.message || 'Đăng nhập Google không thành công.');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Có lỗi xảy ra trong quá trình đăng nhập bằng Google.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const triggerGoogleLogin = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: (err) => {
+      console.error("Google Login Error:", err);
+      setError("Đã hủy hoặc xảy ra lỗi khi đăng nhập bằng Google.");
+    }
+  });
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -176,7 +218,9 @@ const LoginPage = () => {
             {/* Google Login Button */}
             <button
               type="button"
-              className="flex items-center justify-center w-full min-h-[56px] px-6 py-3 bg-white border-2 border-gray-200 text-gray-800 font-bold rounded-2xl shadow-[0_4px_0_#e5e7eb] hover:shadow-[0_6px_0_#d1d5db] hover:-translate-y-1 active:shadow-[0_0px_0_#d1d5db] active:translate-y-1 hover:border-gray-300 transition-all mb-4 whitespace-normal"
+              onClick={() => triggerGoogleLogin()}
+              disabled={loading}
+              className="flex items-center justify-center w-full bg-white border-2 border-gray-200 text-gray-800 font-bold py-4 rounded-2xl shadow-[0_4px_0_#e5e7eb] hover:shadow-[0_6px_0_#d1d5db] hover:-translate-y-1 active:shadow-[0_0px_0_#d1d5db] active:translate-y-1 hover:border-gray-300 transition-all mb-4 disabled:opacity-50 cursor-pointer"
             >
               <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-6 h-6 mr-3" />
               Đăng nhập bằng Google
@@ -185,12 +229,12 @@ const LoginPage = () => {
             {/* Register Link */}
             <div className="text-center mt-6">
               <span className="text-gray-500 font-medium mr-2">Chưa có tài khoản?</span>
-              <a
-                href="/register"
-                className="text-[#EE0033] font-bold hover:text-[#A00022] transition-colors"
+              <Link
+                to="/register"
+                className="text-[#EE0033] font-extrabold hover:text-[#A00022] underline underline-offset-4 transition-colors"
               >
-                Tạo tài khoản mới
-              </a>
+                Đăng ký tài khoản mới
+              </Link>
             </div>
           </form>
 

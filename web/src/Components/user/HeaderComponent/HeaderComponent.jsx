@@ -68,8 +68,17 @@ const HeaderComponent = () => {
                 onClick={handleProfileClick}
                 className="flex items-center gap-2.5 bg-black/20 hover:bg-black/30 backdrop-blur-md px-3.5 py-1.5 rounded-2xl border border-white/20 hover:border-white/40 transition-all cursor-pointer shadow-sm group"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 to-amber-500 border border-white/80 flex items-center justify-center text-slate-900 font-bold shadow-md group-hover:scale-105 transition-transform text-xs">
-                  {user?.name ? user.name.charAt(0).toUpperCase() : <FaUser size={13} />}
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 to-amber-500 border border-white/80 flex items-center justify-center text-slate-900 font-bold shadow-md group-hover:scale-105 transition-transform text-xs overflow-hidden">
+                  {(user?.anh_dai_dien || user?.avatar || user?.picture) ? (
+                    <img 
+                      src={user?.anh_dai_dien || user?.avatar || user?.picture} 
+                      alt={user?.name || 'User'} 
+                      className="w-full h-full object-cover rounded-full"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  ) : (
+                    user?.name ? user.name.charAt(0).toUpperCase() : <FaUser size={13} />
+                  )}
                 </div>
                 <div className="text-left hidden sm:block">
                   <p className="text-[10px] text-red-200 font-medium leading-none">Xin chào</p>
@@ -125,14 +134,24 @@ const HeaderComponent = () => {
             <div className="flex items-center gap-2.5">
               <Link
                 to="/login"
+<<<<<<< HEAD
                 className="bg-white font-black text-xs px-4 py-2 rounded-xl transition-all shadow-[0_4px_0_#cbd5e1] hover:shadow-[0_6px_0_#94a3b8] hover:-translate-y-0.5 active:shadow-none active:translate-y-0.5 border border-slate-100"
                 style={{ color: '#EE0033' }}
+=======
+                style={{ color: '#EE0033' }}
+                className="bg-white hover:bg-red-50 !text-[#EE0033] font-black text-xs px-4.5 py-2 rounded-xl transition-all shadow-md border border-white/90 active:scale-95 flex items-center justify-center"
+>>>>>>> ac60cd7 (login with google)
               >
                 Đăng nhập
               </Link>
               <Link
                 to="/register"
+<<<<<<< HEAD
                 className="bg-[#FBBF24] text-slate-900 font-black text-xs px-4 py-2 rounded-xl transition-all shadow-[0_4px_0_#d97706] hover:shadow-[0_6px_0_#b45309] hover:-translate-y-0.5 active:shadow-none active:translate-y-0.5"
+=======
+                style={{ color: '#0f172a' }}
+                className="bg-amber-400 hover:bg-amber-300 !text-slate-900 font-black text-xs px-4.5 py-2 rounded-xl transition-all shadow-md border border-amber-300 active:scale-95 tracking-wide flex items-center justify-center"
+>>>>>>> ac60cd7 (login with google)
               >
                 Đăng ký
               </Link>
