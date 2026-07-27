@@ -45,6 +45,24 @@ class AuthRepository:
         """
         return await get_pool().fetchrow(sql, google_id)
 
+    async def find_by_phone(self, so_dien_thoai: str):
+        sql = """
+            SELECT
+                id_khach_hang,
+                ten_dang_nhap,
+                ho_ten,
+                email,
+                so_dien_thoai,
+                mat_khau,
+                vai_tro,
+                trang_thai,
+                google_id,
+                anh_dai_dien
+            FROM khachhang
+            WHERE so_dien_thoai = $1 AND da_xoa = false
+        """
+        return await get_pool().fetchrow(sql, so_dien_thoai)
+
     async def create_google_user(
         self,
         id_khach_hang: str,

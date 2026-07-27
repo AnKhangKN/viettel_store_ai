@@ -251,6 +251,9 @@ class CSKHService:
             print(f"[CSKHService] Error finding customer by phone {phone}: {e}")
         return None
 
+    def is_phone_in_cskh_data(self, phone: str) -> bool:
+        return self.find_customer_by_phone(phone) is not None
+
     def extract_phones_from_message(self, message: str) -> List[str]:
         if not message:
             return []

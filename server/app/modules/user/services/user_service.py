@@ -6,21 +6,45 @@ from app.modules.user.repositories.user_repository import UserRepository
 from app.modules.user.schemas.user_schema import EmployeeCreateRequest, EmployeeApproveRequest, AccountRoleUpdateRequest, StaffProfileUpdateRequest, ChangePasswordRequest
 from app.common.enums.role_enum import RoleEnum
 from app.modules.branch.repositories.branch_repository import BranchRepository
+from app.modules.cskh.services.cskh_service import CSKHService
 
 class UserService:
 
     def __init__(self):
         self.repository = UserRepository()
         self.branch_repository = BranchRepository()
+        self.cskh_service = CSKHService()
+
+    def _raise_phone_duplicate_in_cskh(self, phone: str):
+        if phone and self.cskh_service.is_phone_in_cskh_data(phone):
+            raise AppException(
+                status_code=status.HTTP_409_CONFLICT,
+                message="Số điện thoại đã tồn tại trong file data-cskh.xlsx"
+            )
+
+    async def _ensure_phone_unique(self, phone: str, current_user_id: str | None = None):
+        if not phone:
+            return
+
+        existing = await self.repository.find_by_email_or_phone("", phone)
+        if existing and str(existing["id_khach_hang"]) != str(current_user_id):
+            raise AppException(
+                status_code=status.HTTP_409_CONFLICT,
+                message="Số điện thoại đã tồn tại trong hệ thống"
+            )
+
+        self._raise_phone_duplicate_in_cskh(phone)
 
     async def create_employee(self, body: EmployeeCreateRequest):
         # 1. Kiểm tra email hoặc sđt đã tồn tại chưa
-        existing = await self.repository.find_by_email_or_phone(body.email, body.so_dien_thoai)
-        if existing:
+        existing_email = await self.repository.find_by_email_or_phone(body.email, "")
+        if existing_email:
             raise AppException(
                 status_code=status.HTTP_409_CONFLICT,
-                message="Email hoặc Số điện thoại đã tồn tại trong hệ thống"
+                message="Email đã tồn tại trong hệ thống"
             )
+
+        await self._ensure_phone_unique(body.so_dien_thoai)
 
         # 2. Kiểm tra chi nhánh có tồn tại không
         branch = await self.branch_repository.get_by_id(body.id_chi_nhanh)
@@ -269,6 +293,8 @@ class UserService:
                     message="Email này đã được sử dụng bởi tài khoản khác"
                 )
 
+        await self._ensure_phone_unique(body.so_dien_thoai, id_khach_hang)
+
         res = await self.repository.update_profile(
             id_khach_hang=id_khach_hang,
             ho_ten=body.ho_ten,
@@ -346,6 +372,8 @@ class UserService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 message="Không xác định được danh tính nhân viên"
             )
+
+        await self._ensure_phone_unique(body.so_dien_thoai, id_khach_hang)
 
         res = await self.repository.update_staff_profile(
             id_khach_hang=id_khach_hang,

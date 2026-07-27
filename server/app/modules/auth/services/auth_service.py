@@ -6,6 +6,7 @@ from app.core.config import Config
 from app.core.jwt import jwt_handler
 from app.core.security import hash_password, verify_password
 from app.modules.auth.repositories.auth_repository import AuthRepository
+from app.modules.cskh.services.cskh_service import CSKHService
 from app.modules.auth.schemas.register_request import RegisterRequest
 from app.modules.auth.schemas.login_request import LoginRequest
 from app.modules.auth.schemas.google_login_request import GoogleLoginRequest
@@ -15,6 +16,7 @@ class AuthService:
 
     def __init__(self):
         self.repository = AuthRepository()
+        self.cskh_service = CSKHService()
     
     async def register(self, body: RegisterRequest):
 
@@ -24,6 +26,19 @@ class AuthService:
             raise AppException(
                 status_code=status.HTTP_409_CONFLICT,
                 message="Email đã tồn tại",
+            )
+
+        phone_user = await self.repository.find_by_phone(body.phone)
+        if phone_user:
+            raise AppException(
+                status_code=status.HTTP_409_CONFLICT,
+                message="Số điện thoại đã tồn tại trong hệ thống",
+            )
+
+        if self.cskh_service.is_phone_in_cskh_data(body.phone):
+            raise AppException(
+                status_code=status.HTTP_409_CONFLICT,
+                message="Số điện thoại đã tồn tại trong file data-cskh.xlsx",
             )
 
         hashed_password = hash_password(body.password)
