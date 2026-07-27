@@ -4,7 +4,7 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Bell, ArrowLeft, LogOut, User, Menu, MapPin, Zap, Monitor, Lock, CheckCircle2, ShieldAlert } from "lucide-react";
 import { getBoothsStatus, selectBooth, releaseBooth } from "../../../api/queue/booth.api";
 
-const HeaderComponentStaff = () => {
+const HeaderComponentStaff = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const user = useSelector((state) => state.auth.user);
@@ -134,19 +134,23 @@ const HeaderComponentStaff = () => {
 
   return (
     <>
-      <header className="px-6 py-4 flex items-center justify-between relative bg-white border-b border-gray-100">
+      <header className="px-4 sm:px-6 py-4 flex items-center justify-between relative bg-white border-b border-gray-100">
         {/* Left: Brand name / Portal title & Back Button */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {!isDashboard && (
             <button
               onClick={() => navigate(-1)}
-              className="w-9 h-9 rounded-xl bg-gray-50 border border-gray-200 hover:bg-red-50 hover:text-[#EE0033] flex items-center justify-center text-gray-500 transition-all cursor-pointer mr-2"
+              className="w-9 h-9 rounded-xl bg-gray-50 border border-gray-200 hover:bg-red-50 hover:text-[#EE0033] flex items-center justify-center text-gray-500 transition-all cursor-pointer mr-1"
               title="Quay lại"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
-          <button className="lg:hidden text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-2 rounded-lg transition-colors">
+          <button
+            onClick={onToggleSidebar}
+            className="lg:hidden text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-2 rounded-lg transition-colors cursor-pointer"
+            title="Mở menu"
+          >
             <Menu className="w-5 h-5" />
           </button>
           <Link to="/staff/dashboard" className="flex items-center gap-2 hover:opacity-90 transition-opacity">

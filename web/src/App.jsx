@@ -7,6 +7,7 @@ import UserLayout from "./layout/UserLayout/UserLayout";
 import AdminLayout from "./layout/AdminLayout/AdminLayout";
 import StaffLayout from "./layout/StaffLayout/StaffLayout";
 import ProtectedRoute from "./components/common/ProtectedRoute/ProtectedRoute";
+import ScrollToTop from "./components/common/ScrollToTop/ScrollToTop";
 
 import { store } from "./app/store";
 import { setCredentials } from "./features/auth/authSlice";
@@ -104,8 +105,10 @@ function App() {
 
 
   return (
-    <Routes>
-      {routes.map((route, index) => {
+    <>
+      <ScrollToTop />
+      <Routes>
+        {routes.map((route, index) => {
         const Page = route.page;
         let Layout = React.Fragment;
 
@@ -131,7 +134,8 @@ function App() {
       })}
 
       <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+      </Routes>
+    </>
   );
 }
 

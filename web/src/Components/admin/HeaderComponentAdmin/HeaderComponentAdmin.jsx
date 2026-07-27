@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { Bell, Search, LogOut, User, Menu, Settings } from "lucide-react";
 
-const HeaderComponentAdmin = () => {
+const HeaderComponentAdmin = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -20,10 +20,14 @@ const HeaderComponentAdmin = () => {
   }, []);
 
   return (
-    <header className="px-6 py-4 flex items-center justify-between bg-white border-b border-gray-100 relative z-50">
+    <header className="px-4 sm:px-6 py-4 flex items-center justify-between bg-white border-b border-gray-100 relative z-30">
       {/* Left: Brand name / Portal title */}
       <div className="flex items-center gap-3">
-        <button className="md:hidden text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-2 rounded-lg transition-colors">
+        <button
+          onClick={onToggleSidebar}
+          className="md:hidden text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-2 rounded-lg transition-colors cursor-pointer"
+          title="Mở menu"
+        >
           <Menu className="w-5 h-5" />
         </button>
         <Link to="/admin/dashboard" className="flex items-center gap-2 hover:opacity-90 transition-opacity">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Phone,
@@ -16,10 +16,65 @@ import {
   Zap,
   CheckCircle2,
   Tv,
-  Play
+  Play,
+  Wifi,
+  Headphones
 } from 'lucide-react';
 import { getAllBranches } from "../../../api/branch/branch.api";
 import BranchMapSection from "./components/BranchMapSection";
+
+// Custom Hook for Number Counter Animation
+const useCountUp = (end, startAnimating, duration = 2500) => {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!startAnimating) return;
+    let startTime = null;
+    const animate = (currentTime) => {
+      if (!startTime) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      // easeOutQuart
+      const easeProgress = 1 - Math.pow(1 - progress, 4);
+      setCount(Math.floor(easeProgress * end));
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+    requestAnimationFrame(animate);
+  }, [end, duration, startAnimating]);
+  return count;
+};
+
+const StatItem = ({ end, suffix, label }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect(); // Ngừng theo dõi sau khi đã xuất hiện
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+    return () => observer.disconnect();
+  }, []);
+
+  const count = useCountUp(end, isVisible);
+  return (
+    <div ref={ref} className="px-4 py-8 group relative">
+      <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl blur-xl"></div>
+      <div className="text-5xl md:text-6xl font-black mb-3 drop-shadow-xl tracking-tighter text-white group-hover:scale-110 group-hover:text-yellow-300 transition-all duration-500 relative z-10">
+        {count}{suffix}
+      </div>
+      <div className="text-red-100/80 font-bold text-xs md:text-sm uppercase tracking-[0.2em] relative z-10">{label}</div>
+    </div>
+  );
+};
 
 export default function HomePage() {
   const [branchStores, setBranchStores] = useState([]);
@@ -46,7 +101,6 @@ export default function HomePage() {
     fetchStores();
   }, []);
 
-  // Dữ liệu gói cước nổi bật
   const hotPackages = [
     { maGoi: 'ST90N', tenGoi: 'ST90N', giaTien: '90.000đ', dungLuong: '4GB/Ngày', thoiHan: '30 ngày', moTa: 'Miễn phí data truy cập Tiktok & gọi nội mạng' },
     { maGoi: 'V200C', tenGoi: 'V200C', giaTien: '200.000đ', dungLuong: '4GB/Ngày', thoiHan: '30 ngày', moTa: 'Miễn phí gọi nội mạng dưới 20 phút + 100 phút ngoại mạng' },
@@ -56,8 +110,7 @@ export default function HomePage() {
   const backgroundImages = [
     'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&w=1200&q=80',
     'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80'
+    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80'
   ];
 
   const [currentBg, setCurrentBg] = useState(0);
@@ -65,168 +118,214 @@ export default function HomePage() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentBg((prev) => (prev + 1) % backgroundImages.length);
-    }, 5000);
+    }, 6000);
     return () => clearInterval(timer);
-  }, []);
+  }, [backgroundImages.length]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans antialiased overflow-hidden">
+      {/* Custom Styles for Animations */}
+      <style>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-150%) skewX(-15deg); }
+          50% { transform: translateX(150%) skewX(-15deg); }
+          100% { transform: translateX(150%) skewX(-15deg); }
+        }
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        @keyframes float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-15px); }
+          100% { transform: translateY(0px); }
+        }
+        .animate-blob { animation: blob 8s infinite; }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+      `}</style>
 
-      {/* BANNER CÁC GÓI CƯỚC NỔI BẬT (HERO SECTION - TỶ LỆ CHUẨN) */}
-      <section className="relative bg-gradient-to-r from-[#EE0033] via-[#D0002C] to-[#A00022] text-white py-24 px-4 overflow-hidden" style={{ perspective: '1200px' }}>
+      {/* 1. HERO SECTION (GLASSMORPHISM & MESH GRADIENT) */}
+      <section className="relative bg-slate-950 text-white pt-28 pb-32 px-4 overflow-hidden">
+        {/* Animated Mesh Gradient Background */}
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[60%] bg-red-600/40 rounded-full blur-[120px] mix-blend-screen animate-blob z-0 pointer-events-none"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-purple-700/40 rounded-full blur-[120px] mix-blend-screen animate-blob animation-delay-2000 z-0 pointer-events-none"></div>
+        <div className="absolute top-[20%] right-[20%] w-[30%] h-[40%] bg-blue-600/30 rounded-full blur-[100px] mix-blend-screen animate-blob animation-delay-4000 z-0 pointer-events-none"></div>
+
+        {/* Dynamic Image Background with Heavy Glass Overlay */}
         {backgroundImages.map((img, index) => {
-          let transformClass = '';
-          if (index === currentBg) {
-            transformClass = 'translate-x-0 opacity-20 scale-100 z-10';
-          } else if (index === (currentBg - 1 + backgroundImages.length) % backgroundImages.length) {
-            transformClass = 'translate-x-full opacity-0 scale-90 z-0';
-          } else {
-            transformClass = '-translate-x-full opacity-0 scale-90 z-0';
-          }
-
+          const isActive = index === currentBg;
           return (
             <div
               key={index}
-              className={`absolute inset-0 bg-cover bg-center transition-all duration-[1500ms] ease-in-out ${transformClass}`}
-              style={{
-                backgroundImage: `url('${img}')`,
-              }}
-            ></div>
+              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out ${isActive ? 'opacity-30' : 'opacity-0'} z-0`}
+              style={{ backgroundImage: `url('${img}')` }}
+            >
+              <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]"></div>
+            </div>
           );
         })}
         
-        <div className="max-w-7xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-          <div className="space-y-6 text-center lg:text-left">
-            <span className="inline-flex items-center gap-2 bg-white/20 text-white text-xs font-black tracking-widest uppercase px-4 py-2 rounded-full backdrop-blur-md border border-white/30 shadow-sm">
-              <Sparkles className="w-4 h-4 text-yellow-300" /> Công nghệ tiên phong 5G Viettel
-            </span>
-            <h1 className="text-4xl sm:text-5xl font-black leading-tight drop-shadow-md tracking-tight">
-              BÙNG NỔ TRẢI NGHIỆM <br />
-              <span className="text-[#FBBF24] drop-shadow-lg">5G SIÊU TỐC ĐỘ</span>
+        <div className="max-w-7xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-bold tracking-[0.2em] uppercase px-5 py-2.5 rounded-full backdrop-blur-md border border-white/20 shadow-2xl">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              </span>
+              Tiên phong công nghệ 2026
+            </div>
+            
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-black leading-[1.1] tracking-tighter drop-shadow-2xl">
+              KẾT NỐI <br className="hidden sm:block" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-pink-500 to-purple-500 animate-gradient">
+                TƯƠNG LAI
+              </span>
             </h1>
-            <p className="text-base sm:text-lg text-white/95 font-medium max-w-xl mx-auto lg:mx-0 leading-relaxed drop-shadow-xs">
-              Đăng ký ngay hôm nay để nhận ưu đãi lên đến 6GB Data tốc độ cao mỗi ngày. Lướt web, xem phim 4K, chiến game mượt mà không lo ngắt quãng!
+            
+            <p className="text-lg sm:text-xl text-slate-300 font-medium max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+              Trải nghiệm viễn thông không giới hạn với hạ tầng mạng 5G siêu tốc độ. Đăng ký ngay để nhận đặc quyền Data khủng.
             </p>
-            <div className="flex flex-wrap gap-4 pt-2 justify-center lg:justify-start">
-              <Link to="/package" className="bg-white text-[#EE0033] font-black px-8 py-3.5 rounded-xl text-sm sm:text-base shadow-[0_6px_0_#e5e7eb] hover:shadow-[0_8px_0_#d1d5db] hover:-translate-y-1 active:shadow-[0_0px_0_#d1d5db] active:translate-y-1 transition-all flex items-center group">
+            
+            <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start">
+              <Link to="/package" className="h-14 bg-white font-black px-8 rounded-2xl shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group text-base" style={{ color: '#0f172a' }}>
                 Khám phá gói cước
-                <ArrowRight className="w-4.5 h-4.5 ml-2 group-hover:translate-x-1.5 transition-transform" />
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1.5 transition-transform" />
               </Link>
-              <Link to="/buysim" className="border-2 border-white/80 text-white font-bold px-8 py-3.5 rounded-xl text-sm sm:text-base hover:bg-white/15 transition backdrop-blur-xs flex items-center">
-                Chọn SIM số đẹp
+              <Link to="/chatbot" className="h-14 bg-white/10 backdrop-blur-md border border-white/20 text-white font-bold px-8 rounded-2xl hover:bg-white/20 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 text-base">
+                <Bot className="w-5 h-5 text-purple-300" /> Hỏi AI ngay
               </Link>
             </div>
           </div>
 
-          {/* Khối minh họa Banner 3D */}
-          <div className="hidden lg:flex justify-center relative" style={{ perspective: '1000px' }}>
-            <div className="w-72 h-72 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-full absolute -top-4 opacity-35 blur-3xl animate-pulse"></div>
-            <div className="bg-white/15 backdrop-blur-md p-6 rounded-3xl border-t-2 border-l-2 border-white/50 border-r border-b border-white/20 shadow-[20px_20px_40px_-10px_rgba(0,0,0,0.5)] text-center w-80 relative z-10 transition-all duration-500 hover:shadow-[30px_30px_50px_-15px_rgba(0,0,0,0.6)] hover:rotate-0" style={{ transform: 'rotateX(15deg) rotateY(-20deg) translateZ(50px)', transformStyle: 'preserve-3d' }}>
-              <div style={{ transform: 'translateZ(40px)' }}>
-                <span className="text-xs font-black tracking-widest text-yellow-300 uppercase drop-shadow-md">Gói Cước Hot Nhất</span>
-                <h3 className="text-6xl font-black my-4 drop-shadow-xl text-white tracking-tight">5G150</h3>
-                <p className="text-xl font-black text-white/95 drop-shadow-md">180 GB / Tháng</p>
-                <div className="border-t border-white/20 my-4 shadow-[0_2px_0_rgba(255,255,255,0.1)]"></div>
-                <p className="text-sm font-bold text-white/90 drop-shadow-sm">Chỉ 150.000đ cho 30 ngày sử dụng</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* QUICK ACTIONS SECTION (TỶ LỆ CHUẨN XÁC, THOÁNG MẮT) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
-        <div className="bg-white rounded-3xl shadow-xl border border-slate-200/80 p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-
-          <Link to="/package" className="flex items-center p-4.5 rounded-2xl bg-white border-2 border-red-100 shadow-[0_6px_0_#fecaca] hover:shadow-[0_8px_0_#fca5a5] hover:-translate-y-1 active:shadow-[0_0px_0_#fca5a5] active:translate-y-1 transition-all duration-200 text-left group">
-            <div className="p-3.5 rounded-2xl bg-[#EE0033] text-white mr-4 shadow-md group-hover:scale-105 transition-transform">
-              <Smartphone className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-extrabold text-base text-slate-900 group-hover:text-[#EE0033] transition">Gói Cước 4G/5G</h4>
-              <p className="text-xs text-slate-500 mt-0.5 font-medium leading-relaxed">Tra cứu ưu đãi Data, Thoại</p>
-            </div>
-          </Link>
-
-          <Link to="/buysim" className="flex items-center p-4.5 rounded-2xl bg-white border-2 border-red-100 shadow-[0_6px_0_#fecaca] hover:shadow-[0_8px_0_#fca5a5] hover:-translate-y-1 active:shadow-[0_0px_0_#fca5a5] active:translate-y-1 transition-all duration-200 text-left group">
-            <div className="p-3.5 rounded-2xl bg-[#EE0033] text-white mr-4 shadow-md group-hover:scale-105 transition-transform">
-              <CreditCard className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-extrabold text-base text-slate-900 group-hover:text-[#EE0033] transition">SIM Số Đẹp</h4>
-              <p className="text-xs text-slate-500 mt-0.5 font-medium leading-relaxed">Chọn số VIP, giao tận nhà</p>
-            </div>
-          </Link>
-
-          <Link to="/appointment" className="flex items-center p-4.5 rounded-2xl bg-white border-2 border-red-100 shadow-[0_6px_0_#fecaca] hover:shadow-[0_8px_0_#fca5a5] hover:-translate-y-1 active:shadow-[0_0px_0_#fca5a5] active:translate-y-1 transition-all duration-200 text-left group">
-            <div className="p-3.5 rounded-2xl bg-[#EE0033] text-white mr-4 shadow-md group-hover:scale-105 transition-transform">
-              <Clock className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-extrabold text-base text-slate-900 group-hover:text-[#EE0033] transition">Đặt Số Quầy</h4>
-              <p className="text-xs text-slate-500 mt-0.5 font-medium leading-relaxed">Hẹn giờ trước, không đợi</p>
-            </div>
-          </Link>
-
-          <Link to="/chatbot" className="flex items-center p-4.5 rounded-2xl bg-white border-2 border-purple-200 shadow-[0_6px_0_#e9d5ff] hover:shadow-[0_8px_0_#d8b4fe] hover:-translate-y-1 active:shadow-[0_0px_0_#d8b4fe] active:translate-y-1 transition-all duration-200 text-left group">
-            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white mr-4 shadow-md group-hover:scale-105 transition-transform">
-              <Sparkles className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-extrabold text-base text-slate-900 group-hover:text-purple-600 transition flex items-center">
-                Trợ Lý AI
-                <span className="ml-1.5 flex h-2 w-2 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
-                </span>
-              </h4>
-              <p className="text-xs text-slate-500 mt-0.5 font-medium">Tư vấn thông minh 24/7</p>
-            </div>
-          </Link>
-
-        </div>
-      </section>
-
-      {/* DANH SÁCH GÓI CƯỚC NỔI BẬT */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 py-16">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8">
-          <div>
-            <span className="text-xs font-black text-[#EE0033] tracking-widest uppercase bg-red-50 px-3.5 py-1 rounded-full border border-red-100">Gợi ý ưu đãi 2026</span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2 tracking-tight">Gói Cước Thịnh Hành Nhất</h2>
-          </div>
-          <Link to="/package" className="text-[#EE0033] font-bold text-sm flex items-center mt-3 md:mt-0 hover:underline">
-            Xem tất cả gói cước <ArrowRight className="w-4 h-4 ml-1" />
-          </Link>
-        </div>
-
-        {/* Grid gói cước */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {hotPackages.map((pkg) => (
-            <div key={pkg.maGoi} className="bg-white rounded-2xl border-2 border-slate-100 shadow-[0_8px_20px_-10px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_40px_-15px_rgba(238,0,51,0.25)] hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between overflow-hidden group">
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <span className="bg-red-50 text-[#EE0033] font-black px-4 py-1.5 rounded-xl text-lg tracking-wide border border-red-100">
-                    {pkg.tenGoi}
+          {/* Floating 3D Premium Card */}
+          <div className="lg:col-span-5 hidden lg:flex justify-center relative perspective-[2000px]">
+            <div className="w-80 relative animate-float" style={{ transformStyle: 'preserve-3d' }}>
+              <div className="absolute inset-0 bg-gradient-to-tr from-red-500 to-purple-600 rounded-[2.5rem] blur-2xl opacity-40"></div>
+              <Link to="/package/5G150" className="block bg-white/10 backdrop-blur-xl p-8 rounded-[2.5rem] border-t border-l border-white/40 border-r border-b border-white/10 shadow-2xl relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="flex justify-between items-start mb-12">
+                  <Wifi className="w-10 h-10 text-white drop-shadow-md" />
+                  <span className="bg-red-500/80 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">
+                    HOT
                   </span>
-                  <div className="text-right">
-                    <p className="text-2xl font-black text-slate-900">{pkg.giaTien}</p>
-                    <p className="text-xs text-slate-400 font-medium mt-0.5">/ {pkg.thoiHan}</p>
+                </div>
+                
+                <h3 className="text-5xl font-black text-white drop-shadow-lg tracking-tighter mb-2">5G150</h3>
+                <p className="text-slate-300 font-medium mb-8">Trải nghiệm tốc độ ánh sáng</p>
+                
+                <div className="pt-6 border-t border-white/20 flex items-end justify-between">
+                  <div>
+                    <p className="text-3xl font-black text-white">150K</p>
+                    <p className="text-xs text-slate-400 font-medium">/ 30 ngày</p>
+                  </div>
+                  <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-md border border-white/20">
+                    <ArrowRight className="w-5 h-5 text-white" />
                   </div>
                 </div>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
 
-                <div className="bg-slate-50 rounded-xl p-3.5 my-4 flex items-center justify-between border border-slate-100">
-                  <span className="text-xs text-slate-500 font-medium">Dung lượng tốc độ cao:</span>
-                  <span className="font-extrabold text-[#EE0033] text-base">{pkg.dungLuong}</span>
-                </div>
-
-                <p className="text-xs sm:text-sm text-slate-600 line-clamp-3 font-medium leading-relaxed">
-                  {pkg.moTa}
+      {/* 2. BENTO GRID (QUICK ACTIONS) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {/* Bento Item 1: Large */}
+          <Link to="/package" className="lg:col-span-2 bg-white/90 backdrop-blur-xl border border-slate-200/60 p-8 rounded-[2rem] shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10 flex flex-col h-full justify-between">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#EE0033] to-[#A00022] text-white flex items-center justify-center shadow-lg shadow-red-500/30 group-hover:scale-110 transition-transform duration-500">
+                <Smartphone className="w-7 h-7" />
+              </div>
+              <div className="mt-8">
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight group-hover:text-[#EE0033] transition-colors">Gói Cước & Data</h3>
+                <p className="text-slate-500 mt-2 text-sm font-medium leading-relaxed max-w-sm">
+                  Truy cập kho ưu đãi khổng lồ với các gói cước được thiết kế riêng cho bạn.
                 </p>
               </div>
+            </div>
+          </Link>
+          
+          {/* Bento Item 2 */}
+          <Link to="/buysim" className="bg-white/90 backdrop-blur-xl border border-slate-200/60 p-8 rounded-[2rem] shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-500 relative z-10">
+              <CreditCard className="w-7 h-7" />
+            </div>
+            <div className="mt-8 relative z-10">
+              <h3 className="text-xl font-black text-slate-900 group-hover:text-blue-600 transition-colors">SIM Phong Thủy</h3>
+              <p className="text-slate-500 mt-2 text-xs font-medium">Kho số độc quyền, giao tận nhà.</p>
+            </div>
+          </Link>
 
-              <div className="p-6 pt-0 border-t border-slate-50 bg-slate-50/50 group-hover:bg-white transition-colors">
-                <Link to={`/package/${pkg.maGoi}`} className="w-full bg-white border-2 border-slate-200 text-slate-800 font-extrabold py-2.5 rounded-xl text-xs shadow-[0_3px_0_#e5e7eb] hover:shadow-[0_5px_0_#d1d5db] hover:-translate-y-0.5 active:shadow-[0_0px_0_#d1d5db] active:translate-y-0.5 hover:border-slate-300 transition-all flex items-center justify-center">
-                  Xem chi tiết
+          {/* Bento Item 3 (Dark mode style for AI) */}
+          <Link to="/chatbot" className="bg-slate-900 p-8 rounded-[2rem] shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden relative border border-slate-800">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 blur-3xl rounded-full group-hover:bg-purple-500/40 transition-colors duration-500"></div>
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:scale-110 transition-transform duration-500 relative z-10">
+              <Sparkles className="w-7 h-7" />
+            </div>
+            <div className="mt-8 relative z-10">
+              <h3 className="text-xl font-black text-white group-hover:text-purple-300 transition-colors">Trợ Lý AI</h3>
+              <p className="text-slate-400 mt-2 text-xs font-medium">Giải đáp tức thì mọi thắc mắc.</p>
+            </div>
+          </Link>
+        </div>
+      </section>
+
+      {/* 3. PREMIUM PACKAGE CARDS */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 py-20 relative">
+        {/* Background Decals */}
+        <div className="absolute top-20 right-0 w-64 h-64 bg-red-100/50 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-50/50 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div className="text-center mb-16 relative z-10">
+          <span className="inline-block text-[#EE0033] font-bold tracking-[0.15em] uppercase text-xs mb-3 bg-red-50 px-4 py-1.5 rounded-full border border-red-100">
+            Độc quyền Viettel 2026
+          </span>
+          <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter">Đặc Quyền Hội Viên</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+          {hotPackages.map((pkg, idx) => (
+            <div key={pkg.maGoi} className="relative bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(238,0,51,0.12)] hover:-translate-y-2 transition-all duration-500 flex flex-col justify-between overflow-hidden group">
+              {/* Animated Shimmer Line */}
+              <div className="absolute top-0 left-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/60 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite] transform -skew-x-12 z-20 pointer-events-none"></div>
+              
+              <div className="p-8 md:p-10 relative z-10">
+                <div className="flex justify-between items-center mb-8">
+                  <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 shadow-sm">
+                    <Zap className={`w-6 h-6 ${idx === 0 ? 'text-amber-500' : idx === 1 ? 'text-blue-500' : 'text-[#EE0033]'}`} />
+                  </div>
+                  <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">Gói Cước</span>
+                </div>
+                
+                <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">{pkg.tenGoi}</h3>
+                <div className="flex items-baseline gap-2 mb-6">
+                  <span className="text-2xl font-black text-[#EE0033]">{pkg.giaTien}</span>
+                  <span className="text-sm text-slate-400 font-medium">/ {pkg.thoiHan}</span>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                    <span className="text-sm font-medium text-slate-700">{pkg.dungLuong} data tốc độ cao</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                    <span className="text-sm font-medium text-slate-700 line-clamp-2">{pkg.moTa}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 pt-0 relative z-10">
+                <Link to={`/package/${pkg.maGoi}`} className="w-full bg-slate-900 hover:bg-[#EE0033] font-bold py-4 rounded-2xl transition-colors duration-300 flex items-center justify-center gap-2 shadow-md" style={{ color: '#ffffff' }}>
+                  Đăng ký ngay <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
@@ -234,67 +333,54 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* WHY CHOOSE VIETTEL SECTION */}
-      <section className="bg-white py-20 relative overflow-hidden border-y border-slate-100">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-red-50 rounded-full blur-3xl opacity-50 -mr-20 -mt-20 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-50 -ml-20 -mb-20 pointer-events-none"></div>
-
+      {/* 4. FEATURES SECTION (FLOATING ICONS) */}
+      <section className="bg-slate-900 py-24 relative overflow-hidden text-white">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-red-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+        
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-14">
-            <span className="text-[#EE0033] font-bold tracking-widest uppercase text-xs mb-1.5 block">Giá trị đích thực</span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Vì Sao Chọn Viettel Telecom?</h2>
-            <div className="w-16 h-1.5 bg-[#EE0033] mx-auto mt-3 rounded-full"></div>
+          <div className="text-center mb-20">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter mb-4">Vì Sao Chọn Viettel?</h2>
+            <p className="text-slate-400 font-medium max-w-xl mx-auto">Cam kết mang lại chất lượng mạng lưới tốt nhất cùng dịch vụ chăm sóc khách hàng đẳng cấp quốc tế.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center group p-6 rounded-2xl hover:bg-slate-50 transition-all duration-300 border border-transparent hover:border-slate-100">
-              <div className="w-20 h-20 mx-auto bg-red-50 rounded-2xl flex items-center justify-center mb-5 group-hover:-translate-y-1.5 transition-transform duration-300 shadow-sm border border-red-100">
-                <Zap className="w-10 h-10 text-[#EE0033]" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {[
+              { icon: Zap, color: 'text-amber-400', bg: 'bg-amber-400/10', title: 'Tốc Độ Tiên Phong', desc: 'Trải nghiệm mạng 5G nhanh nhất Việt Nam, không độ trễ, tải phim 4K trong tích tắc.' },
+              { icon: MapPin, color: 'text-emerald-400', bg: 'bg-emerald-400/10', title: 'Phủ Sóng Toàn Quốc', desc: 'Sóng khỏe mọi lúc mọi nơi. Từ thành thị đến miền núi, từ đất liền đến hải đảo xa.' },
+              { icon: Headphones, color: 'text-blue-400', bg: 'bg-blue-400/10', title: 'Hỗ Trợ Siêu Tốc', desc: 'Trợ lý AI và đội ngũ chuyên viên sẵn sàng hỗ trợ bạn 24/7 không ngày nghỉ.' }
+            ].map((feature, idx) => (
+              <div key={idx} className="text-center group">
+                <div className={`w-24 h-24 mx-auto ${feature.bg} rounded-[2rem] flex items-center justify-center mb-8 animate-float shadow-[0_0_30px_rgba(0,0,0,0.3)] border border-white/10`} style={{ animationDelay: `${idx * 0.5}s` }}>
+                  <feature.icon className={`w-12 h-12 ${feature.color} drop-shadow-lg group-hover:scale-110 transition-transform duration-500`} />
+                </div>
+                <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
+                <p className="text-slate-400 leading-relaxed font-medium">
+                  {feature.desc}
+                </p>
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-[#EE0033] transition-colors">Sóng Khỏe Mọi Nơi</h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                Phủ sóng 99% diện tích Việt Nam. Dù bạn ở hải đảo hay vùng sâu vùng xa, Viettel luôn đồng hành bên bạn.
-              </p>
-            </div>
-
-            <div className="text-center group p-6 rounded-2xl hover:bg-slate-50 transition-all duration-300 border border-transparent hover:border-slate-100">
-              <div className="w-20 h-20 mx-auto bg-blue-50 rounded-2xl flex items-center justify-center mb-5 group-hover:-translate-y-1.5 transition-transform duration-300 shadow-sm border border-blue-100">
-                <Smartphone className="w-10 h-10 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">Công Nghệ 5G Tiên Phong</h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                Trải nghiệm internet siêu tốc độ với hạ tầng 5G hàng đầu thế giới. Tải phim 4K, chiến game không độ trễ.
-              </p>
-            </div>
-
-            <div className="text-center group p-6 rounded-2xl hover:bg-slate-50 transition-all duration-300 border border-transparent hover:border-slate-100">
-              <div className="w-20 h-20 mx-auto bg-emerald-50 rounded-2xl flex items-center justify-center mb-5 group-hover:-translate-y-1.5 transition-transform duration-300 shadow-sm border border-emerald-100">
-                <ShieldCheck className="w-10 h-10 text-emerald-600" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-emerald-600 transition-colors">Chăm Sóc 24/7</h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                Đội ngũ tổng đài viên chuyên nghiệp và Trợ lý AI sẵn sàng giải đáp thắc mắc của bạn 24/7.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* VIDEO QUẢNG CÁO NỔI BẬT */}
-      <section className="bg-slate-900 text-white py-20 border-t border-slate-800 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      {/* 5. VIDEO QUẢNG CÁO NỔI BẬT */}
+      <section className="bg-slate-950 text-white py-24 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+        
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-10">
-            <span className="text-[#FBBF24] font-bold tracking-widest uppercase text-xs mb-1.5 block flex items-center justify-center gap-1.5">
-              <Tv className="w-4 h-4 text-yellow-400" /> Trải nghiệm viễn thông đột phá
+          <div className="text-center mb-12">
+            <span className="text-yellow-400 font-bold tracking-[0.2em] uppercase text-xs mb-3 inline-flex items-center justify-center gap-2 bg-yellow-400/10 px-4 py-1.5 rounded-full border border-yellow-400/20">
+              <Tv className="w-4 h-4" /> Trải nghiệm đột phá 2026
             </span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight">Khám Phá Công Nghệ Viettel 5G</h2>
-            <div className="w-16 h-1 bg-[#EE0033] mx-auto mt-3 rounded-full"></div>
+            <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter mb-4">Kỷ Nguyên Mạng 5G Viettel</h2>
+            <p className="text-slate-400 font-medium max-w-xl mx-auto">Tốc độ ánh sáng, kết nối không giới hạn. Xem ngay video giới thiệu công nghệ độc quyền của Viettel.</p>
           </div>
 
-          <div className="relative w-full overflow-hidden rounded-3xl shadow-2xl border-4 border-white/20 aspect-video bg-black group">
+          <div className="relative w-full overflow-hidden rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 aspect-video bg-black group">
+            <div className="absolute inset-0 bg-gradient-to-tr from-red-500/20 to-purple-500/20 mix-blend-overlay pointer-events-none z-10"></div>
             <iframe
-              className="absolute top-0 left-0 w-full h-full"
+              className="absolute top-0 left-0 w-full h-full z-0"
               src="https://www.youtube.com/embed/5dmLpdy3Lr8?si=O39kM2-W8q8y9QzN&amp;controls=1&amp;rel=0&amp;autoplay=1&amp;mute=1"
               title="Viettel Telecom Promo Video"
               frameBorder="0"
@@ -302,35 +388,23 @@ export default function HomePage() {
               allowFullScreen>
             </iframe>
           </div>
-          <p className="text-center text-slate-400 text-xs mt-4 font-medium italic">Viettel - Theo cách của bạn</p>
         </div>
       </section>
 
-      {/* STATS SECTION */}
-      <section className="bg-gradient-to-r from-[#EE0033] via-[#D0002C] to-[#A00022] py-16 text-white shadow-inner">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* 6. ANIMATED STATS SECTION */}
+      <section className="bg-gradient-to-r from-[#EE0033] to-[#A00022] py-20 relative overflow-hidden shadow-[inset_0_10px_30px_rgba(0,0,0,0.2)]">
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-white/20">
-            <div className="px-4">
-              <div className="text-4xl md:text-5xl font-black mb-1.5 drop-shadow-md tracking-tight">70M+</div>
-              <div className="text-red-100 font-bold text-xs md:text-sm uppercase tracking-wider">Khách hàng tin dùng</div>
-            </div>
-            <div className="px-4">
-              <div className="text-4xl md:text-5xl font-black mb-1.5 drop-shadow-md tracking-tight">99%</div>
-              <div className="text-red-100 font-bold text-xs md:text-sm uppercase tracking-wider">Phủ sóng toàn quốc</div>
-            </div>
-            <div className="px-4">
-              <div className="text-4xl md:text-5xl font-black mb-1.5 drop-shadow-md tracking-tight">63</div>
-              <div className="text-red-100 font-bold text-xs md:text-sm uppercase tracking-wider">Tỉnh thành & Đảo xa</div>
-            </div>
-            <div className="px-4">
-              <div className="text-4xl md:text-5xl font-black mb-1.5 drop-shadow-md tracking-tight">24/7</div>
-              <div className="text-red-100 font-bold text-xs md:text-sm uppercase tracking-wider">Trợ lý AI hỗ trợ</div>
-            </div>
+            <StatItem end={70} suffix="M+" label="Khách Hàng" />
+            <StatItem end={99} suffix="%" label="Phủ Sóng" />
+            <StatItem end={63} suffix="" label="Tỉnh Thành" />
+            <StatItem end={24} suffix="/7" label="Hỗ Trợ AI" />
           </div>
         </div>
       </section>
 
-      {/* MAP & BRANCHES SECTION */}
+      {/* 7. MAP & BRANCHES SECTION */}
       <BranchMapSection
         branchStores={branchStores}
         selectedStore={selectedStore}

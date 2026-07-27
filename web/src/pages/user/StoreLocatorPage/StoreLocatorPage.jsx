@@ -75,7 +75,7 @@ const StoreLocatorPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 flex flex-col lg:flex-row gap-6">
         
         {/* Sidebar List */}
-        <div className="w-full lg:w-96 bg-white rounded-3xl shadow-xs border border-slate-200 p-5 flex flex-col h-[650px]">
+        <div className="w-full lg:w-96 bg-white rounded-3xl shadow-xs border border-slate-200 p-5 flex flex-col h-[400px] lg:h-[650px]">
           <div className="relative mb-4">
             <Search className="absolute left-3.5 top-3.5 text-slate-400 w-4 h-4" />
             <input 
@@ -124,7 +124,7 @@ const StoreLocatorPage = () => {
         </div>
 
         {/* Map Display */}
-        <div className="flex-1 bg-white rounded-3xl overflow-hidden h-[650px] border border-slate-200 shadow-xs flex flex-col">
+        <div className="flex-1 bg-white rounded-3xl overflow-hidden h-[450px] lg:h-[650px] border border-slate-200 shadow-xs flex flex-col">
           <div className="bg-slate-900 text-white p-4 flex justify-between items-center border-b border-slate-800">
             <div>
               <h2 className="text-base font-black flex items-center gap-2">

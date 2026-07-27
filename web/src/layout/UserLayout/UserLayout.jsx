@@ -37,7 +37,7 @@ const UserLayout = ({ children }) => {
 
       {/* Sticky Top Bar with Back Button & Breadcrumb (for Subpages) */}
       {!isHomePage && (
-        <div className="bg-white border-b border-slate-200/80 sticky top-14 z-30 shadow-2xs">
+        <div className="bg-white/80 backdrop-blur-xl border-b border-slate-200/50 sticky top-14 z-30 shadow-sm transition-all duration-300">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
@@ -79,10 +79,10 @@ const UserLayout = ({ children }) => {
 
       {/* Floating AI Chatbot Button (Hidden on /chatbot page) */}
       {!isChatbotPage && (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
           <Link
             to="/chatbot"
-            className="bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white p-4 rounded-full shadow-2xl hover:-translate-y-1 active:translate-y-0 transition-all duration-200 flex items-center justify-center group relative border-2 border-white/40"
+            className="bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white p-3.5 sm:p-4 rounded-full shadow-[0_10px_25px_-5px_rgba(147,51,234,0.5)] hover:shadow-[0_15px_30px_-5px_rgba(147,51,234,0.6)] hover:-translate-y-1.5 active:translate-y-0 transition-all duration-300 flex items-center justify-center group relative border-2 border-white/40 backdrop-blur-sm"
           >
             <Sparkles className="w-6 h-6 animate-spin-slow" />
             

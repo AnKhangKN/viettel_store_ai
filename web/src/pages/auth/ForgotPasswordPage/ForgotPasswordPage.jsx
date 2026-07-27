@@ -95,7 +95,7 @@ const ForgotPasswordPage = () => {
                     required
                   />
                 </div>
-                <button type="submit" className="w-full bg-[#EE0033] text-white font-black py-4 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:translate-y-1 transition-all text-lg">
+                <button type="submit" className="w-full min-h-[56px] flex items-center justify-center bg-[#EE0033] text-white font-black px-6 py-3 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:translate-y-1 transition-all duration-200 text-lg whitespace-normal">
                   Nhận Mã Xác Thực (OTP)
                 </button>
               </form>
@@ -125,7 +125,7 @@ const ForgotPasswordPage = () => {
                     />
                   ))}
                 </div>
-                <button type="submit" className="w-full bg-[#EE0033] text-white font-black py-4 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:translate-y-1 transition-all text-lg">
+                <button type="submit" className="w-full min-h-[56px] flex items-center justify-center bg-[#EE0033] text-white font-black px-6 py-3 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:translate-y-1 transition-all duration-200 text-lg whitespace-normal">
                   Xác Nhận Mã OTP
                 </button>
               </form>
@@ -157,7 +157,7 @@ const ForgotPasswordPage = () => {
                     </button>
                   </div>
                 </div>
-                <button type="submit" className="w-full bg-[#EE0033] text-white font-black py-4 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:translate-y-1 transition-all text-lg">
+                <button type="submit" className="w-full min-h-[56px] flex items-center justify-center bg-[#EE0033] text-white font-black px-6 py-3 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:translate-y-1 transition-all duration-200 text-lg whitespace-normal">
                   Cập Nhật Mật Khẩu
                 </button>
               </form>

@@ -158,7 +158,7 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#EE0033] text-white font-black py-4 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:shadow-[0_0px_0_#A00022] active:translate-y-1 transition-all duration-200 text-lg mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full min-h-[56px] flex items-center justify-center bg-[#EE0033] text-white font-black px-6 py-3 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:shadow-[0_0px_0_#A00022] active:translate-y-1 transition-all duration-200 text-lg mt-4 disabled:opacity-50 disabled:cursor-not-allowed whitespace-normal"
             >
               {loading ? 'Đang đăng nhập...' : 'Đăng Nhập'}
             </button>
@@ -176,7 +176,7 @@ const LoginPage = () => {
             {/* Google Login Button */}
             <button
               type="button"
-              className="flex items-center justify-center w-full bg-white border-2 border-gray-200 text-gray-800 font-bold py-4 rounded-2xl shadow-[0_4px_0_#e5e7eb] hover:shadow-[0_6px_0_#d1d5db] hover:-translate-y-1 active:shadow-[0_0px_0_#d1d5db] active:translate-y-1 hover:border-gray-300 transition-all mb-4"
+              className="flex items-center justify-center w-full min-h-[56px] px-6 py-3 bg-white border-2 border-gray-200 text-gray-800 font-bold rounded-2xl shadow-[0_4px_0_#e5e7eb] hover:shadow-[0_6px_0_#d1d5db] hover:-translate-y-1 active:shadow-[0_0px_0_#d1d5db] active:translate-y-1 hover:border-gray-300 transition-all mb-4 whitespace-normal"
             >
               <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-6 h-6 mr-3" />
               Đăng nhập bằng Google

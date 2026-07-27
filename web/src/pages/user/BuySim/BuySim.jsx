@@ -139,17 +139,17 @@ const BuySim = () => {
               {filteredSim.map((sim) => (
                 <div
                   key={sim.maSim}
-                  className="bg-white rounded-3xl shadow-xs hover:shadow-xl transition-all duration-300 p-6 border border-slate-200/90 flex flex-col justify-between group relative overflow-hidden"
+                  className="bg-white rounded-3xl shadow-[0_6px_20px_-10px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_40px_-15px_rgba(238,0,51,0.2)] hover:-translate-y-2 transition-all duration-300 p-6 border-2 border-slate-100 flex flex-col justify-between group relative overflow-hidden"
                 >
-                  <div className="absolute top-0 right-0 bg-red-50 text-[#EE0033] text-[10px] font-black px-3 py-1 rounded-bl-2xl border-l border-b border-red-100 uppercase tracking-widest flex items-center gap-1">
-                    <Star className="w-3 h-3 fill-current text-yellow-400" /> VIP
+                  <div className="absolute top-0 right-0 bg-gradient-to-r from-red-50 to-amber-50 text-[#EE0033] text-[10px] font-black px-3.5 py-1 rounded-bl-2xl border-l border-b border-red-100 uppercase tracking-widest flex items-center gap-1.5 shadow-2xs">
+                    <Star className="w-3 h-3 fill-current text-amber-500 animate-pulse" /> SIM VIP
                   </div>
 
                   <div>
                     {/* Số SIM Header */}
-                    <div className="text-center py-4 my-2 bg-slate-50/80 rounded-2xl border border-slate-100 group-hover:bg-red-50/40 group-hover:border-red-100 transition-colors">
-                      <p className="text-xs text-slate-400 font-medium mb-1">Số thuê bao Viettel</p>
-                      <h2 className="text-3xl font-black text-slate-900 tracking-wider group-hover:text-[#EE0033] transition-colors">
+                    <div className="text-center py-5 my-2 bg-gradient-to-br from-slate-50 to-red-50/20 rounded-2xl border border-slate-100 group-hover:bg-red-50/50 group-hover:border-red-200 transition-colors shadow-2xs">
+                      <p className="text-[10px] uppercase tracking-wider text-slate-400 font-extrabold mb-1">Số thuê bao Viettel</p>
+                      <h2 className="text-3xl font-black text-slate-900 tracking-wider group-hover:text-[#EE0033] transition-colors drop-shadow-2xs">
                         {sim.soSim}
                       </h2>
                     </div>
@@ -157,23 +157,23 @@ const BuySim = () => {
                     {/* Meta info */}
                     <div className="space-y-3 my-5 text-xs">
                       <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                        <span className="text-slate-400 font-medium">Dòng SIM</span>
-                        <span className="font-extrabold text-[#EE0033]">
+                        <span className="text-slate-500 font-medium">Dòng SIM</span>
+                        <span className="font-extrabold text-[#EE0033] bg-red-50 px-2.5 py-0.5 rounded-lg border border-red-100">
                           {sim.loaiSim}
                         </span>
                       </div>
 
                       <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                        <span className="text-slate-400 font-medium">Giá bán niêm yết</span>
-                        <span className="font-black text-emerald-600 text-base">{sim.giaBan}</span>
+                        <span className="text-slate-500 font-medium">Giá bán niêm yết</span>
+                        <span className="font-black text-emerald-600 text-base drop-shadow-2xs">{sim.giaBan}</span>
                       </div>
 
                       <div className="flex justify-between items-center">
-                        <span className="text-slate-400 font-medium">Trạng thái kho</span>
-                        <span className={`font-extrabold px-2.5 py-0.5 rounded-full text-[11px] ${
+                        <span className="text-slate-500 font-medium">Trạng thái kho</span>
+                        <span className={`font-extrabold px-3 py-1 rounded-full text-[11px] ${
                           sim.rawStatus === "ConHang"
-                            ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
-                            : "bg-amber-50 text-amber-600 border border-amber-200"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            : "bg-amber-50 text-amber-700 border border-amber-200"
                         }`}>
                           {sim.trangThai}
                         </span>
@@ -185,7 +185,7 @@ const BuySim = () => {
                   <div className="flex gap-3 pt-2">
                     <Link
                       to={`/buysim/${sim.maSim}`}
-                      className="flex-1 flex items-center justify-center gap-1.5 border border-slate-300 rounded-xl py-2.5 text-xs font-bold hover:bg-slate-100 transition text-slate-700 shadow-2xs cursor-pointer"
+                      className="flex-1 flex items-center justify-center gap-1.5 bg-slate-50 border-2 border-slate-200 rounded-xl py-2.5 text-xs font-extrabold hover:bg-slate-100 transition text-slate-700 shadow-[0_4px_0_#e5e7eb] hover:shadow-[0_6px_0_#d1d5db] hover:-translate-y-0.5 active:shadow-none active:translate-y-0.5 cursor-pointer"
                     >
                       <Eye size={15} />
                       Chi tiết
@@ -193,7 +193,7 @@ const BuySim = () => {
 
                     <Link
                       to={`/buysim/${sim.maSim}`}
-                      className="flex-1 flex items-center justify-center gap-1.5 bg-[#EE0033] text-white rounded-xl py-2.5 text-xs font-extrabold hover:bg-red-700 transition shadow-md shadow-red-500/20 cursor-pointer"
+                      className="flex-1 flex items-center justify-center gap-1.5 bg-[#EE0033] text-white rounded-xl py-2.5 text-xs font-black hover:bg-red-700 transition shadow-[0_4px_0_#A00022] hover:shadow-[0_6px_0_#A00022] hover:-translate-y-0.5 active:shadow-none active:translate-y-0.5 cursor-pointer"
                     >
                       <ShoppingCart size={15} />
                       Đặt mua

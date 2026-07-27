@@ -10,7 +10,7 @@ import {
   LogOut
 } from "lucide-react";
 
-const SidebarComponentStaff = () => {
+const SidebarComponentStaff = ({ onCloseSidebar }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -50,7 +50,10 @@ const SidebarComponentStaff = () => {
           return (
             <button
               key={idx}
-              onClick={() => navigate(item.path)}
+              onClick={() => {
+                navigate(item.path);
+                if (onCloseSidebar) onCloseSidebar();
+              }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 isActive
                   ? "bg-red-50 text-[#EE0033] shadow-sm border-l-4 border-[#EE0033] rounded-l-none pl-3"

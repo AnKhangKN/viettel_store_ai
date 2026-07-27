@@ -18,9 +18,9 @@ const NavbarComponent = () => {
 
   return (
     <nav className="bg-white/95 backdrop-blur-md shadow-xs border-b border-slate-200/80 sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar w-full py-2">
+          <div className="flex items-center justify-between gap-6 md:gap-10 lg:gap-12 overflow-x-auto no-scrollbar w-full py-4">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
@@ -28,23 +28,19 @@ const NavbarComponent = () => {
                 <button
                   key={item.path}
                   onClick={() => navigate(item.path)}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all duration-200 cursor-pointer relative ${
+                  className={`flex items-center gap-3 px-6 py-3.5 rounded-full text-[1.1rem] font-bold whitespace-nowrap transition-all duration-300 cursor-pointer relative ${
                     isActive
-                      ? 'bg-red-50 text-[#EE0033] border border-red-200 shadow-2xs'
-                      : 'text-slate-700 hover:text-[#EE0033] hover:bg-slate-50'
+                      ? 'bg-red-50 text-red-600 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
-                  <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-[#EE0033]' : 'text-slate-400'}`} />
+                  <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-red-600' : 'text-slate-400'}`} />
                   <span>{item.label}</span>
                   
                   {item.badge && (
-                    <span className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wide">
+                    <span className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wide ml-0.5">
                       {item.badge}
                     </span>
-                  )}
-
-                  {isActive && (
-                    <div className="absolute bottom-0 left-3 right-3 h-0.5 bg-[#EE0033] rounded-full shadow-xs"></div>
                   )}
                 </button>
               );

@@ -101,7 +101,7 @@ const MobileServicesPage = () => {
               </div>
 
               <div className="p-6 pt-0">
-                <Link to={`/mobile-services/${service.id}`} className="w-full bg-slate-900 hover:bg-black text-white font-bold py-3 px-4 rounded-xl transition text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-xs">
+                <Link to={`/mobile-services/${service.id}`} className="w-full bg-slate-900 hover:bg-black font-bold py-3 px-4 rounded-xl transition text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-xs" style={{ color: '#ffffff' }}>
                   <span>Chi tiết dịch vụ</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>

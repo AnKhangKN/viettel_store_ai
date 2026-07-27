@@ -14,7 +14,7 @@ import {
   Monitor
 } from "lucide-react";
 
-const SidebarComponentAdmin = () => {
+const SidebarComponentAdmin = ({ onCloseSidebar }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -81,7 +81,10 @@ const SidebarComponentAdmin = () => {
           return (
             <button
               key={idx}
-              onClick={() => navigate(item.path)}
+              onClick={() => {
+                navigate(item.path);
+                if (onCloseSidebar) onCloseSidebar();
+              }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${isActive
                 ? "bg-red-50 text-[#EE0033] shadow-sm border-l-4 border-[#EE0033] rounded-l-none pl-3"
                 : "text-gray-600 hover:text-[#EE0033] hover:bg-gray-50"

@@ -38,7 +38,7 @@ export default function ChatbotPage() {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -57,7 +57,12 @@ export default function ChatbotPage() {
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   }, [messages, isTyping]);
 
   const handleSend = async (text) => {
@@ -125,9 +130,9 @@ export default function ChatbotPage() {
                 <button
                   key={idx}
                   onClick={() => handleSend(q.label)}
-                  className="w-full text-left text-xs bg-slate-50 border border-slate-200 hover:border-purple-300 hover:bg-purple-50/50 p-3 rounded-2xl transition-all font-semibold text-slate-700 hover:text-purple-700 flex items-start gap-2 group cursor-pointer"
+                  className="w-full text-left text-xs bg-white border border-slate-200 hover:border-purple-300 hover:bg-purple-50/60 p-3 rounded-2xl transition-all font-bold text-slate-700 hover:text-purple-700 flex items-start gap-2.5 group cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5"
                 >
-                  <span className="bg-slate-200 group-hover:bg-purple-200 text-slate-600 group-hover:text-purple-700 w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-[10px] mt-0.5">
+                  <span className="bg-purple-100 group-hover:bg-purple-600 text-purple-700 group-hover:text-white w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 font-black text-[10px] mt-0.5 transition-colors">
                     {idx + 1}
                   </span>
                   <span className="leading-snug">{q.label}</span>
@@ -182,7 +187,7 @@ export default function ChatbotPage() {
           </div>
 
           {/* Chat Messages List */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/50">
+          <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/50">
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -222,7 +227,6 @@ export default function ChatbotPage() {
                 </div>
               </div>
             )}
-            <div ref={messagesEndRef} />
           </div>
 
           {/* Footer Input Bar */}

@@ -3,6 +3,7 @@
 
 html {
   font-size: 16px;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -14,6 +15,11 @@ body {
   background-color: #ffffff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: #fca5a5; /* red-300 */
+  color: #7f1d1d; /* red-900 */
 }
 
 #root {

@@ -110,19 +110,35 @@ const Appointment = () => {
       
       {/* HERO SECTION */}
       <div className="max-w-3xl mx-auto text-center mb-8">
-        <span className="inline-flex items-center gap-1.5 bg-red-50 text-[#EE0033] border border-red-100 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider mb-2">
-          <Clock className="w-3.5 h-3.5" /> Hàng Đợi Thông Minh AI
+        <span className="inline-flex items-center gap-1.5 bg-red-50 text-[#EE0033] border border-red-100 text-xs font-black px-3.5 py-1 rounded-full uppercase tracking-wider mb-3 shadow-2xs">
+          <Clock className="w-3.5 h-3.5" /> Hàng Đợi Thông Minh AI 2026
         </span>
         <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-2">LẤY SỐ THỨ TỰ TẠI QUẦY</h1>
-        <p className="text-slate-500 text-xs sm:text-sm max-w-lg mx-auto">
-          Chủ động đặt số thứ tự trước khi đến cửa hàng Viettel Store. Tiết kiệm thời gian, không lo phải xếp hàng chờ đợi!
+        <p className="text-slate-500 text-xs sm:text-sm max-w-lg mx-auto leading-relaxed">
+          Chủ động lấy số thứ tự trực tuyến trước khi đến cửa hàng Viettel Store. Tiết kiệm thời gian, không lo xếp hàng chờ đợi!
         </p>
+
+        {/* 3-Step Visual Process Bar */}
+        <div className="grid grid-cols-3 gap-2 mt-6 bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-red-50 text-[#EE0033]">
+            <span className="w-5 h-5 rounded-full bg-[#EE0033] text-white font-black text-[10px] flex items-center justify-center shrink-0">1</span>
+            <span className="text-[11px] font-extrabold truncate">1. Điền thông tin</span>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 text-slate-600">
+            <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 font-black text-[10px] flex items-center justify-center shrink-0">2</span>
+            <span className="text-[11px] font-bold truncate">2. Chọn dịch vụ</span>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 text-slate-600">
+            <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 font-black text-[10px] flex items-center justify-center shrink-0">3</span>
+            <span className="text-[11px] font-bold truncate">3. Nhận phiếu</span>
+          </div>
+        </div>
       </div>
 
       <div className="max-w-3xl mx-auto">
         
         {/* CARD CONTAINER */}
-        <div className="bg-white rounded-3xl shadow-xs border border-slate-200 p-6 sm:p-10 relative overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-[0_10px_30px_-10px_rgba(0,0,0,0.08)] border-2 border-slate-100 p-6 sm:p-10 relative overflow-hidden">
           
           {error && (
             <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3 text-rose-800 text-xs font-semibold">
@@ -218,11 +234,11 @@ const Appointment = () => {
                 </select>
               </div>
 
-              {/* Submit Button */}
+              {/* Submit Button 3D */}
               <button
                 type="submit"
                 disabled={submitLoading}
-                className="w-full bg-[#EE0033] hover:bg-red-700 text-white font-extrabold py-3.5 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                className="w-full bg-[#EE0033] text-white font-black py-3.5 rounded-xl text-sm transition shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:shadow-none active:translate-y-1 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
               >
                 {submitLoading ? (
                   <>

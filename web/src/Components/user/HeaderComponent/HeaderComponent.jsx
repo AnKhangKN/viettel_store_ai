@@ -125,13 +125,14 @@ const HeaderComponent = () => {
             <div className="flex items-center gap-2.5">
               <Link
                 to="/login"
-                className="bg-white hover:bg-red-50 text-[#EE0033] font-black text-xs px-4.5 py-2 rounded-xl transition-all shadow-sm border border-white/80"
+                className="bg-white font-black text-xs px-4 py-2 rounded-xl transition-all shadow-[0_4px_0_#cbd5e1] hover:shadow-[0_6px_0_#94a3b8] hover:-translate-y-0.5 active:shadow-none active:translate-y-0.5 border border-slate-100"
+                style={{ color: '#EE0033' }}
               >
                 Đăng nhập
               </Link>
               <Link
                 to="/register"
-                className="bg-[#FBBF24] hover:bg-amber-400 text-slate-900 font-black text-xs px-4.5 py-2 rounded-xl transition-all shadow-sm"
+                className="bg-[#FBBF24] text-slate-900 font-black text-xs px-4 py-2 rounded-xl transition-all shadow-[0_4px_0_#d97706] hover:shadow-[0_6px_0_#b45309] hover:-translate-y-0.5 active:shadow-none active:translate-y-0.5"
               >
                 Đăng ký
               </Link>

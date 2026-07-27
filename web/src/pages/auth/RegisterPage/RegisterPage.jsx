@@ -93,11 +93,11 @@ const RegisterPage = () => {
 
               {/* Social Login Buttons */}
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <button type="button" className="flex items-center justify-center bg-white border-2 border-gray-200 text-gray-700 font-bold py-3 rounded-2xl hover:border-gray-300 transition-all shadow-sm">
+                <button type="button" className="flex items-center justify-center min-h-[56px] px-4 py-3 bg-white border-2 border-gray-200 text-gray-700 font-bold rounded-2xl hover:border-gray-300 transition-all shadow-sm whitespace-normal text-center">
                   <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5 mr-2" />
                   Google
                 </button>
-                <button type="button" className="flex items-center justify-center bg-[#1877F2] text-white font-bold py-3 rounded-2xl hover:bg-[#166fe5] transition-all shadow-sm">
+                <button type="button" className="flex items-center justify-center min-h-[56px] px-4 py-3 bg-[#1877F2] text-white font-bold rounded-2xl hover:bg-[#166fe5] transition-all shadow-sm whitespace-normal text-center">
                   <FaFacebook className="w-5 h-5 mr-2" />
                   Facebook
                 </button>
@@ -157,7 +157,7 @@ const RegisterPage = () => {
                   </label>
                 </div>
 
-                <button type="submit" disabled={loading} className="w-full bg-[#EE0033] text-white font-black py-4 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:translate-y-1 active:shadow-[0_0px_0_#A00022] transition-all text-lg mt-4 disabled:opacity-50 disabled:cursor-not-allowed">
+                <button type="submit" disabled={loading} className="w-full min-h-[56px] flex items-center justify-center bg-[#EE0033] text-white font-black px-6 py-3 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:translate-y-1 active:shadow-[0_0px_0_#A00022] transition-all duration-200 text-lg mt-4 disabled:opacity-50 disabled:cursor-not-allowed whitespace-normal">
                   {loading ? 'Đang đăng ký...' : 'Tiếp Tục'}
                 </button>
               </form>
@@ -178,7 +178,7 @@ const RegisterPage = () => {
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="w-full bg-[#EE0033] text-white font-black py-4 rounded-2xl shadow-[0_6px_0_#A00022] hover:-translate-y-1 active:translate-y-1 transition-all text-lg flex items-center justify-center cursor-pointer"
+                className="w-full min-h-[56px] flex items-center justify-center bg-[#EE0033] text-white font-black px-6 py-3 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:shadow-[0_0px_0_#A00022] active:translate-y-1 transition-all duration-200 text-lg whitespace-normal cursor-pointer"
               >
                 Đăng Nhập Ngay
               </button>
