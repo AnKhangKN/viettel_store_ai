@@ -475,20 +475,23 @@ const PackagePageAdmin = () => {
                   />
                 </div>
 
-                {/* Mô tả */}
+                {/* Mô tả / Đặc quyền ưu đãi */}
                 <div className="col-span-2">
                   <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                    Mô tả chi tiết ưu đãi
+                    Mô tả / Đặc quyền ưu đãi
                   </label>
                   <textarea
-                    rows="3"
-                    placeholder="Mô tả các khuyến mãi đi kèm của gói cước..."
+                    rows="4"
+                    placeholder="Nhập đặc quyền ưu đãi của gói cước (Mỗi đặc quyền xuống 1 dòng)..."
                     value={createFormData.mo_ta}
                     onChange={(e) =>
                       setCreateFormData({ ...createFormData, mo_ta: e.target.value })
                     }
                     className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
                   ></textarea>
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    * Nội dung mô tả này sẽ hiển thị trực tiếp làm danh sách <strong>Đặc quyền ưu đãi nổi bật</strong> trên trang chi tiết gói cước. Nhập mỗi đặc quyền trên một dòng.
+                  </p>
                 </div>
               </div>
 
@@ -673,19 +676,23 @@ const PackagePageAdmin = () => {
                   </div>
                 </div>
 
-                {/* Mô tả */}
+                {/* Mô tả / Đặc quyền ưu đãi */}
                 <div>
                   <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                    Mô tả chi tiết ưu đãi
+                    Mô tả / Đặc quyền ưu đãi
                   </label>
                   <textarea
-                    rows="3"
+                    rows="4"
+                    placeholder="Nhập đặc quyền ưu đãi của gói cước (Mỗi đặc quyền xuống 1 dòng)..."
                     value={editFormData.mo_ta}
                     onChange={(e) =>
                       setEditFormData({ ...editFormData, mo_ta: e.target.value })
                     }
                     className="w-full bg-white border border-gray-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033]"
                   ></textarea>
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    * Nội dung mô tả này sẽ hiển thị trực tiếp làm danh sách <strong>Đặc quyền ưu đãi nổi bật</strong> trên trang chi tiết gói cước. Nhập mỗi đặc quyền trên một dòng.
+                  </p>
                 </div>
               </div>
 

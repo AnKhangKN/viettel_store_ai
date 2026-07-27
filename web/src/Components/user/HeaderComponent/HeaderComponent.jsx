@@ -42,11 +42,11 @@ const HeaderComponent = () => {
   return (
     <header className="bg-gradient-to-r from-[#EE0033] via-[#D0002C] to-[#A00022] text-white shadow-md relative z-50 border-b border-red-500/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-        
+
         {/* Brand & Logo */}
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-3 group">
-            <Zap className="w-8 h-8 text-[#FBBF24] fill-current drop-shadow-md group-hover:scale-110 transition-transform" />
+            {/* <Zap className="w-8 h-8 text-[#FBBF24] fill-current drop-shadow-md group-hover:scale-110 transition-transform" /> */}
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-2xl font-black tracking-tighter text-white drop-shadow-sm">viettel</span>

@@ -93,27 +93,21 @@ const PackageDetailPage = () => {
     );
   }
 
-  // Tự động sinh danh sách đặc quyền dựa trên dữ liệu thật của gói cước
-  const chiTietUuDai = [];
-  if (pkg.dung_luong_gb > 0) {
-    chiTietUuDai.push(`Sở hữu ngay ${formatData(pkg.dung_luong_gb)} data tốc độ cao mỗi ngày/tháng.`);
-  }
-  if (pkg.so_phut_goi > 0) {
-    chiTietUuDai.push(`Miễn phí ${pkg.so_phut_goi} phút gọi điện trong chu kỳ sử dụng.`);
-  }
-  if (pkg.so_sms > 0) {
-    chiTietUuDai.push(`Ưu đãi tặng kèm ${pkg.so_sms} tin nhắn SMS miễn phí.`);
-  }
-  chiTietUuDai.push(`Chu kỳ sử dụng ưu đãi trong vòng ${pkg.thoi_han_ngay || 30} ngày.`);
-  chiTietUuDai.push('Tự động gia hạn khi tài khoản chính có đủ số dư cần thiết.');
+  // Lấy danh sách đặc quyền ưu đãi trực tiếp từ mô tả (pkg.mo_ta) do Admin nhập
+  const chiTietUuDai = pkg?.mo_ta && pkg.mo_ta.trim()
+    ? pkg.mo_ta
+      .split(/[\n;]+/)
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0)
+    : [];
 
   return (
     <div className="bg-slate-50 min-h-screen py-10 pb-20">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200">
           <div className="flex flex-col lg:flex-row">
-            
+
             {/* Left: Package Summary */}
             <div className="lg:w-5/12 p-8 lg:p-10 bg-gradient-to-br from-red-50 via-pink-50/30 to-white border-b lg:border-b-0 lg:border-r border-red-100 flex flex-col justify-between">
               <div>
@@ -124,9 +118,8 @@ const PackageDetailPage = () => {
                   <span className="bg-amber-100 text-amber-800 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">5G READY</span>
                 </div>
 
-                <h1 className="text-4xl font-black text-slate-900 mb-2">{pkg.ten_goi}</h1>
-                <p className="text-slate-600 text-sm leading-relaxed mb-6">{pkg.mo_ta || 'Gói cước ưu đãi Data tốc độ cao Viettel.'}</p>
-                
+                <h1 className="text-4xl font-black text-slate-900 mb-6">{pkg.ten_goi}</h1>
+
                 {/* Price & Specs Box */}
                 <div className="bg-white rounded-2xl p-6 shadow-sm mb-6 border border-red-100 space-y-4">
                   <div className="flex justify-between items-center pb-3 border-b border-slate-100">
@@ -146,15 +139,15 @@ const PackageDetailPage = () => {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <button
+              <div>
+                {/* <button
                   onClick={() => setShowRegisterModal(true)}
                   className="w-full bg-[#EE0033] hover:bg-red-700 text-white font-extrabold py-3.5 rounded-xl text-base transition-all shadow-lg hover:shadow-red-500/25 cursor-pointer flex items-center justify-center gap-2"
                 >
                   <Sparkles className="w-5 h-5 text-yellow-300" />
                   <span>Đăng ký ngay</span>
-                </button>
-                
+                </button> */}
+
                 <button
                   onClick={() => navigate('/package')}
                   className="w-full bg-white hover:bg-slate-100 text-slate-700 font-bold py-2.5 rounded-xl text-xs border border-slate-300 transition cursor-pointer"
@@ -168,16 +161,20 @@ const PackageDetailPage = () => {
             <div className="lg:w-7/12 p-8 lg:p-10 flex flex-col justify-between">
               <div>
                 <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-amber-500" /> Đặc quyền ưu đãi nổi bật
+                  Đặc quyền ưu đãi nổi bật
                 </h3>
-                
+
                 <ul className="space-y-3.5 mb-8">
-                  {chiTietUuDai.map((item, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-slate-700 text-xs sm:text-sm leading-relaxed">{item}</span>
-                    </li>
-                  ))}
+                  {chiTietUuDai.length > 0 ? (
+                    chiTietUuDai.map((item, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-slate-700 text-xs sm:text-sm leading-relaxed">{item}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <p className="text-xs text-slate-400 italic">Chưa có thông tin đặc quyền ưu đãi cho gói cước này.</p>
+                  )}
                 </ul>
 
                 <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -220,7 +217,7 @@ const PackageDetailPage = () => {
               <div>
                 <h3 className="text-xl font-black text-slate-900 mb-1">Đăng ký gói {pkg.ten_goi}</h3>
                 <p className="text-xs text-slate-500 mb-4">Nhập số điện thoại Viettel của bạn để tiến hành kích hoạt gói cước.</p>
-                
+
                 <form onSubmit={handleRegisterSubmit} className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1.5">Số điện thoại thuê bao:</label>
