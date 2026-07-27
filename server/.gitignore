@@ -107,3 +107,8 @@ temp/
 # Migrations (nếu muốn commit thì bỏ phần này)
 # =========================
 # migrations/
+
+
+# data của khách hàng không push lên git
+/data
+*.xlsx

@@ -17,10 +17,10 @@ const NavbarComponent = () => {
   ];
 
   return (
-    <nav className="bg-white/95 backdrop-blur-md shadow-xs border-b border-slate-200/80 sticky top-0 z-40">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center justify-between gap-6 md:gap-10 lg:gap-12 overflow-x-auto no-scrollbar w-full py-4">
+    <nav className="bg-white/95 shadow-xs border-b border-slate-200/80 sticky top-0 z-40">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center h-12">
+          <div className="flex items-center gap-1 w-full overflow-x-auto no-scrollbar">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
@@ -28,17 +28,17 @@ const NavbarComponent = () => {
                 <button
                   key={item.path}
                   onClick={() => navigate(item.path)}
-                  className={`flex items-center gap-3 px-6 py-3.5 rounded-full text-[1.1rem] font-bold whitespace-nowrap transition-all duration-300 cursor-pointer relative ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer flex-shrink-0 ${
                     isActive
-                      ? 'bg-red-50 text-red-600 shadow-sm'
+                      ? 'bg-red-50 text-red-600'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
-                  <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-red-600' : 'text-slate-400'}`} />
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-red-600' : 'text-slate-400'}`} />
                   <span>{item.label}</span>
-                  
+
                   {item.badge && (
-                    <span className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wide ml-0.5">
+                    <span className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide">
                       {item.badge}
                     </span>
                   )}

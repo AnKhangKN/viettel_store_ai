@@ -11,6 +11,7 @@ from app.modules.chatbot.schemas.chatbot_schema import ChatbotRequest
 from app.modules.package.services.package_service import PackageService
 from app.modules.branch.services.branch_service import BranchService
 from app.modules.sim.services.sim_service import SimService
+from app.modules.cskh.services.cskh_service import CSKHService
 
 class ChatbotService:
     def __init__(self):
@@ -49,15 +50,17 @@ class ChatbotService:
     async def generate_response(self, body: ChatbotRequest):
         system_instruction = self._get_system_instruction()
 
-        # 1. Lấy dữ liệu gói cước, chi nhánh và SIM thật từ Database thông qua Services
+        # 1. Lấy dữ liệu gói cước, chi nhánh, SIM thật và dữ liệu CSKH từ các service
         packages_context = ""
         branches_context = ""
         sims_context = ""
+        customer_context = ""
         
         try:
             pkg_service = PackageService()
             branch_service = BranchService()
             sim_service = SimService()
+            cskh_service = CSKHService()
             
             pkgs_res = await pkg_service.get_all_packages()
             branches_res = await branch_service.get_all_branches()
@@ -90,6 +93,17 @@ class ChatbotService:
                     )
                 
                 sims_context = f"TỔNG SỐ LƯỢNG SIM ĐANG CÓ SẴN TRONG HỆ THỐNG: {total_available} SIM.\nDANH SÁCH 5 SIM SỐ ĐẸP MỚI NHẤT:\n" + "\n".join(sim_lines)
+
+            detected_phones = cskh_service.extract_phones_from_message(body.message)
+            customer_lines = []
+            for phone in detected_phones:
+                customer = cskh_service.find_customer_by_phone(phone)
+                if customer:
+                    customer_lines.append(cskh_service.get_customer_context(customer))
+                else:
+                    customer_lines.append(f"- Không tìm thấy thông tin khách hàng cho số điện thoại: {phone}")
+            if customer_lines:
+                customer_context = "\n\n".join(customer_lines)
         except Exception as err:
             print(f"Lỗi khi fetch context database cho Chatbot: {err}")
 
@@ -101,6 +115,12 @@ class ChatbotService:
             full_instruction += f"DANH SÁCH CHI NHÁNH CỬA HÀNG THỰC TẾ TRONG HỆ THỐNG:\n{branches_context}\n\n"
         if sims_context:
             full_instruction += f"THÔNG TIN VỀ KHO SIM THỰC TẾ TRONG HỆ THỐNG:\n{sims_context}\n\n"
+        if customer_context:
+            full_instruction += (
+                "THÔNG TIN KHÁCH HÀNG TRA CỨU TỪ EXCEL THEO SỐ ĐIỆN THOẠI:\n"
+                f"{customer_context}\n\n"
+                "Khi người dùng hỏi về số điện thoại này, ưu tiên dùng đúng dữ liệu tra cứu ở trên và trả lời ngắn gọn, chính xác.\n\n"
+            )
 
         message = body.message.strip()
         if not message:

@@ -57,12 +57,12 @@ const RegisterPage = () => {
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#EE0033] rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
 
       <div className="flex w-full max-w-6xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10 border border-gray-100 h-[85vh] lg:h-auto min-h-[700px]">
-        
+
         {/* Left Side - Branding */}
         <div className="hidden lg:flex w-5/12 flex-col justify-center items-start text-left p-16 bg-gradient-to-br from-[#EE0033] to-[#A00022] text-white relative overflow-hidden">
           <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-2xl"></div>
           <div className="absolute bottom-[-20%] left-[-10%] w-80 h-80 bg-black/20 rounded-full blur-3xl"></div>
-          
+
           <div className="relative z-10">
             <div className="flex items-center mb-10 opacity-90 cursor-pointer" onClick={() => navigate('/')}>
               <svg viewBox="0 0 100 100" className="w-10 h-10 text-white mr-2" fill="none" stroke="currentColor" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round">
@@ -70,7 +70,7 @@ const RegisterPage = () => {
               </svg>
               <h1 className="text-4xl font-black tracking-tighter drop-shadow-md">viettel</h1>
             </div>
-            <h2 className="text-4xl lg:text-5xl font-black mb-6 leading-tight drop-shadow-lg">Mở Khóa <br/>Đặc Quyền</h2>
+            <h2 className="text-4xl lg:text-5xl font-black mb-6 leading-tight drop-shadow-lg">Mở Khóa <br />Đặc Quyền</h2>
             <p className="text-lg text-white/90 max-w-sm leading-relaxed mb-12">
               Trở thành thành viên Viettel Store để nhận ngay hàng ngàn ưu đãi Data và cước gọi độc quyền.
             </p>
@@ -79,7 +79,7 @@ const RegisterPage = () => {
 
         {/* Right Side - Forms */}
         <div className="w-full lg:w-7/12 p-8 md:p-12 lg:px-16 flex flex-col justify-center bg-white overflow-y-auto relative">
-          
+
           <button onClick={() => navigate('/login')} className="absolute top-6 left-8 text-gray-400 hover:text-[#EE0033] transition flex items-center font-medium z-20">
             <FaArrowLeft className="mr-2" /> Quay lại Đăng Nhập
           </button>
@@ -157,13 +157,8 @@ const RegisterPage = () => {
                   </label>
                 </div>
 
-<<<<<<< HEAD
-                <button type="submit" disabled={loading} className="w-full min-h-[56px] flex items-center justify-center bg-[#EE0033] text-white font-black px-6 py-3 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:translate-y-1 active:shadow-[0_0px_0_#A00022] transition-all duration-200 text-lg mt-4 disabled:opacity-50 disabled:cursor-not-allowed whitespace-normal">
-                  {loading ? 'Đang đăng ký...' : 'Tiếp Tục'}
-=======
                 <button type="submit" disabled={loading} className="w-full bg-[#EE0033] text-white font-black py-4 rounded-2xl shadow-[0_6px_0_#A00022] hover:shadow-[0_8px_0_#A00022] hover:-translate-y-1 active:translate-y-1 active:shadow-[0_0px_0_#A00022] transition-all text-lg mt-4 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
                   {loading ? 'Đang đăng ký...' : 'Đăng Ký Tài Khoản'}
->>>>>>> ac60cd7 (login with google)
                 </button>
               </form>
             </div>
@@ -176,7 +171,7 @@ const RegisterPage = () => {
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-2">Đăng Ký Thành Công!</h2>
               <p className="text-gray-500 text-base mb-8 leading-relaxed">
-                Tài khoản của bạn đã được tạo thành công với email <br/>
+                Tài khoản của bạn đã được tạo thành công với email <br />
                 <span className="font-bold text-[#EE0033]">{formData.email}</span>. Vui lòng tiến hành đăng nhập để trải nghiệm dịch vụ.
               </p>
 

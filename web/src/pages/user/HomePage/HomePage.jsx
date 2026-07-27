@@ -21,6 +21,7 @@ import {
   Headphones
 } from 'lucide-react';
 import { getAllBranches } from "../../../api/branch/branch.api";
+import { getAllPackages } from "../../../api/package/package.api";
 import BranchMapSection from "./components/BranchMapSection";
 
 // Custom Hook for Number Counter Animation
@@ -101,11 +102,22 @@ export default function HomePage() {
     fetchStores();
   }, []);
 
-  const hotPackages = [
-    { maGoi: 'ST90N', tenGoi: 'ST90N', giaTien: '90.000đ', dungLuong: '4GB/Ngày', thoiHan: '30 ngày', moTa: 'Miễn phí data truy cập Tiktok & gọi nội mạng' },
-    { maGoi: 'V200C', tenGoi: 'V200C', giaTien: '200.000đ', dungLuong: '4GB/Ngày', thoiHan: '30 ngày', moTa: 'Miễn phí gọi nội mạng dưới 20 phút + 100 phút ngoại mạng' },
-    { maGoi: '5G150', tenGoi: '5G150', giaTien: '150.000đ', dungLuong: '6GB/Ngày', thoiHan: '30 ngày', moTa: 'Trải nghiệm data 5G siêu tốc độ cao không lo gián đoạn' },
-  ];
+  const [hotPackages, setHotPackages] = useState([]);
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const res = await getAllPackages();
+        if (res?.success && Array.isArray(res.data)) {
+          // Lấy 3 gói cước đầu tiên để hiển thị nổi bật
+          setHotPackages(res.data.slice(0, 3));
+        }
+      } catch (error) {
+        console.error("Lỗi fetch gói cước ở HomePage:", error);
+      }
+    };
+    fetchPackages();
+  }, []);
 
   const backgroundImages = [
     'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&w=1200&q=80',
@@ -126,46 +138,36 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans antialiased overflow-hidden">
       {/* Custom Styles for Animations */}
       <style>{`
-        @keyframes shimmer {
-          0% { transform: translateX(-150%) skewX(-15deg); }
-          50% { transform: translateX(150%) skewX(-15deg); }
-          100% { transform: translateX(150%) skewX(-15deg); }
-        }
-        @keyframes blob {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
         @keyframes float {
-          0% { transform: translateY(0px); }
-          50% { transform: translateY(-15px); }
+          0%   { transform: translateY(0px); }
+          50%  { transform: translateY(-12px); }
           100% { transform: translateY(0px); }
         }
-        .animate-blob { animation: blob 8s infinite; }
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        .animation-delay-2000 { animation-delay: 2s; }
-        .animation-delay-4000 { animation-delay: 4s; }
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+          will-change: transform;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-float { animation: none; }
+        }
       `}</style>
 
-      {/* 1. HERO SECTION (GLASSMORPHISM & MESH GRADIENT) */}
-      <section className="relative bg-slate-950 text-white pt-28 pb-32 px-4 overflow-hidden">
-        {/* Animated Mesh Gradient Background */}
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[60%] bg-red-600/40 rounded-full blur-[120px] mix-blend-screen animate-blob z-0 pointer-events-none"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-purple-700/40 rounded-full blur-[120px] mix-blend-screen animate-blob animation-delay-2000 z-0 pointer-events-none"></div>
-        <div className="absolute top-[20%] right-[20%] w-[30%] h-[40%] bg-blue-600/30 rounded-full blur-[100px] mix-blend-screen animate-blob animation-delay-4000 z-0 pointer-events-none"></div>
+      {/* 1. HERO SECTION */}
+      <section className="relative bg-slate-950 text-white pt-28 pb-32 px-4 overflow-hidden" style={{ contain: 'layout style' }}>
+        {/* Static Mesh Gradient — không animate để tránh lag */}
+        <div className="absolute inset-0 z-0 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse 60% 70% at 10% 20%, rgba(220,38,38,0.35) 0%, transparent 70%), radial-gradient(ellipse 50% 60% at 90% 80%, rgba(124,58,237,0.30) 0%, transparent 70%), radial-gradient(ellipse 40% 50% at 70% 30%, rgba(37,99,235,0.20) 0%, transparent 70%)'
+        }}></div>
 
-        {/* Dynamic Image Background with Heavy Glass Overlay */}
+        {/* Background Image Slideshow — opacity transition only, no blur overlay */}
         {backgroundImages.map((img, index) => {
           const isActive = index === currentBg;
           return (
             <div
               key={index}
-              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out ${isActive ? 'opacity-30' : 'opacity-0'} z-0`}
-              style={{ backgroundImage: `url('${img}')` }}
-            >
-              <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]"></div>
-            </div>
+              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out ${isActive ? 'opacity-20' : 'opacity-0'} z-0`}
+              style={{ backgroundImage: `url('${img}')`, willChange: 'opacity' }}
+            />
           );
         })}
 
@@ -202,11 +204,11 @@ export default function HomePage() {
           </div>
 
           {/* Floating 3D Premium Card */}
-          <div className="lg:col-span-5 hidden lg:flex justify-center relative perspective-[2000px]">
-            <div className="w-80 relative animate-float" style={{ transformStyle: 'preserve-3d' }}>
-              <div className="absolute inset-0 bg-gradient-to-tr from-red-500 to-purple-600 rounded-[2.5rem] blur-2xl opacity-40"></div>
-              <Link to="/package/5G150" className="block bg-white/10 backdrop-blur-xl p-8 rounded-[2.5rem] border-t border-l border-white/40 border-r border-b border-white/10 shadow-2xl relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="lg:col-span-5 hidden lg:flex justify-center relative">
+            <div className="w-80 relative animate-float">
+              <div className="absolute inset-0 bg-gradient-to-tr from-red-500 to-purple-600 rounded-[2.5rem] blur-xl opacity-30"></div>
+              <Link to="/package/5G150" className="block bg-white/10 p-8 rounded-[2.5rem] border border-white/20 shadow-2xl relative overflow-hidden group" style={{ backdropFilter: 'blur(16px)' }}>
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                 <div className="flex justify-between items-start mb-12">
                   <Wifi className="w-10 h-10 text-white drop-shadow-md" />
@@ -237,25 +239,23 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20">
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {/* Bento Item 1: Large */}
-          <Link to="/package" className="lg:col-span-2 bg-white/90 backdrop-blur-xl border border-slate-200/60 p-8 rounded-[2rem] shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <Link to="/package" className="lg:col-span-2 bg-white border border-slate-100 p-8 rounded-[2rem] shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200 group overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
             <div className="relative z-10 flex flex-col h-full justify-between">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#EE0033] to-[#A00022] text-white flex items-center justify-center shadow-lg shadow-red-500/30 group-hover:scale-110 transition-transform duration-500">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#EE0033] to-[#A00022] text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-200">
                 <Smartphone className="w-7 h-7" />
               </div>
               <div className="mt-8">
                 <h3 className="text-2xl font-black text-slate-900 tracking-tight group-hover:text-[#EE0033] transition-colors">Gói Cước & Data</h3>
-                <p className="text-slate-500 mt-2 text-sm font-medium leading-relaxed max-w-sm">
-                  Truy cập kho ưu đãi khổng lồ với các gói cước được thiết kế riêng cho bạn.
-                </p>
+                <p className="text-slate-500 mt-2 text-sm font-medium leading-relaxed max-w-sm">Truy cập kho ưu đãi khổng lồ với các gói cước được thiết kế riêng cho bạn.</p>
               </div>
             </div>
           </Link>
 
           {/* Bento Item 2 */}
-          <Link to="/buysim" className="bg-white/90 backdrop-blur-xl border border-slate-200/60 p-8 rounded-[2rem] shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-500 relative z-10">
+          <Link to="/buysim" className="bg-white border border-slate-100 p-8 rounded-[2rem] shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200 group overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-200 relative z-10">
               <CreditCard className="w-7 h-7" />
             </div>
             <div className="mt-8 relative z-10">
@@ -264,10 +264,9 @@ export default function HomePage() {
             </div>
           </Link>
 
-          {/* Bento Item 3 (Dark mode style for AI) */}
-          <Link to="/chatbot" className="bg-slate-900 p-8 rounded-[2rem] shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden relative border border-slate-800">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 blur-3xl rounded-full group-hover:bg-purple-500/40 transition-colors duration-500"></div>
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:scale-110 transition-transform duration-500 relative z-10">
+          {/* Bento Item 3 */}
+          <Link to="/chatbot" className="bg-slate-900 p-8 rounded-[2rem] shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200 group overflow-hidden relative border border-slate-800">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-200 relative z-10">
               <Sparkles className="w-7 h-7" />
             </div>
             <div className="mt-8 relative z-10">
@@ -292,50 +291,73 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
-          {hotPackages.map((pkg, idx) => (
-            <div key={pkg.maGoi} className="relative bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(238,0,51,0.12)] hover:-translate-y-2 transition-all duration-500 flex flex-col justify-between overflow-hidden group">
-              {/* Animated Shimmer Line */}
-              <div className="absolute top-0 left-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/60 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite] transform -skew-x-12 z-20 pointer-events-none"></div>
+          {hotPackages.length === 0 ? (
+            <div className="col-span-3 text-center py-16 text-slate-400 font-medium">Đang tải gói cước...</div>
+          ) : (
+            hotPackages.map((pkg, idx) => {
+              // Format giá tiền từ số sang chuỗi
+              const giaHienThi = pkg.gia_cuoc
+                ? new Intl.NumberFormat('vi-VN').format(pkg.gia_cuoc) + 'đ'
+                : (pkg.giaTien || 'Liên hệ');
+              const dataHienThi = pkg.dung_luong_gb
+                ? `${pkg.dung_luong_gb}GB/Ngày`
+                : (pkg.dungLuong || 'Xem chi tiết');
+              const thoiHanHienThi = pkg.thoi_han_ngay
+                ? `${pkg.thoi_han_ngay} ngày`
+                : (pkg.thoiHan || '30 ngày');
+              const moTaHienThi = pkg.mo_ta || pkg.moTa || '';
+              const idGoi = pkg.id_goi || pkg.maGoi;
+              const tenGoi = pkg.ten_goi || pkg.tenGoi;
 
-              <div className="p-8 md:p-10 relative z-10">
-                <div className="flex justify-between items-center mb-8">
-                  <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 shadow-sm">
-                    <Zap className={`w-6 h-6 ${idx === 0 ? 'text-amber-500' : idx === 1 ? 'text-blue-500' : 'text-[#EE0033]'}`} />
+              return (
+                <div key={idGoi} className="relative bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(238,0,51,0.12)] hover:-translate-y-2 transition-all duration-500 flex flex-col justify-between overflow-hidden group">
+                  {/* Animated Shimmer Line */}
+                  <div className="absolute top-0 left-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/60 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite] transform -skew-x-12 z-20 pointer-events-none"></div>
+
+                  <div className="p-8 md:p-10 relative z-10">
+                    <div className="flex justify-between items-center mb-8">
+                      <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 shadow-sm">
+                        <Zap className={`w-6 h-6 ${idx === 0 ? 'text-amber-500' : idx === 1 ? 'text-blue-500' : 'text-[#EE0033]'}`} />
+                      </div>
+                      <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">Gói Cước</span>
+                    </div>
+
+                    <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">{tenGoi}</h3>
+                    <div className="flex items-baseline gap-2 mb-6">
+                      <span className="text-2xl font-black text-[#EE0033]">{giaHienThi}</span>
+                      <span className="text-sm text-slate-400 font-medium">/ {thoiHanHienThi}</span>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                        <span className="text-sm font-medium text-slate-700">{dataHienThi} data tốc độ cao</span>
+                      </div>
+                      {moTaHienThi && (
+                        <div className="flex items-center gap-3">
+                          <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                          <span className="text-sm font-medium text-slate-700 line-clamp-2">{moTaHienThi}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">Gói Cước</span>
-                </div>
 
-                <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">{pkg.tenGoi}</h3>
-                <div className="flex items-baseline gap-2 mb-6">
-                  <span className="text-2xl font-black text-[#EE0033]">{pkg.giaTien}</span>
-                  <span className="text-sm text-slate-400 font-medium">/ {pkg.thoiHan}</span>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                    <span className="text-sm font-medium text-slate-700">{pkg.dungLuong} data tốc độ cao</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                    <span className="text-sm font-medium text-slate-700 line-clamp-2">{pkg.moTa}</span>
+                  <div className="p-6 pt-0 relative z-10">
+                    <Link to={`/package/${idGoi}`} className="w-full bg-slate-900 hover:bg-[#EE0033] font-bold py-4 rounded-2xl transition-colors duration-300 flex items-center justify-center gap-2 shadow-md" style={{ color: '#ffffff' }}>
+                      Đăng ký ngay <ArrowRight className="w-4 h-4" />
+                    </Link>
                   </div>
                 </div>
-              </div>
-
-              <div className="p-6 pt-0 relative z-10">
-                <Link to={`/package/${pkg.maGoi}`} className="w-full bg-slate-900 hover:bg-[#EE0033] font-bold py-4 rounded-2xl transition-colors duration-300 flex items-center justify-center gap-2 shadow-md" style={{ color: '#ffffff' }}>
-                  Đăng ký ngay <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-          ))}
+              );
+            })
+          )}
         </div>
       </section>
 
-      {/* 4. FEATURES SECTION (FLOATING ICONS) */}
+      {/* 4. FEATURES SECTION */}
       <section className="bg-slate-900 py-24 relative overflow-hidden text-white">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-red-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+        {/* Static glow — không animate */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-red-600/8 rounded-full blur-[80px] pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-20">
@@ -350,13 +372,14 @@ export default function HomePage() {
               { icon: Headphones, color: 'text-blue-400', bg: 'bg-blue-400/10', title: 'Hỗ Trợ Siêu Tốc', desc: 'Trợ lý AI và đội ngũ chuyên viên sẵn sàng hỗ trợ bạn 24/7 không ngày nghỉ.' }
             ].map((feature, idx) => (
               <div key={idx} className="text-center group">
-                <div className={`w-24 h-24 mx-auto ${feature.bg} rounded-[2rem] flex items-center justify-center mb-8 animate-float shadow-[0_0_30px_rgba(0,0,0,0.3)] border border-white/10`} style={{ animationDelay: `${idx * 0.5}s` }}>
-                  <feature.icon className={`w-12 h-12 ${feature.color} drop-shadow-lg group-hover:scale-110 transition-transform duration-500`} />
+                <div
+                  className={`w-24 h-24 mx-auto ${feature.bg} rounded-[2rem] flex items-center justify-center mb-8 border border-white/10 animate-float`}
+                  style={{ animationDelay: `${idx * 0.6}s`, willChange: 'transform' }}
+                >
+                  <feature.icon className={`w-12 h-12 ${feature.color} group-hover:scale-110 transition-transform duration-300`} />
                 </div>
                 <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
-                <p className="text-slate-400 leading-relaxed font-medium">
-                  {feature.desc}
-                </p>
+                <p className="text-slate-400 leading-relaxed font-medium">{feature.desc}</p>
               </div>
             ))}
           </div>
