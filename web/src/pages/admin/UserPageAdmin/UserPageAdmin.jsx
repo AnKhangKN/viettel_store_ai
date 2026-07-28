@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getAllAccounts, updateAccountRole, createEmployee } from "../../../api/user/user.api";
 import { getAllBranches } from "../../../api/branch/branch.api";
 import { getAllBoothsAdmin } from "../../../api/queue/booth.api";
-import TableComponent from "../../../Components/shared/TableComponent/TableComponent";
+import TableComponent from "../../../components/shared/TableComponent/TableComponent";
 import {
   UserCheck,
   ShieldAlert,

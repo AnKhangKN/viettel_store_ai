@@ -4,7 +4,7 @@ import {
   createPackage,
   updatePackage
 } from "../../../api/package/package.api";
-import TableComponent from "../../../Components/shared/TableComponent/TableComponent";
+import TableComponent from "../../../components/shared/TableComponent/TableComponent";
 import {
   Plus,
   X,

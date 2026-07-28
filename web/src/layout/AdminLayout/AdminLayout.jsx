@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import HeaderComponentAdmin from "../../Components/admin/HeaderComponentAdmin/HeaderComponentAdmin";
-import SidebarComponentAdmin from "../../Components/admin/SidebarComponentAdmin/SidebarComponentAdmin";
+import HeaderComponentAdmin from "../../components/admin/HeaderComponentAdmin/HeaderComponentAdmin";
+import SidebarComponentAdmin from "../../components/admin/SidebarComponentAdmin/SidebarComponentAdmin";
 
 const AdminLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);

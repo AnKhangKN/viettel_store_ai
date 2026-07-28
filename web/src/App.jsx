@@ -6,8 +6,8 @@ import React, { useEffect, useState } from "react";
 import UserLayout from "./layout/UserLayout/UserLayout";
 import AdminLayout from "./layout/AdminLayout/AdminLayout";
 import StaffLayout from "./layout/StaffLayout/StaffLayout";
-import ProtectedRoute from "./Components/common/ProtectedRoute/ProtectedRoute.jsx";
-import ScrollToTop from "./Components/common/ScrollToTop/ScrollToTop.jsx";
+import ProtectedRoute from "./components/common/ProtectedRoute/ProtectedRoute.jsx";
+import ScrollToTop from "./components/common/ScrollToTop/ScrollToTop.jsx";
 
 import { store } from "./app/store";
 import { setCredentials } from "./features/auth/authSlice";

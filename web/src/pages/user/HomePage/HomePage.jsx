@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { getAllBranches } from "../../../api/branch/branch.api";
 import { getAllPackages } from "../../../api/package/package.api";
-import BranchMapSection from "./Components/BranchMapSection";
+import BranchMapSection from "./components/BranchMapSection";
 
 // Custom Hook for Number Counter Animation
 const useCountUp = (end, startAnimating, duration = 2500) => {

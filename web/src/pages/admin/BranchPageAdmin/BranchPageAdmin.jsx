@@ -4,7 +4,7 @@ import {
   createBranch,
   updateBranch
 } from "../../../api/branch/branch.api";
-import TableComponent from "../../../Components/shared/TableComponent/TableComponent";
+import TableComponent from "../../../components/shared/TableComponent/TableComponent";
 import {
   Plus,
   X,

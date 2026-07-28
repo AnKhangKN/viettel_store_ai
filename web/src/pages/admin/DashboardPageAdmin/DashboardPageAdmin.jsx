@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaUsers, FaShoppingCart, FaChartLine, FaBox } from 'react-icons/fa';
-import TableComponent from '../../../Components/shared/TableComponent/TableComponent';
+import TableComponent from '../../../components/shared/TableComponent/TableComponent';
 
 const DashboardPageAdmin = () => {
   // Dữ liệu mock phong phú cho đơn hàng gần đây để test phân trang & tìm kiếm
