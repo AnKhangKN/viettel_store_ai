@@ -2,7 +2,7 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-ARG VITE_BACKEND_URL=http://localhost:8000
+ARG VITE_BACKEND_URL=https://viettel-store-ai.onrender.com
 ENV VITE_BACKEND_URL=${VITE_BACKEND_URL}
 
 COPY package*.json ./
