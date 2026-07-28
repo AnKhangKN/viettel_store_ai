@@ -5,13 +5,10 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+load_dotenv(BASE_DIR / ".env.development", override=False)
 APP_ENV = os.getenv("APP_ENV", "development").lower()
 if APP_ENV == "production":
-    env_path = BASE_DIR / ".env.production"
-else:
-    env_path = BASE_DIR / ".env.development"
-
-load_dotenv(env_path, override=False)
+    load_dotenv(BASE_DIR / ".env.production", override=False)
 
 class Config:
 
