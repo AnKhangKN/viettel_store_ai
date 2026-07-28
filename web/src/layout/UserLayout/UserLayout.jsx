@@ -1,9 +1,9 @@
 import React from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { ArrowLeft, ChevronRight, Home, MessageSquare, Sparkles } from 'lucide-react';
-import HeaderComponent from "../../components/user/HeaderComponent/HeaderComponent";
-import NavbarComponent from "../../components/user/NavbarComponent/NavbarComponent";
-import FooterComponent from "../../components/user/FooterComponent/FooterComponent";
+import HeaderComponent from "../../Components/user/HeaderComponent/HeaderComponent";
+import NavbarComponent from "../../Components/user/NavbarComponent/NavbarComponent";
+import FooterComponent from "../../Components/user/FooterComponent/FooterComponent";
 
 const UserLayout = ({ children }) => {
   const navigate = useNavigate();

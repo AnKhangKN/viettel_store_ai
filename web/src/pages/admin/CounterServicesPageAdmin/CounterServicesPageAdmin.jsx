@@ -5,7 +5,7 @@ import {
   adminUpdateService,
   adminDeleteService
 } from "../../../api/queue/queue.api";
-import TableComponent from "../../../components/shared/TableComponent/TableComponent";
+import TableComponent from "../../../Components/shared/TableComponent/TableComponent";
 import {
   Plus,
   X,

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import HeaderComponentStaff from "../../components/staff/HeaderComponentStaff/HeaderComponentStaff";
-import SidebarComponentStaff from "../../components/staff/SidebarComponentStaff/SidebarComponentStaff";
+import HeaderComponentStaff from "../../Components/staff/HeaderComponentStaff/HeaderComponentStaff";
+import SidebarComponentStaff from "../../Components/staff/SidebarComponentStaff/SidebarComponentStaff";
 
 const StaffLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);

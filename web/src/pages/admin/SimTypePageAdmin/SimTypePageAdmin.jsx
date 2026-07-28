@@ -4,7 +4,7 @@ import {
   createSimType,
   updateSimType
 } from "../../../api/sim/sim.api";
-import TableComponent from "../../../components/shared/TableComponent/TableComponent";
+import TableComponent from "../../../Components/shared/TableComponent/TableComponent";
 import {
   Plus,
   X,
