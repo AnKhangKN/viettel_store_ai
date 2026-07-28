@@ -108,7 +108,3 @@ temp/
 # =========================
 # migrations/
 
-
-# data của khách hàng không push lên git
-/data
-*.xlsx
