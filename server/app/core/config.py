@@ -16,6 +16,11 @@ load_dotenv(env_path, override=False)
 class Config:
 
     APP_NAME = os.getenv("APP_NAME")
+    FRONTEND_ORIGINS = [
+        origin.strip()
+        for origin in os.getenv("FRONTEND_ORIGINS", "").split(",")
+        if origin.strip()
+    ]
 
     APP_ENV = os.getenv("APP_ENV")
 
