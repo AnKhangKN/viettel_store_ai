@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import HeaderComponentStaff from "../../Components/staff/HeaderComponentStaff/HeaderComponentStaff";
-import SidebarComponentStaff from "../../Components/staff/SidebarComponentStaff/SidebarComponentStaff";
+import HeaderComponentStaff from "../../components/staff/HeaderComponentStaff/HeaderComponentStaff";
+import SidebarComponentStaff from "../../components/staff/SidebarComponentStaff/SidebarComponentStaff";
 
 const StaffLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -23,9 +23,8 @@ const StaffLayout = ({ children }) => {
 
         {/* Sidebar */}
         <div
-          className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r shadow-md transition-transform duration-300 ease-in-out ${
-            isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-          }`}
+          className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r shadow-md transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+            }`}
         >
           <SidebarComponentStaff onCloseSidebar={() => setIsSidebarOpen(false)} />
         </div>
