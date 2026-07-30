@@ -22,6 +22,10 @@ def _send_smtp_email_sync(msg: MIMEMultipart, recipients: list[str]):
     username = Config.SMTP_USERNAME
     password = Config.SMTP_PASSWORD
     timeout = int(os.getenv("SMTP_TIMEOUT", "3"))
+    email_mode = os.getenv("EMAIL_DELIVERY_MODE", "smtp").strip().lower()
+
+    if email_mode != "smtp":
+        raise RuntimeError(f"Email delivery mode '{email_mode}' bypasses SMTP")
 
     if not server_host or not username or not password:
         raise RuntimeError("SMTP is not configured")
@@ -118,6 +122,11 @@ async def send_otp_email(to_email: str, otp_code: str, loai_otp: str = "REGISTER
         print(f"📧 [EMAIL OTP SENDER] Gửi thêm bản sao tới mail chủ: {owner_email}")
     print(f"🔑 [MÃ OTP ({loai_otp})]: {otp_code}")
     print(f"==================================================\n")
+
+    email_mode = os.getenv("EMAIL_DELIVERY_MODE", "smtp").strip().lower()
+    if email_mode != "smtp":
+        print(f"ℹ️ [EMAIL OTP SENDER] EMAIL_DELIVERY_MODE={email_mode}; bỏ qua gửi SMTP và chỉ log OTP để test.")
+        return True
 
     # Kiểm tra cấu hình SMTP Server
     if not Config.SMTP_USERNAME or not Config.SMTP_PASSWORD or not Config.SMTP_SERVER:
@@ -294,6 +303,11 @@ async def send_invoice_email(to_email: str, order_data: dict) -> bool:
     print(f"📧 [INVOICE EMAIL SENDER] Gửi Hóa đơn Điện tử tới: {to_email}")
     print(f"📄 Đơn hàng: #{id_don_hang} | SIM: {so_sim} | Tổng tiền: {tong_tien_str}")
     print(f"==================================================\n")
+
+    email_mode = os.getenv("EMAIL_DELIVERY_MODE", "smtp").strip().lower()
+    if email_mode != "smtp":
+        print(f"ℹ️ [INVOICE EMAIL] EMAIL_DELIVERY_MODE={email_mode}; bỏ qua gửi SMTP và chỉ log hóa đơn để test.")
+        return True
 
     if not Config.SMTP_USERNAME or not Config.SMTP_PASSWORD or not Config.SMTP_SERVER:
         print("⚠️ [INVOICE EMAIL] Thiếu cấu hình SMTP trong .env. Đã log hóa đơn điện tử lên console.")
