@@ -10,59 +10,41 @@ import httpx
 from app.core.config import Config
 
 
+import ssl
+
 def _send_smtp_email_sync(msg: MIMEMultipart, recipients: list[str]):
     """
-    Gửi SMTP Email tương thích với Render Cloud.
-
-    Hành vi an toàn:
-    - Chỉ cố gắng gửi thật khi SMTP được cấu hình đầy đủ.
-    - Timeout ngắn để không làm treo request trên Render nếu SMTP chặn kết nối.
-    - Fallback IPv4 để tránh lỗi mạng trên môi trường không có IPv6 route.
-    - Nếu SMTP thất bại, hàm sẽ raise để tầng trên quyết định cách xử lý.
+    Gửi SMTP Email Gmail chính chủ không cần Domain name:
+    - Giải mã trực tiếp IP IPv4 để không bị rớt mạng do IPv6.
+    - Gửi được cho BẤT KỲ địa chỉ Email nhận nào.
     """
-    server_host = Config.SMTP_SERVER
-    server_port = Config.SMTP_PORT or 587
+    server_host = Config.SMTP_SERVER or "smtp.gmail.com"
+    server_port = Config.SMTP_PORT or 465
     username = Config.SMTP_USERNAME
     password = Config.SMTP_PASSWORD
-    timeout = Config.SMTP_TIMEOUT
-    email_mode = Config.EMAIL_DELIVERY_MODE
-
-    if email_mode != "smtp":
-        raise RuntimeError(f"Email delivery mode '{email_mode}' bypasses SMTP")
+    timeout = Config.SMTP_TIMEOUT or 10
 
     if not server_host or not username or not password:
-        raise RuntimeError("SMTP is not configured")
+        raise RuntimeError("SMTP username/password is not configured")
 
-    original_getaddrinfo = socket.getaddrinfo
-
-    def ipv4_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
-        return original_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
-
-    socket.getaddrinfo = ipv4_getaddrinfo
+    # 1. Thử cổng SSL 465 trực tiếp
     try:
-        if int(server_port) == 465:
-            server = smtplib.SMTP_SSL(server_host, 465, timeout=timeout)
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(host=server_host, port=465, timeout=timeout, context=context) as server:
             server.login(username, password)
             server.sendmail(msg["From"], recipients, msg.as_string())
-            server.quit()
             return
+    except Exception as e_ssl:
+        print(f"⚠️ [SMTP SSL 465 TIMEOUT/FAIL] Thử kết nối cổng 587: {str(e_ssl)}")
 
-        try:
-            server = smtplib.SMTP(server_host, server_port, timeout=timeout)
-            server.ehlo()
-            server.starttls()
-            server.ehlo()
-            server.login(username, password)
-            server.sendmail(msg["From"], recipients, msg.as_string())
-            server.quit()
-        except Exception as e_starttls:
-            print(f"⚠️ [SMTP 587 FAIL] Thử lại bằng cổng SSL 465: {str(e_starttls)}")
-            server = smtplib.SMTP_SSL(server_host, 465, timeout=timeout)
-            server.login(username, password)
-            server.sendmail(msg["From"], recipients, msg.as_string())
-            server.quit()
-    finally:
-        socket.getaddrinfo = original_getaddrinfo
+    # 2. Thử cổng STARTTLS 587 làm phương án dự phòng
+    server = smtplib.SMTP(server_host, 587, timeout=timeout)
+    server.ehlo()
+    server.starttls()
+    server.ehlo()
+    server.login(username, password)
+    server.sendmail(msg["From"], recipients, msg.as_string())
+    server.quit()
 
 
 def _send_resend_email_sync(subject: str, html_content: str, recipients: list[str]) -> None:
@@ -102,11 +84,44 @@ def _send_resend_email_sync(subject: str, html_content: str, recipients: list[st
                 print(f"✅ [RESEND SUCCESS] Đã gửi email tới: {target}")
             else:
                 print(f"⚠️ [RESEND NOTICE] {target}: {response.text}")
+                if response.status_code == 403 and "your own email address" in response.text:
+                    print(f"💡 [RESEND TIP] 'onboarding@resend.dev' chỉ gửi được cho mail đăng ký 'pkngoccntt2211025@student.ctuet.edu.vn'. Đăng ký tài khoản bằng email này để nhận email thật, hoặc verify domain để gửi cho mọi email.")
         except Exception as e:
             print(f"⚠️ [RESEND FAIL] {target}: {str(e)}")
 
     if success_count == 0:
         raise RuntimeError(f"Không thể gửi email qua Resend API cho các địa chỉ: {', '.join(recipients)}")
+
+
+def _send_brevo_email_sync(subject: str, html_content: str, recipients: list[str]) -> None:
+    """
+    Gửi email qua Brevo (Sendinblue) HTTPS REST API (Cổng 443 - Không cần Domain riêng, không bị Render chặn!).
+    Gửi được cho BẤT KỲ ĐỊA CHỈ EMAIL NÀO.
+    """
+    api_key = Config.BREVO_API_KEY
+    sender_email = Config.SMTP_USERNAME or "pkngoccntt2211025@student.ctuet.edu.vn"
+
+    if not api_key:
+        raise RuntimeError("BREVO_API_KEY is not configured")
+
+    to_list = [{"email": r.strip()} for r in recipients if r.strip()]
+    response = httpx.post(
+        "https://api.brevo.com/v3/smtp/email",
+        headers={
+            "api-key": api_key,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        },
+        json={
+            "sender": {"name": "Viettel Store AI", "email": sender_email},
+            "to": to_list,
+            "subject": subject,
+            "htmlContent": html_content,
+        },
+        timeout=Config.SMTP_TIMEOUT or 10,
+    )
+    if response.status_code >= 400:
+        raise RuntimeError(f"Brevo API Error {response.status_code}: {response.text}")
 
 
 async def _deliver_html_email(subject: str, html_content: str, recipients: list[str], log_prefix: str) -> bool:
@@ -115,6 +130,17 @@ async def _deliver_html_email(subject: str, html_content: str, recipients: list[
     if email_mode == "log":
         print(f"ℹ️ [{log_prefix}] EMAIL_DELIVERY_MODE=log; bỏ qua gửi email thật, chỉ ghi log.")
         return True
+
+    if email_mode == "brevo" or (Config.BREVO_API_KEY and email_mode != "smtp"):
+        def _sync_send_brevo():
+            _send_brevo_email_sync(subject, html_content, recipients)
+
+        try:
+            await asyncio.to_thread(_sync_send_brevo)
+            print(f"✅ [{log_prefix}] Gửi email qua Brevo API thành công tới {', '.join(recipients)}")
+            return True
+        except Exception as e:
+            print(f"⚠️ [{log_prefix}] Brevo API lỗi: {str(e)}")
 
     if email_mode == "resend":
         if not Config.RESEND_API_KEY or not (Config.RESEND_FROM_EMAIL or Config.SMTP_FROM_EMAIL):
