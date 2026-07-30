@@ -63,6 +63,11 @@ class Config:
     SMTP_USERNAME = os.getenv("SMTP_USERNAME", "").strip() or None
     SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "").strip() or None
     SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", "").strip() or None
+    SMTP_TIMEOUT = int(os.getenv("SMTP_TIMEOUT", "3"))
+    EMAIL_DELIVERY_MODE = (
+        os.getenv("EMAIL_DELIVERY_MODE")
+        or ("log" if APP_ENV and APP_ENV.lower() == "production" and (not SMTP_SERVER or not SMTP_USERNAME or not SMTP_PASSWORD) else "smtp")
+    ).strip().lower()
 
 
 config = Config()

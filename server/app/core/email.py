@@ -21,8 +21,8 @@ def _send_smtp_email_sync(msg: MIMEMultipart, recipients: list[str]):
     server_port = Config.SMTP_PORT or 587
     username = Config.SMTP_USERNAME
     password = Config.SMTP_PASSWORD
-    timeout = int(os.getenv("SMTP_TIMEOUT", "3"))
-    email_mode = os.getenv("EMAIL_DELIVERY_MODE", "smtp").strip().lower()
+    timeout = Config.SMTP_TIMEOUT
+    email_mode = Config.EMAIL_DELIVERY_MODE
 
     if email_mode != "smtp":
         raise RuntimeError(f"Email delivery mode '{email_mode}' bypasses SMTP")
@@ -123,7 +123,7 @@ async def send_otp_email(to_email: str, otp_code: str, loai_otp: str = "REGISTER
     print(f"🔑 [MÃ OTP ({loai_otp})]: {otp_code}")
     print(f"==================================================\n")
 
-    email_mode = os.getenv("EMAIL_DELIVERY_MODE", "smtp").strip().lower()
+    email_mode = Config.EMAIL_DELIVERY_MODE
     if email_mode != "smtp":
         print(f"ℹ️ [EMAIL OTP SENDER] EMAIL_DELIVERY_MODE={email_mode}; bỏ qua gửi SMTP và chỉ log OTP để test.")
         return True
@@ -304,7 +304,7 @@ async def send_invoice_email(to_email: str, order_data: dict) -> bool:
     print(f"📄 Đơn hàng: #{id_don_hang} | SIM: {so_sim} | Tổng tiền: {tong_tien_str}")
     print(f"==================================================\n")
 
-    email_mode = os.getenv("EMAIL_DELIVERY_MODE", "smtp").strip().lower()
+    email_mode = Config.EMAIL_DELIVERY_MODE
     if email_mode != "smtp":
         print(f"ℹ️ [INVOICE EMAIL] EMAIL_DELIVERY_MODE={email_mode}; bỏ qua gửi SMTP và chỉ log hóa đơn để test.")
         return True
