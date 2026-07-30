@@ -566,7 +566,7 @@ const BoothPageAdmin = () => {
                     value={formData.so_quay}
                     onChange={(e) => setFormData({ ...formData, so_quay: parseInt(e.target.value) || 1 })}
                     placeholder="VD: 1"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#EE0033] focus:bg-white transition-all"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#EE0033] focus:bg-white transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     required
                   />
                 </div>

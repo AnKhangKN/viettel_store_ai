@@ -24,10 +24,16 @@ export const routes = [
     page: React.lazy(() => import("../pages/auth/ForgotPasswordPage/ForgotPasswordPage")),
   },
   {
+    path: "/verify-otp",
+    name: "Verify OTP",
+    page: React.lazy(() => import("../pages/auth/VerifyOtpPage/VerifyOtpPage")),
+  },
+  {
     path: "/logout",
     name: "Logout",
     page: React.lazy(() => import("../pages/auth/LogoutPage/LogoutPage")),
   },
+
 
 
 
@@ -44,6 +50,19 @@ export const routes = [
     page: React.lazy(() => import("../pages/user/UserProfilePage/UserProfilePage")),
     isShowUserLayout: true,
   },
+  {
+    path: "/my-orders",
+    name: "My Orders",
+    page: React.lazy(() => import("../pages/user/OrderHistoryPage/OrderHistoryPage")),
+    isShowUserLayout: true,
+  },
+  {
+    path: "/profile/orders",
+    name: "Profile Orders",
+    page: React.lazy(() => import("../pages/user/OrderHistoryPage/OrderHistoryPage")),
+    isShowUserLayout: true,
+  },
+
   {
     path: "/package",
     name: "Package",

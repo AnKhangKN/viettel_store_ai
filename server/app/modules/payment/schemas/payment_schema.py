@@ -28,6 +28,43 @@ class CreateSimOrderRequest(BaseModel):
                 return v
         return v
 
+    @field_validator("ho_ten")
+    @classmethod
+    def validate_ho_ten(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v_clean = v.strip()
+        if v_clean and len(v_clean) < 2:
+            raise ValueError("Họ và tên người đăng ký SIM phải chứa ít nhất 2 ký tự.")
+        return v_clean if v_clean else None
+
+    @field_validator("so_dien_thoai")
+    @classmethod
+    def validate_phone(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v_clean = v.strip()
+        if not v_clean:
+            return None
+        import re
+        if not re.match(r"^(0[3|5|7|8|9])+([0-9]{8})$", v_clean):
+            raise ValueError("Số điện thoại liên hệ không hợp lệ! Vui lòng nhập SĐT 10 chữ số chuẩn nhà mạng Việt Nam (bắt đầu bằng 03, 05, 07, 08, 09).")
+        return v_clean
+
+    @field_validator("cccd")
+    @classmethod
+    def validate_cccd(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v_clean = v.strip()
+        if not v_clean:
+            return None
+        import re
+        if not re.match(r"^[0-9]{12}$", v_clean):
+            raise ValueError("Số CCCD không hợp lệ! Số CCCD phải chứa đúng 12 chữ số.")
+        return v_clean
+
+
 
 class CreateSimPaymentRequest(BaseModel):
     id_don_hang: UUID | str = Field(..., description="ID của đơn hàng SIM cần thanh toán")

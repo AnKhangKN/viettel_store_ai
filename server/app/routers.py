@@ -8,6 +8,7 @@ from app.modules.package.package_routes import PackageRoutes
 from app.modules.queue.queue_routes import QueueRoutes
 from app.modules.chatbot.chatbot_routes import ChatbotRoutes
 from app.modules.payment.payment_routes import PaymentRoutes
+from app.modules.orders.order_routes import OrderRoutes
 
 api_router = APIRouter(prefix="/api")
 
@@ -18,4 +19,6 @@ api_router.include_router(SimRoutes().router)
 api_router.include_router(PackageRoutes().router)
 api_router.include_router(QueueRoutes().router)
 api_router.include_router(ChatbotRoutes().router)
-api_router.include_router(PaymentRoutes().router)
+api_router.include_router(PaymentRoutes().router)
+api_router.include_router(OrderRoutes().router)
+

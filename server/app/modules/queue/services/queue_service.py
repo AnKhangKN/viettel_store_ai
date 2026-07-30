@@ -229,9 +229,11 @@ class QueueService:
                     "so_dien_thoai": body.so_dien_thoai
                 },
                 "chi_nhanh": {
+                    "id_chi_nhanh": str(body.id_chi_nhanh),
                     "ten_chi_nhanh": branch["ten_chi_nhanh"],
                     "dia_chi": branch["dia_chi"]
                 },
+
                 "dich_vu": {
                     "ten_giao_dich": service["ten_giao_dich"]
                 }
@@ -657,7 +659,59 @@ class QueueService:
             "message": "Xóa quầy giao dịch thành công"
         }
 
+    async def get_ticket_status(self, id_phieu: str):
+        ticket = await self.repository.get_ticket_details(id_phieu)
+        if not ticket:
+            raise AppException(status_code=status.HTTP_404_NOT_FOUND, message="Phiếu thứ tự không tồn tại")
+
+        id_chi_nhanh = str(ticket["id_chi_nhanh"])
+        trang_thai = ticket["trang_thai"]
+
+        if trang_thai in ["HoanThanh", "DaHuy"]:
+            return {
+                "success": True,
+                "data": {
+                    "id_phieu": str(ticket["id_phieu"]),
+                    "so_thu_tu": ticket["so_thu_tu"],
+                    "trang_thai": trang_thai,
+                    "is_completed": True,
+                    "message": "Giao dịch tại quầy đã phục vụ hoàn thành."
+                }
+            }
+
+        # Đếm số người chờ trước phiếu này
+        waiting_count = await self.repository.count_waiting_tickets_before(id_chi_nhanh, ticket["ngay_tao"])
+        avg_time = ticket["thoi_gian_xu_ly_trung_binh"] or 15
+        so_phut_cho = max(5, waiting_count * avg_time)
+        thoi_gian_du_kien = datetime.now() + timedelta(minutes=so_phut_cho)
+
+        return {
+            "success": True,
+            "data": {
+                "id_phieu": str(ticket["id_phieu"]),
+                "so_thu_tu": ticket["so_thu_tu"],
+                "trang_thai": trang_thai,
+                "is_completed": False,
+                "so_nguoi_cho_truoc": waiting_count,
+                "so_phut_cho": so_phut_cho,
+                "thoi_gian_du_kien": thoi_gian_du_kien.isoformat(),
+                "khach_hang": {
+                    "ho_ten": ticket["ten_khach_hang"],
+                    "so_dien_thoai": ticket["so_dien_thoai"]
+                },
+                "dich_vu": {
+                    "ten_giao_dich": ticket["ten_giao_dich"]
+                },
+                "chi_nhanh": {
+                    "id_chi_nhanh": id_chi_nhanh,
+                    "ten_chi_nhanh": ticket["ten_chi_nhanh"],
+                    "dia_chi": ticket["dia_chi_chi_nhanh"]
+                }
+            }
+        }
+
 # Global Memory Storage for Booth Occupancies per branch
+
 booth_occupancy_manager = {}
 
 

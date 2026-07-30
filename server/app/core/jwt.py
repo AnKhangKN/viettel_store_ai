@@ -61,12 +61,20 @@ class Jwt:
 
     # Xác minh refresh token 
     def verify_refresh_token(self, token: str) -> dict:
-
-        return jwt.decode(
-            token,
-            self.refresh_secret,
-            algorithms=[self.algorithm],
-        )
+        try:
+            return jwt.decode(
+                token,
+                self.refresh_secret,
+                algorithms=[self.algorithm],
+            )
+        except InvalidTokenError:
+            if self.refresh_secret != self.access_secret:
+                return jwt.decode(
+                    token,
+                    self.access_secret,
+                    algorithms=[self.algorithm],
+                )
+            raise
 
     def handle_refresh_token(self, refresh_token: str):
 
@@ -75,6 +83,12 @@ class Jwt:
 
             payload.pop("exp", None)
             payload.pop("type", None)
+
+            # Đảm bảo chuẩn hóa tên trường trong payload
+            if "userId" in payload and "id_khach_hang" not in payload:
+                payload["id_khach_hang"] = payload["userId"]
+            if "role" in payload and "quyen" not in payload:
+                payload["quyen"] = payload["role"]
 
             access_token = self.create_access_token(payload)
 
@@ -94,6 +108,7 @@ class Jwt:
                 "success": False,
                 "message": "Invalid refresh token",
             }
+
 
 
 from app.core.config import Config

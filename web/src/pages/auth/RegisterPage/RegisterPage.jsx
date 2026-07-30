@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaLock, FaEye, FaEyeSlash, FaArrowLeft, FaCheckCircle, FaFacebook } from 'react-icons/fa';
-import { register } from '../../../api/auth/auth.api';
+import { FaLock, FaEye, FaEyeSlash, FaArrowLeft, FaCheckCircle } from 'react-icons/fa';
+import { register, googleLogin } from '../../../api/auth/auth.api';
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '../../../features/auth/authSlice';
+import { decodeToken } from '../../../utils/jwt';
+import GoogleLoginButton from '../../../components/common/GoogleLoginButton/GoogleLoginButton';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -15,31 +20,91 @@ const RegisterPage = () => {
     fullName: '', email: '', phone: '', password: '', confirmPassword: ''
   });
 
+  const handleGoogleSuccess = async (tokenResponse) => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await googleLogin({ accessToken: tokenResponse.access_token });
+      if (res.success && res.data) {
+        const { accessToken, user } = res.data;
+        const decoded = decodeToken(accessToken);
+        const role = decoded?.quyen || 'user';
+
+        localStorage.removeItem("staff_active_booth");
+        dispatch(setCredentials({
+          accessToken,
+          user: { ...user, role }
+        }));
+
+        if (role === 'admin') {
+          navigate('/admin/dashboard');
+        } else if (role === 'staff') {
+          navigate('/staff/dashboard');
+        } else {
+          navigate('/');
+        }
+      } else {
+        setError(res.message || 'Đăng nhập Google không thành công.');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Có lỗi xảy ra trong quá trình đăng nhập bằng Google.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleRegisterSubmit = async (e) => {
-    e.preventDefault();
-    if (!agree) {
-      setError('Vui lòng đồng ý với điều khoản sử dụng');
-      return;
+
+  const validateForm = () => {
+    const nameClean = formData.fullName.trim();
+    if (!nameClean || nameClean.length < 2) {
+      return 'Vui lòng nhập Họ và Tên của bạn (tối thiểu 2 ký tự)!';
+    }
+    const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+
+
+    if (!phoneRegex.test(formData.phone.trim())) {
+      return 'Số điện thoại không hợp lệ! Vui lòng nhập SĐT 10 chữ số chuẩn nhà mạng Việt Nam (bắt đầu bằng 03, 05, 07, 08, 09).';
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      return 'Địa chỉ Email không đúng định dạng (VD: example@gmail.com)!';
+    }
+    if (formData.password.length < 6) {
+      return 'Mật khẩu phải chứa ít nhất 6 ký tự!';
     }
     if (formData.password !== formData.confirmPassword) {
-      setError('Mật khẩu xác nhận không khớp!');
+      return 'Mật khẩu xác nhận không trùng khớp với mật khẩu đã nhập!';
+    }
+    if (!agree) {
+      return 'Vui lòng đánh dấu đồng ý với Điều khoản và Chính sách của Viettel Store!';
+    }
+    return null;
+  };
+
+  const handleRegisterSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
       return;
     }
+
     setLoading(true);
-    setError('');
     try {
       const res = await register(
-        formData.fullName,
-        formData.phone,
-        formData.email,
+        formData.fullName.trim(),
+        formData.phone.trim(),
+        formData.email.trim(),
         formData.password
       );
       if (res.success) {
-        setStep(2);
+        navigate('/verify-otp', { state: { email: formData.email.trim() } });
       } else {
         setError(res.message || 'Đăng ký không thành công.');
       }
@@ -50,16 +115,17 @@ const RegisterPage = () => {
     }
   };
 
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8f9fa] relative overflow-hidden p-4">
       {/* Decorative background blobs */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-[100px] opacity-50 animate-pulse"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#EE0033] rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
 
-      <div className="flex w-full max-w-6xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10 border border-gray-100 h-[85vh] lg:h-auto min-h-[700px]">
+      <div className="flex w-full max-w-lg lg:max-w-6xl bg-white rounded-2xl sm:rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10 border border-gray-100 my-4 sm:my-8">
 
         {/* Left Side - Branding */}
-        <div className="hidden lg:flex w-5/12 flex-col justify-center items-start text-left p-16 bg-gradient-to-br from-[#EE0033] to-[#A00022] text-white relative overflow-hidden">
+        <div className="hidden lg:flex w-5/12 flex-col justify-center items-start text-left p-12 lg:p-16 bg-gradient-to-br from-[#EE0033] to-[#A00022] text-white relative overflow-hidden">
           <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-2xl"></div>
           <div className="absolute bottom-[-20%] left-[-10%] w-80 h-80 bg-black/20 rounded-full blur-3xl"></div>
 
@@ -78,29 +144,31 @@ const RegisterPage = () => {
         </div>
 
         {/* Right Side - Forms */}
-        <div className="w-full lg:w-7/12 p-8 md:p-12 lg:px-16 flex flex-col justify-center bg-white overflow-y-auto relative">
+        <div className="w-full lg:w-7/12 p-5 sm:p-8 md:p-12 lg:px-16 flex flex-col justify-center bg-white overflow-y-auto relative">
 
-          <button onClick={() => navigate('/login')} className="absolute top-6 left-8 text-gray-400 hover:text-[#EE0033] transition flex items-center font-medium z-20">
+          <button onClick={() => navigate('/login')} className="relative sm:absolute sm:top-6 sm:left-8 mb-4 sm:mb-0 text-gray-500 hover:text-[#EE0033] transition flex items-center font-bold text-xs sm:text-sm z-20 cursor-pointer">
             <FaArrowLeft className="mr-2" /> Quay lại Đăng Nhập
           </button>
 
           {step === 1 && (
-            <div className="animate-fade-in-up mt-12">
-              <div className="mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">Tạo Tài Khoản Mới</h2>
-                <p className="text-gray-500 text-base">Đăng ký nhanh chóng để trải nghiệm dịch vụ</p>
+            <div className="animate-fade-in-up sm:mt-8">
+              <div className="mb-6 sm:mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">Tạo Tài Khoản Mới</h2>
+                <p className="text-gray-500 text-xs sm:text-base">Đăng ký nhanh chóng để trải nghiệm dịch vụ</p>
               </div>
 
+
               {/* Social Login Buttons */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <button type="button" className="flex items-center justify-center min-h-[56px] px-4 py-3 bg-white border-2 border-gray-200 text-gray-700 font-bold rounded-2xl hover:border-gray-300 transition-all shadow-sm whitespace-normal text-center">
-                  <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5 mr-2" />
-                  Google
-                </button>
-                <button type="button" className="flex items-center justify-center min-h-[56px] px-4 py-3 bg-[#1877F2] text-white font-bold rounded-2xl hover:bg-[#166fe5] transition-all shadow-sm whitespace-normal text-center">
-                  <FaFacebook className="w-5 h-5 mr-2" />
-                  Facebook
-                </button>
+              <div className="mb-6">
+                <GoogleLoginButton
+                  onSuccess={handleGoogleSuccess}
+                  onError={(err) => {
+                    console.error("Google Register Error:", err);
+                    setError("Đã hủy hoặc xảy ra lỗi khi đăng nhập bằng Google.");
+                  }}
+                  loading={loading}
+                  text="Đăng ký nhanh bằng Google"
+                />
               </div>
 
               {/* Divider */}
@@ -121,6 +189,8 @@ const RegisterPage = () => {
                     <label className="block text-sm font-bold text-gray-700 mb-2">Họ và Tên</label>
                     <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="Nguyễn Văn A" className="w-full px-5 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-[#EE0033] focus:bg-white outline-none transition-all text-gray-800" required />
                   </div>
+
+
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">Số điện thoại</label>
                     <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="098..." className="w-full px-5 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-[#EE0033] focus:bg-white outline-none transition-all text-gray-800" required />
@@ -161,8 +231,20 @@ const RegisterPage = () => {
                   {loading ? 'Đang đăng ký...' : 'Đăng Ký Tài Khoản'}
                 </button>
               </form>
+
+              {/* Divider */}
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white text-gray-500 font-medium">Hoặc đăng ký / đăng nhập với</span>
+                </div>
+              </div>
+
             </div>
           )}
+
 
           {step === 2 && (
             <div className="animate-fade-in-up flex flex-col justify-center h-full">

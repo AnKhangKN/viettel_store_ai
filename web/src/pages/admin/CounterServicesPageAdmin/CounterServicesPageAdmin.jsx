@@ -374,7 +374,7 @@ const CounterServicesPageAdmin = () => {
                   min={1}
                   value={createFormData.thoi_gian_xu_ly_trung_binh}
                   onChange={(e) => setCreateFormData(prev => ({ ...prev, thoi_gian_xu_ly_trung_binh: e.target.value }))}
-                  className="w-full h-11 px-3 border border-gray-300 rounded-xl focus:border-[#EE0033] focus:ring-1 focus:ring-[#EE0033] outline-none text-sm"
+                  className="w-full h-11 px-3 border border-gray-300 rounded-xl focus:border-[#EE0033] focus:ring-1 focus:ring-[#EE0033] outline-none text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
 
@@ -460,7 +460,7 @@ const CounterServicesPageAdmin = () => {
                   min={1}
                   value={editFormData.thoi_gian_xu_ly_trung_binh}
                   onChange={(e) => setEditFormData(prev => ({ ...prev, thoi_gian_xu_ly_trung_binh: e.target.value }))}
-                  className="w-full h-11 px-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm"
+                  className="w-full h-11 px-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
 

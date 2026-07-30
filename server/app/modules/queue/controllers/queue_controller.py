@@ -35,6 +35,10 @@ class QueueController:
     async def create_queue_ticket(self, body: QueueTicketCreateRequest):
         return await self.service.create_queue_ticket(body)
 
+    async def get_ticket_status(self, id_phieu: str):
+        return await self.service.get_ticket_status(id_phieu)
+
+
     async def get_staff_queue_tickets(self, current_user: dict = Depends(get_current_staff)):
         return await self.service.get_staff_queue_tickets(current_user["id_khach_hang"])
 

@@ -1,7 +1,10 @@
+import random
+from datetime import datetime, timezone, timedelta
 from fastapi import status, Response
 from app.core.exceptions import AppException
 from app.common.utils.uuid import generate_uuid7
 from app.core.config import Config
+from app.core.email import send_otp_email
 
 from app.core.jwt import jwt_handler
 from app.core.security import hash_password, verify_password
@@ -10,6 +13,14 @@ from app.modules.cskh.services.cskh_service import CSKHService
 from app.modules.auth.schemas.register_request import RegisterRequest
 from app.modules.auth.schemas.login_request import LoginRequest
 from app.modules.auth.schemas.google_login_request import GoogleLoginRequest
+from app.modules.auth.schemas.verify_otp_request import VerifyOtpRequest
+from app.modules.auth.schemas.resend_otp_request import ResendOtpRequest
+from app.modules.auth.schemas.forgot_password_request import ForgotPasswordRequest
+from app.modules.auth.schemas.reset_password_request import ResetPasswordRequest
+
+# Lưu trữ OTP trong bộ nhớ tạm (In-Memory OTP Store)
+# Cấu trúc: { email: { "code": "123456", "loai": "REGISTER", "expires_at": datetime } }
+_otp_store: dict[str, dict] = {}
 
 
 class AuthService:
@@ -17,12 +28,38 @@ class AuthService:
     def __init__(self):
         self.repository = AuthRepository()
         self.cskh_service = CSKHService()
-    
+
+    def _generate_and_store_otp(self, email: str, loai_otp: str) -> tuple[str, str]:
+        otp_code = str(random.randint(100000, 999999))
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+        _otp_store[email] = {
+            "code": otp_code,
+            "loai": loai_otp,
+            "expires_at": expires_at
+        }
+        # Định dạng HH:MM:SS hiển thị cho client
+        expires_at_str = (expires_at + timedelta(hours=7)).strftime("%H:%M:%S")
+        return otp_code, expires_at_str
+
     async def register(self, body: RegisterRequest):
 
         user = await self.repository.find_by_email(body.email)
 
         if user:
+            # Nếu người dùng đã tồn tại nhưng chưa xác thực email, hỗ trợ cập nhật lại mật khẩu và gửi lại OTP
+            if not user.get("da_xac_thuc_email") or user.get("trang_thai") == "ChoXacThuc":
+                hashed_password = hash_password(body.password)
+                await self.repository.update_password(body.email, hashed_password)
+                otp_code, expires_at_str = self._generate_and_store_otp(body.email, "REGISTER")
+                await send_otp_email(body.email, otp_code, "REGISTER")
+                return {
+                    "success": True,
+                    "message": f"Tài khoản chưa được kích hoạt. Mã OTP mới đã được gửi về email (Hết hạn lúc: {expires_at_str}).",
+                    "require_otp": True,
+                    "email": body.email,
+                    "expires_at_str": expires_at_str
+                }
+
             raise AppException(
                 status_code=status.HTTP_409_CONFLICT,
                 message="Email đã tồn tại",
@@ -42,7 +79,6 @@ class AuthService:
             )
 
         hashed_password = hash_password(body.password)
-
         id_khach_hang = generate_uuid7()
 
         await self.repository.create(
@@ -54,20 +90,29 @@ class AuthService:
             so_dien_thoai=body.phone
         )
 
+        otp_code, expires_at_str = self._generate_and_store_otp(body.email, "REGISTER")
+        await send_otp_email(body.email, otp_code, "REGISTER")
+
         return {
             "success": True,
-            "message": "Đăng ký thành công"
+            "message": f"Đăng ký thành công! Mã OTP (10 phút) đã gửi tới Email. Hết hạn lúc: {expires_at_str}.",
+            "require_otp": True,
+            "email": body.email,
+            "expires_at_str": expires_at_str
         }
 
     async def login(self, body: LoginRequest, response: Response):
 
         user = await self.repository.find_by_email(body.email)
+        if user is None:
+            user = await self.repository.find_by_phone(body.email)
 
         if user is None:
             raise AppException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                message="Email không tồn tại"
+                message="Tài khoản này không tồn tại trong hệ thống. Vui lòng kiểm tra lại hoặc đăng ký tài khoản mới."
             )
+
 
         if not verify_password(
             body.password,
@@ -76,6 +121,17 @@ class AuthService:
             raise AppException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 message="Sai mật khẩu"
+            )
+
+        # Kiểm tra xác thực email
+        if not user.get("da_xac_thuc_email") or user.get("trang_thai") == "ChoXacThuc":
+            otp_code, expires_at_str = self._generate_and_store_otp(body.email, "REGISTER")
+            await send_otp_email(body.email, otp_code, "REGISTER")
+
+            raise AppException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                message=f"Tài khoản chưa xác thực Email. Mã OTP mới đã gửi tới Email (Hết hạn lúc: {expires_at_str}).",
+                details={"require_otp": True, "email": body.email, "expires_at_str": expires_at_str}
             )
 
         payload = {
@@ -120,6 +176,109 @@ class AuthService:
                 "refreshToken": refresh_token
             }
         }
+
+    async def verify_otp(self, body: VerifyOtpRequest):
+        user = await self.repository.find_by_email(body.email)
+        if not user:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Không tìm thấy người dùng với Email này."
+            )
+
+        stored_data = _otp_store.get(body.email)
+        if not stored_data or stored_data["code"] != body.otp or stored_data["loai"] != body.loai_otp:
+            raise AppException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message="Mã OTP không chính xác."
+            )
+
+        if datetime.now(timezone.utc) > stored_data["expires_at"]:
+            _otp_store.pop(body.email, None)
+            raise AppException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message="Mã OTP đã hết hạn (quá 10 phút). Vui lòng bấm gửi lại mã."
+            )
+
+        if body.loai_otp == "REGISTER":
+            await self.repository.activate_user_email(body.email)
+            _otp_store.pop(body.email, None)
+            return {
+                "success": True,
+                "message": "Xác thực email thành công! Bạn có thể đăng nhập ngay bây giờ."
+            }
+        else:
+            # FORGOT_PASSWORD: Giữ OTP trong store để bước reset-password đổi mật khẩu
+            return {
+                "success": True,
+                "message": "Xác thực OTP thành công. Vui lòng nhập mật khẩu mới."
+            }
+
+    async def resend_otp(self, body: ResendOtpRequest):
+        user = await self.repository.find_by_email(body.email)
+        if not user:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Không tìm thấy người dùng với Email này."
+            )
+
+        otp_code, expires_at_str = self._generate_and_store_otp(body.email, body.loai_otp)
+        await send_otp_email(body.email, otp_code, body.loai_otp)
+
+        return {
+            "success": True,
+            "message": f"Mã OTP mới (10 phút) đã gửi về email {body.email}. Hết hạn lúc: {expires_at_str}.",
+            "expires_at_str": expires_at_str
+        }
+
+    async def forgot_password(self, body: ForgotPasswordRequest):
+        user = await self.repository.find_by_email(body.email)
+        if not user:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Email này chưa được đăng ký trong hệ thống."
+            )
+
+        otp_code, expires_at_str = self._generate_and_store_otp(body.email, "FORGOT_PASSWORD")
+        await send_otp_email(body.email, otp_code, "FORGOT_PASSWORD")
+
+        return {
+            "success": True,
+            "message": f"Mã OTP khôi phục mật khẩu (10 phút) đã gửi tới email. Hết hạn lúc: {expires_at_str}.",
+            "expires_at_str": expires_at_str
+        }
+
+    async def reset_password(self, body: ResetPasswordRequest):
+        user = await self.repository.find_by_email(body.email)
+        if not user:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Email này chưa được đăng ký trong hệ thống."
+            )
+
+        stored_data = _otp_store.get(body.email)
+        if not stored_data or stored_data["code"] != body.otp or stored_data["loai"] != "FORGOT_PASSWORD":
+            raise AppException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message="Mã OTP không hợp lệ hoặc đã hết hạn."
+            )
+
+        if datetime.now(timezone.utc) > stored_data["expires_at"]:
+            _otp_store.pop(body.email, None)
+            raise AppException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message="Mã OTP đã hết hạn (quá 10 phút). Vui lòng yêu cầu gửi lại mã."
+            )
+
+        new_hashed_password = hash_password(body.new_password)
+        await self.repository.update_password(body.email, new_hashed_password)
+        _otp_store.pop(body.email, None)
+
+        return {
+            "success": True,
+            "message": "Đổi mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới."
+        }
+
+
 
     async def logout(self, response: Response):
         is_production = Config.APP_ENV == "production"
@@ -167,7 +326,15 @@ class AuthService:
         }
 
     async def refresh_token(self, refresh_token: str | None, response: Response):
+        is_production = Config.APP_ENV == "production"
+
         if not refresh_token:
+            response.delete_cookie(
+                key="refreshToken",
+                httponly=True,
+                secure=is_production,
+                samesite="lax" if not is_production else "none"
+            )
             raise AppException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 message="Không tìm thấy refresh token"
@@ -177,9 +344,15 @@ class AuthService:
 
         res = jwt_handler.handle_refresh_token(refresh_token)
         if not res["success"]:
+            response.delete_cookie(
+                key="refreshToken",
+                httponly=True,
+                secure=is_production,
+                samesite="lax" if not is_production else "none"
+            )
             raise AppException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                message=str(res.get("message", "Refresh token không hợp lệ"))
+                message=str(res.get("message", "Refresh token không hợp lệ hoặc đã hết hạn"))
             )
 
         new_access_token = res["accessToken"]
@@ -190,6 +363,7 @@ class AuthService:
                 "accessToken": new_access_token
             }
         }
+
 
     async def google_login(self, body: GoogleLoginRequest, response: Response):
         google_id = None

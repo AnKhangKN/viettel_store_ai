@@ -4,7 +4,8 @@ import { Phone, Mail, MapPin, ShieldCheck, Clock, Headphones, Smartphone } from 
 
 const FooterComponent = () => {
   return (
-    <footer className="bg-slate-900 text-slate-300 pt-16 pb-10 border-t border-slate-800 relative overflow-hidden">
+    <footer className="bg-slate-900 text-slate-300 pt-16 pb-10 border-t border-slate-800 relative overflow-hidden no-print">
+
       {/* Background glow highlights */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>

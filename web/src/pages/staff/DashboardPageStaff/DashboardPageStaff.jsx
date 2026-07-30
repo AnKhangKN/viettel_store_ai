@@ -40,12 +40,17 @@ const DashboardPageStaff = () => {
     return () => clearInterval(timer);
   }, []);
 
+  const [branchId, setBranchId] = useState(null);
+
   const fetchTickets = async () => {
     try {
       setLoading(true);
       const res = await getStaffQueueTickets();
       if (res?.success && Array.isArray(res?.data)) {
         setTickets(res.data);
+        if (res.id_chi_nhanh) {
+          setBranchId(res.id_chi_nhanh);
+        }
       }
     } catch (err) {
       console.error("Lỗi tải hàng chờ dashboard:", err);
@@ -53,8 +58,6 @@ const DashboardPageStaff = () => {
       setLoading(false);
     }
   };
-
-  const [branchId, setBranchId] = useState("default_branch");
 
   const fetchBooths = async () => {
     try {
@@ -84,6 +87,8 @@ const DashboardPageStaff = () => {
 
   // WebSocket for real-time updates
   useEffect(() => {
+    if (!branchId) return;
+
     const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
     const hostUrl = backendUrl.replace(/^https?:\/\//, "");
     const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -109,6 +114,7 @@ const DashboardPageStaff = () => {
       socket.close();
     };
   }, [branchId]);
+
 
   // Compute Live Stats
   const waitingTickets = tickets.filter((t) => t.trang_thai === "ChoXuLy");

@@ -7,7 +7,6 @@ export const login = async (email, password) => {
         });
         return response.data;
     } catch (error) {
-        console.error("Login error:", error);
         throw error;
     }
 };
@@ -30,7 +29,6 @@ export const register = async (name, phone, email, password) => {
         });
         return response.data;
     } catch (error) {
-        console.error("Register error:", error);
         throw error;
     }
 };
@@ -45,7 +43,65 @@ export const googleLogin = async ({ idToken, accessToken }) => {
         });
         return response.data;
     } catch (error) {
-        console.error("Google login error:", error);
         throw error;
     }
-};
+};
+
+export const verifyOtp = async (email, otp, loaiOtp = "REGISTER") => {
+    try {
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/verify-otp`, {
+            email,
+            otp,
+            loai_otp: loaiOtp
+        }, {
+            withCredentials: true,
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const resendOtp = async (email, loaiOtp = "REGISTER") => {
+    try {
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/resend-otp`, {
+            email,
+            loai_otp: loaiOtp
+        }, {
+            withCredentials: true,
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const forgotPassword = async (email) => {
+    try {
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/forgot-password`, {
+            email
+        }, {
+            withCredentials: true,
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const resetPassword = async (email, otp, newPassword) => {
+    try {
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/reset-password`, {
+            email,
+            otp,
+            new_password: newPassword
+        }, {
+            withCredentials: true,
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+

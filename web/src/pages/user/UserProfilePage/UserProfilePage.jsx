@@ -45,32 +45,71 @@ const UserProfilePage = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const validateProfileForm = () => {
+    const nameClean = formData.ho_ten.trim();
+    if (!nameClean || nameClean.length < 2) {
+      return "Họ và tên phải chứa tối thiểu 2 ký tự!";
+    }
+
+    const phoneClean = formData.so_dien_thoai.trim();
+    if (phoneClean) {
+      const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+      if (!phoneRegex.test(phoneClean)) {
+        return "Số điện thoại không hợp lệ! Vui lòng nhập SĐT 10 chữ số chuẩn nhà mạng Việt Nam (bắt đầu bằng 03, 05, 07, 08, 09).";
+      }
+    }
+
+    const emailClean = formData.email.trim();
+    if (emailClean) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailClean)) {
+        return "Địa chỉ Email không đúng định dạng (VD: example@gmail.com)!";
+      }
+    }
+
+    const cccdClean = formData.cccd.trim();
+    if (cccdClean) {
+      const cccdRegex = /^[0-9]{12}$/;
+      if (!cccdRegex.test(cccdClean)) {
+        return "Số CCCD không hợp lệ! Số CCCD phải chứa đúng 12 chữ số.";
+      }
+    }
+
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     setMessage({ text: '', type: '' });
-    
+
+    const validationError = validateProfileForm();
+    if (validationError) {
+      setMessage({ text: validationError, type: 'error' });
+      return;
+    }
+
+    setIsLoading(true);
     try {
       await updateProfile({
-        ho_ten: formData.ho_ten,
-        so_dien_thoai: formData.so_dien_thoai,
-        email: formData.email,
-        cccd: formData.cccd,
-        dia_chi: formData.dia_chi
+        ho_ten: formData.ho_ten.trim(),
+        so_dien_thoai: formData.so_dien_thoai.trim(),
+        email: formData.email.trim(),
+        cccd: formData.cccd.trim(),
+        dia_chi: formData.dia_chi.trim()
       });
       
       dispatch(setCredentials({ 
         user: { 
           ...user, 
-          name: formData.ho_ten,
-          phone: formData.so_dien_thoai,
-          email: formData.email,
-          cccd: formData.cccd,
-          dia_chi: formData.dia_chi
+          name: formData.ho_ten.trim(),
+          phone: formData.so_dien_thoai.trim(),
+          email: formData.email.trim(),
+          cccd: formData.cccd.trim(),
+          dia_chi: formData.dia_chi.trim()
         } 
       }));
       
-      setMessage({ text: 'Cập nhật thông tin thành công!', type: 'success' });
+      setMessage({ text: 'Cập nhật thông tin cá nhân thành công!', type: 'success' });
       setIsEditing(false);
     } catch (error) {
       setMessage({ text: error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật thông tin.', type: 'error' });
@@ -83,13 +122,18 @@ const UserProfilePage = () => {
     e.preventDefault();
     setPassMessage({ text: '', type: '' });
 
+    if (!passData.mat_khau_cu) {
+      setPassMessage({ text: 'Vui lòng nhập mật khẩu hiện tại của bạn', type: 'error' });
+      return;
+    }
+
     if (passData.mat_khau_moi.length < 6) {
-      setPassMessage({ text: 'Mật khẩu mới phải có ít nhất 6 ký tự', type: 'error' });
+      setPassMessage({ text: 'Mật khẩu mới phải có tối thiểu 6 ký tự', type: 'error' });
       return;
     }
 
     if (passData.mat_khau_moi !== passData.xac_nhan_mat_khau) {
-      setPassMessage({ text: 'Xác nhận mật khẩu mới không khớp', type: 'error' });
+      setPassMessage({ text: 'Xác nhận mật khẩu mới không trùng khớp', type: 'error' });
       return;
     }
 
@@ -103,6 +147,7 @@ const UserProfilePage = () => {
       setPassMessage({ text: 'Đổi mật khẩu thành công!', type: 'success' });
       setPassData({ mat_khau_cu: '', mat_khau_moi: '', xac_nhan_mat_khau: '' });
     } catch (error) {
+
       setPassMessage({ text: error.response?.data?.message || 'Không thể đổi mật khẩu. Vui lòng kiểm tra lại mật khẩu cũ.', type: 'error' });
     } finally {
       setIsPassLoading(false);

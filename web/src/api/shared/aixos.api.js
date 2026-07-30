@@ -1,6 +1,6 @@
 import axios from "axios";
 import { store } from "../../app/store";
-import { setCredentials } from "../../features/auth/authSlice";
+import { clearCredentials, setCredentials } from "../../features/auth/authSlice";
 
 export const axiosJWT = axios.create({
     baseURL: import.meta.env.VITE_BACKEND_URL,
@@ -24,18 +24,23 @@ axiosJWT.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (
+            error.response?.status === 401 &&
+            !originalRequest._retry &&
+            !originalRequest.url?.includes("/auth/refresh-token")
+        ) {
             originalRequest._retry = true;
 
             const res = await refreshToken();
 
-            const newAccessToken = res.data.accessToken;
+            if (res?.success && res?.data?.accessToken) {
+                const newAccessToken = res.data.accessToken;
+                store.dispatch(setCredentials({ accessToken: newAccessToken }));
+                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                return axiosJWT(originalRequest);
+            }
 
-            store.dispatch(setCredentials({ accessToken: newAccessToken }));
-
-            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-            return axiosJWT(originalRequest);
+            store.dispatch(clearCredentials());
         }
 
         return Promise.reject(error);
@@ -54,8 +59,10 @@ export const refreshToken = async () => {
         );
         return response.data;
     } catch (error) {
-        console.error("Lỗi cấp token mới:", error);
-        throw error;
+        if (error.response?.status === 401) {
+            return { success: false, message: "Chưa đăng nhập hoặc phiên đã hết hạn" };
+        }
+        return { success: false, message: error.message || "Lỗi cấp token mới" };
     }
 }
 

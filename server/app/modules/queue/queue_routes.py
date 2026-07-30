@@ -16,6 +16,8 @@ class QueueRoutes:
         # Public APIs
         self.router.get("/services")(controller.get_all_services)
         self.router.post("/ticket")(controller.create_queue_ticket)
+        self.router.get("/tickets/{id_phieu}")(controller.get_ticket_status)
+
 
         # Staff APIs (Nhân viên cửa hàng & Admin)
         self.router.get("/staff/tickets")(controller.get_staff_queue_tickets)

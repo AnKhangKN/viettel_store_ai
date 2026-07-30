@@ -88,6 +88,27 @@ export default function SimCheckoutPage() {
     }
   }, [id]);
 
+  const validateOrderForm = () => {
+    const nameClean = fullname.trim();
+    if (!nameClean || nameClean.length < 2) {
+      return "Vui lòng nhập Họ và tên đầy đủ (tối thiểu 2 ký tự)!";
+    }
+
+    const phoneClean = phone.trim();
+    const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+    if (!phoneRegex.test(phoneClean)) {
+      return "Số điện thoại liên hệ không hợp lệ! Vui lòng nhập SĐT 10 chữ số chuẩn nhà mạng Việt Nam (bắt đầu bằng 03, 05, 07, 08, 09).";
+    }
+
+    const cccdClean = cccd.trim();
+    const cccdRegex = /^[0-9]{12}$/;
+    if (!cccdRegex.test(cccdClean)) {
+      return "Số CCCD không hợp lệ! Số CCCD/CMND dùng đăng ký chính chủ phải chứa đúng 12 chữ số.";
+    }
+
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const branchId = selectedBranch || (branches.length > 0 ? branches[0].id_chi_nhanh : "");
@@ -101,6 +122,13 @@ export default function SimCheckoutPage() {
       alert("Không tìm thấy thông tin số SIM.");
       return;
     }
+
+    const validationError = validateOrderForm();
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
+
 
     setSubmitting(true);
     try {
@@ -162,22 +190,25 @@ export default function SimCheckoutPage() {
     );
   }
 
-  if (!sim) {
+  const isSold = sim && (sim.trang_thai === "DaBan" || sim.trang_thai === "DaThanhToan");
+
+  if (!sim || isSold) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-xl border border-slate-200">
-          <h2 className="text-xl font-bold text-slate-900 mb-2">Thông tin SIM không tồn tại</h2>
-          <p className="text-slate-500 text-xs mb-6">Số SIM này có thể đã được người khác đặt mua hoặc không còn tồn tại trong hệ thống.</p>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">SIM này không còn sẵn có</h2>
+          <p className="text-slate-500 text-xs mb-6">Số SIM này đã được khách hàng khác đặt mua thành công hoặc không còn có sẵn trong hệ thống.</p>
           <button
             onClick={() => navigate("/buysim")}
             className="w-full bg-[#EE0033] text-white py-3 rounded-xl font-bold text-xs hover:bg-red-700 transition cursor-pointer"
           >
-            Quay lại kho SIM
+            Quay lại chọn số SIM khác
           </button>
         </div>
       </div>
     );
   }
+
 
   const giaSim = sim.gia_ban;
   const phiHoaMang = 50000;

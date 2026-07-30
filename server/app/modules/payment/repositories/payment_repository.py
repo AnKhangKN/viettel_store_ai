@@ -141,8 +141,9 @@ class PaymentRepository:
                 sim_row = await conn.fetchrow(sql_sim, id_sim)
                 if not sim_row:
                     raise ValueError("Không tìm thấy thông tin SIM")
-                if sim_row["trang_thai"] != "ConHang":
-                    raise ValueError("SIM này không còn sẵn có để đặt mua")
+                if sim_row["trang_thai"] in ("DaBan", "DaThanhToan"):
+                    raise ValueError("Số SIM này đã được đặt mua thành công và không còn sẵn có.")
+
 
                 # 2. Xử lý thông tin khách hàng (người mua thực sự)
                 customer_id = None
@@ -458,3 +459,81 @@ class PaymentRepository:
         """
         row = await pool.fetchrow(sql, id_thanh_toan)
         return dict(row) if row else None
+
+    async def get_full_order_invoice_data(self, id_don_hang: UUID) -> Optional[Dict[str, Any]]:
+        """
+        Lấy đầy đủ cấu trúc dữ liệu của đơn hàng để tạo Hóa đơn điện tử gửi Email.
+        """
+        pool = get_pool()
+        sql = """
+            SELECT 
+                dh.id_don_hang,
+                dh.tong_tien,
+                dh.trang_thai AS trang_thai_don_hang,
+                dh.ngay_dat_hang,
+                s.id_sim,
+                s.so_sim,
+                s.gia_ban AS gia_sim,
+                ls.ten_loai_sim,
+                cn.id_chi_nhanh,
+                cn.ten_chi_nhanh,
+                cn.dia_chi AS dia_chi_chi_nhanh,
+                cn.so_hotline AS hotline_chi_nhanh,
+                kh.ho_ten,
+                kh.so_dien_thoai,
+                kh.email,
+                kh.cccd,
+                kh.dia_chi AS dia_chi_khach_hang,
+                tt.id_thanh_toan,
+                tt.phuong_thuc,
+                tt.ma_giao_dich,
+                tt.trang_thai AS trang_thai_thanh_toan,
+                COALESCE(tt.da_nhan, false) AS da_nhan,
+                tt.thoi_gian_nhan,
+                tt.thoi_gian_thanh_toan
+            FROM donhangsim dh
+            JOIN chitietdonhang ct ON dh.id_don_hang = ct.id_don_hang
+            JOIN sim s ON ct.id_sim = s.id_sim
+            JOIN chinhanh cn ON dh.id_chi_nhanh = cn.id_chi_nhanh
+            LEFT JOIN loaisim ls ON s.id_loai_sim = ls.id_loai_sim
+            LEFT JOIN khachhang kh ON dh.id_khach_hang = kh.id_khach_hang
+            LEFT JOIN thanhtoan tt ON dh.id_don_hang = tt.id_don_hang
+            WHERE dh.id_don_hang = $1 AND dh.da_xoa = false
+        """
+        db_uuid = UUID(str(id_don_hang)) if isinstance(id_don_hang, str) else id_don_hang
+        r = await pool.fetchrow(sql, db_uuid)
+        if not r:
+            return None
+
+        gia_sim = float(r["gia_sim"]) if r["gia_sim"] else 0.0
+        phi_hoa_mang = 50000.0
+        tong_tien = float(r["tong_tien"]) if r["tong_tien"] else (gia_sim + phi_hoa_mang)
+
+        return {
+            "id_don_hang": str(r["id_don_hang"]),
+            "so_sim": r["so_sim"],
+            "ten_loai_sim": r["ten_loai_sim"] or "SIM Số Đẹp",
+            "gia_sim": gia_sim,
+            "phi_hoa_mang": phi_hoa_mang,
+            "tong_tien": tong_tien,
+            "trang_thai_don_hang": r["trang_thai_don_hang"],
+            "ngay_dat_hang": r["ngay_dat_hang"].strftime("%H:%M:%S %d/%m/%Y") if r["ngay_dat_hang"] else None,
+            "khach_hang": {
+                "ho_ten": r["ho_ten"] or "Khách hàng",
+                "so_dien_thoai": r["so_dien_thoai"],
+                "email": r["email"],
+                "cccd": r["cccd"],
+                "dia_chi": r["dia_chi_khach_hang"]
+            },
+            "chi_nhanh": {
+                "ten_chi_nhanh": r["ten_chi_nhanh"],
+                "dia_chi": r["dia_chi_chi_nhanh"],
+                "hotline": r["hotline_chi_nhanh"]
+            },
+            "thanh_toan": {
+                "phuong_thuc": r["phuong_thuc"] or "VNPay",
+                "ma_giao_dich": r["ma_giao_dich"],
+                "trang_thai": r["trang_thai_thanh_toan"]
+            }
+        }
+

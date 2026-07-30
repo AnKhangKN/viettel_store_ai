@@ -21,12 +21,15 @@ export default function ChatbotPage() {
   const [loadingBranches, setLoadingBranches] = useState(true);
 
   const sampleQuestions = [
-    { label: 'Gói cước Data 5G Viettel nào hot nhất?', type: 'goi_cuoc' },
-    { label: 'Hướng dẫn mua SIM số đẹp & nhận tại quầy?', type: 'mua_sim' },
-    { label: 'Cách đặt lịch lấy số thứ tự giao dịch online?', type: 'so_thu_tu' },
-    { label: 'Thanh toán đơn hàng qua VNPay Sandbox như thế nào?', type: 'vnpay' },
-    { label: 'Tra cứu địa chỉ & hotline cửa hàng Viettel gần nhất?', type: 'cua_hang' }
+    { label: '🔥 Gói cước Data 4G/5G Viettel ưu đãi nhất hôm nay?', type: 'goi_cuoc' },
+    { label: '📲 Hướng dẫn chọn & đặt mua SIM số đẹp Viettel?', type: 'mua_sim' },
+    { label: '⚡ Cách lấy số thứ tự ưu tiên giao dịch quầy online?', type: 'so_thu_tu' },
+    { label: '📍 Tra cứu cửa hàng Viettel Store gần nhất & hotline?', type: 'cua_hang' },
+    { label: '🎁 Tư vấn các gói cước gọi & Data Viettel mới nhất?', type: 'goi_cuoc_moi' }
   ];
+
+
+
 
   const [messages, setMessages] = useState([
     {
@@ -113,72 +116,21 @@ export default function ChatbotPage() {
   };
 
   return (
-    <div className="bg-slate-50 text-slate-800 font-sans min-h-[calc(100vh-140px)] py-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 h-[720px]">
+    <div className="bg-slate-50 text-slate-800 font-sans min-h-[calc(100vh-140px)] py-4 sm:py-6 px-3 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6">
 
-        {/* SIDEBAR BÊN TRÁI: GỢI Ý CÂU HỎI & CỬA HÀNG */}
-        <aside className="w-full lg:w-80 flex flex-col gap-4 flex-shrink-0 h-full">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-5 flex flex-col">
-            <h2 className="text-xs font-black text-[#EE0033] flex items-center gap-1.5 uppercase tracking-wider mb-3">
-              <Sparkles className="w-4 h-4 text-purple-600" /> Gợi ý câu hỏi nhanh
-            </h2>
-            <p className="text-[11px] text-slate-500 mb-3 leading-relaxed">
-              Nhấp vào các chủ đề mẫu để thử nghiệm khả năng trả lời thông minh của Trợ lý AI:
-            </p>
-            <div className="space-y-2 overflow-y-auto pr-1 flex-1">
-              {sampleQuestions.map((q, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSend(q.label)}
-                  className="w-full text-left text-xs bg-white border border-slate-200 hover:border-purple-300 hover:bg-purple-50/60 p-3 rounded-2xl transition-all font-bold text-slate-700 hover:text-purple-700 flex items-start gap-2.5 group cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5"
-                >
-                  <span className="bg-purple-100 group-hover:bg-purple-600 text-purple-700 group-hover:text-white w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 font-black text-[10px] mt-0.5 transition-colors">
-                    {idx + 1}
-                  </span>
-                  <span className="leading-snug">{q.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-slate-900 rounded-3xl p-5 text-white shadow-xs flex-1 flex flex-col overflow-hidden border border-slate-800">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-2 mb-3">
-              <Store className="w-4 h-4 text-red-400" /> Điểm giao dịch Viettel
-            </h3>
-            {loadingBranches ? (
-              <div className="flex-1 flex items-center justify-center text-xs text-slate-500">
-                Đang tải hệ thống cửa hàng...
-              </div>
-            ) : branches.length > 0 ? (
-              <div className="space-y-2.5 overflow-y-auto pr-1 flex-1">
-                {branches.map((b) => (
-                  <div key={b.id_chi_nhanh} className="bg-slate-800/80 p-3 rounded-2xl border border-slate-700/60 text-xs">
-                    <p className="font-extrabold text-slate-200">{b.ten_chi_nhanh}</p>
-                    <p className="text-slate-400 text-[11px] mt-1 line-clamp-2">📍 {b.dia_chi}</p>
-                    <p className="text-red-400 font-bold mt-1 text-[11px]">Hotline: {b.so_hotline}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex-1 flex items-center justify-center text-xs text-slate-500">
-                Chưa có dữ liệu cửa hàng.
-              </div>
-            )}
-          </div>
-        </aside>
-
-        {/* CHAT MAIN BOX */}
-        <main className="flex-1 bg-white rounded-3xl border border-slate-200 shadow-xs flex flex-col overflow-hidden h-full">
+        {/* CHAT MAIN BOX (ƯU TIÊN HIỂN THỊ TRÊN CÙNG TRÊN CẢ MOBILE LẪN DESKTOP) */}
+        <main className="flex-1 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col overflow-hidden h-[540px] sm:h-[600px] lg:h-[720px]">
 
           {/* Header */}
-          <div className="bg-gradient-to-r from-purple-700 via-indigo-700 to-purple-800 px-6 py-4 flex items-center justify-between text-white flex-shrink-0 shadow-xs">
+          <div className="bg-gradient-to-r from-purple-700 via-indigo-700 to-purple-800 px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between text-white flex-shrink-0 shadow-xs">
             <div className="flex items-center gap-3">
               <div className="bg-white/15 p-2 rounded-2xl border border-white/20 backdrop-blur-md">
-                <Bot className="w-6 h-6 text-white" />
+                <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-extrabold text-sm tracking-wide">Trợ Lý Ảo Viettel AI (Gemini 2026)</h3>
-                <p className="text-[11px] text-purple-200 flex items-center gap-1.5 mt-0.5">
+                <h3 className="font-extrabold text-xs sm:text-sm tracking-wide">Trợ Lý Ảo Viettel AI (Gemini 2026)</h3>
+                <p className="text-[10px] sm:text-[11px] text-purple-200 flex items-center gap-1.5 mt-0.5">
                   <span className="h-2 w-2 bg-emerald-400 rounded-full inline-block animate-pulse"></span>
                   Trực tuyến 24/7 • Kết nối dữ liệu gói cước & SIM
                 </p>
@@ -191,16 +143,16 @@ export default function ChatbotPage() {
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className={`flex items-start gap-3 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
+                className={`flex items-start gap-2.5 sm:gap-3 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
               >
-                <div className={`p-2.5 rounded-2xl flex-shrink-0 shadow-2xs ${
+                <div className={`p-2 sm:p-2.5 rounded-2xl flex-shrink-0 shadow-2xs ${
                   msg.sender === 'user' ? 'bg-[#EE0033] text-white' : 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white'
                 }`}>
-                  {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                  {msg.sender === 'user' ? <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Bot className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
                 </div>
 
                 <div className="max-w-[85%] sm:max-w-[75%]">
-                  <div className={`p-4 rounded-3xl text-xs sm:text-sm leading-relaxed whitespace-pre-line shadow-2xs border ${
+                  <div className={`p-3.5 sm:p-4 rounded-3xl text-xs sm:text-sm leading-relaxed whitespace-pre-line shadow-2xs border ${
                     msg.sender === 'user'
                       ? 'bg-white text-slate-800 border-red-100 rounded-tr-none'
                       : 'bg-white text-slate-800 border-purple-100 rounded-tl-none'
@@ -214,7 +166,7 @@ export default function ChatbotPage() {
 
             {isTyping && (
               <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-2xl flex-shrink-0 bg-gradient-to-br from-purple-600 to-indigo-600 text-white">
+                <div className="p-2 sm:p-2.5 rounded-2xl flex-shrink-0 bg-gradient-to-br from-purple-600 to-indigo-600 text-white">
                   <Bot className="w-4 h-4" />
                 </div>
                 <div className="bg-white text-slate-800 border border-purple-100 p-3.5 rounded-3xl rounded-tl-none shadow-2xs flex items-center gap-2">
@@ -229,15 +181,15 @@ export default function ChatbotPage() {
             )}
           </div>
 
-          {/* Footer Input Bar */}
-          <div className="p-4 border-t border-slate-200 bg-white flex-shrink-0">
+          {/* Footer Input Bar (LUÔN KHÓA NỔI Ở ĐÁY KHUNG CHAT) */}
+          <div className="p-3 sm:p-4 border-t border-slate-200 bg-white flex-shrink-0">
             <form
               onSubmit={(e) => { e.preventDefault(); handleSend(inputValue); }}
-              className="flex items-center gap-2 bg-slate-50 border border-slate-300 rounded-2xl px-4 py-2 focus-within:ring-2 focus-within:ring-purple-600 focus-within:bg-white transition-all"
+              className="flex items-center gap-2 bg-slate-50 border border-slate-300 rounded-2xl px-3 sm:px-4 py-1.5 sm:py-2 focus-within:ring-2 focus-within:ring-purple-600 focus-within:bg-white transition-all"
             >
               <input
                 type="text"
-                placeholder="Nhập nội dung bạn cần hỏi Trợ lý AI Viettel..."
+                placeholder="Nhập câu hỏi cho Trợ lý AI Viettel..."
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 className="flex-1 bg-transparent border-none text-xs sm:text-sm focus:outline-none py-1.5 text-slate-800 placeholder-slate-400"
@@ -245,7 +197,7 @@ export default function ChatbotPage() {
               <button
                 type="submit"
                 disabled={!inputValue.trim()}
-                className={`p-2.5 rounded-xl transition-all shadow-2xs cursor-pointer ${
+                className={`p-2 sm:p-2.5 rounded-xl transition-all shadow-2xs cursor-pointer ${
                   inputValue.trim()
                     ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:opacity-90'
                     : 'bg-slate-200 text-slate-400 cursor-not-allowed'
@@ -258,7 +210,59 @@ export default function ChatbotPage() {
 
         </main>
 
+        {/* SIDEBAR PHỤ: GỢI Ý CÂU HỎI & CỬA HÀNG (NẰM DƯỚI KHUNG CHAT KHI MỞ TRÊN MOBILE) */}
+        <aside className="w-full lg:w-80 flex flex-col gap-4 flex-shrink-0">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-4 sm:p-5 flex flex-col">
+            <h2 className="text-xs font-black text-[#EE0033] flex items-center gap-1.5 uppercase tracking-wider mb-2 sm:mb-3">
+              <Sparkles className="w-4 h-4 text-purple-600" /> Gợi ý câu hỏi nhanh
+            </h2>
+            <p className="text-[11px] text-slate-500 mb-3 leading-relaxed">
+              Nhấp vào các chủ đề mẫu để gửi nhanh câu hỏi:
+            </p>
+            <div className="space-y-2 max-h-48 lg:max-h-none overflow-y-auto pr-1">
+              {sampleQuestions.map((q, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSend(q.label)}
+                  className="w-full text-left text-xs bg-white border border-slate-200 hover:border-purple-300 hover:bg-purple-50/60 p-2.5 sm:p-3 rounded-2xl transition-all font-bold text-slate-700 hover:text-purple-700 flex items-start gap-2.5 group cursor-pointer shadow-2xs hover:shadow-sm"
+                >
+                  <span className="bg-purple-100 group-hover:bg-purple-600 text-purple-700 group-hover:text-white w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 font-black text-[10px] mt-0.5 transition-colors">
+                    {idx + 1}
+                  </span>
+                  <span className="leading-snug">{q.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-slate-900 rounded-3xl p-4 sm:p-5 text-white shadow-xs flex flex-col overflow-hidden border border-slate-800">
+            <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-2 mb-3">
+              <Store className="w-4 h-4 text-red-400" /> Điểm giao dịch Viettel
+            </h3>
+            {loadingBranches ? (
+              <div className="py-4 text-center text-xs text-slate-500">
+                Đang tải hệ thống cửa hàng...
+              </div>
+            ) : branches.length > 0 ? (
+              <div className="space-y-2.5 max-h-40 lg:max-h- none overflow-y-auto pr-1">
+                {branches.map((b) => (
+                  <div key={b.id_chi_nhanh} className="bg-slate-800/80 p-3 rounded-2xl border border-slate-700/60 text-xs">
+                    <p className="font-extrabold text-slate-200">{b.ten_chi_nhanh}</p>
+                    <p className="text-slate-400 text-[11px] mt-1 line-clamp-2">📍 {b.dia_chi}</p>
+                    <p className="text-red-400 font-bold mt-1 text-[11px]">Hotline: {b.so_hotline}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-4 text-center text-xs text-slate-500">
+                Chưa có dữ liệu cửa hàng.
+              </div>
+            )}
+          </div>
+        </aside>
+
       </div>
     </div>
   );
+
 }

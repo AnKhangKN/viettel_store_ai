@@ -5,10 +5,15 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-load_dotenv(BASE_DIR / ".env.development", override=False)
-APP_ENV = os.getenv("APP_ENV", "development").lower()
-if APP_ENV == "production":
-    load_dotenv(BASE_DIR / ".env.production", override=False)
+app_env_initial = os.getenv("APP_ENV", "development").lower()
+
+if (BASE_DIR / ".env").exists():
+    load_dotenv(BASE_DIR / ".env", override=True)
+elif app_env_initial == "production":
+    load_dotenv(BASE_DIR / ".env.production", override=True)
+else:
+    load_dotenv(BASE_DIR / ".env.development", override=True)
+
 
 class Config:
 
@@ -51,6 +56,13 @@ class Config:
     VNPAY_API_URL = os.getenv("VNPAY_API_URL")
 
     GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+
+    SMTP_SERVER = os.getenv("SMTP_SERVER", "").strip() or None
+    smtp_port_raw = os.getenv("SMTP_PORT")
+    SMTP_PORT = int(smtp_port_raw) if smtp_port_raw is not None and smtp_port_raw.strip() else None
+    SMTP_USERNAME = os.getenv("SMTP_USERNAME", "").strip() or None
+    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "").strip() or None
+    SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", "").strip() or None
 
 
 config = Config()

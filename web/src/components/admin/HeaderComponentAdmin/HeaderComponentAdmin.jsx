@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-import { Bell, Search, LogOut, User, Menu, Settings } from "lucide-react";
+import { Bell, Search, LogOut, User, Menu, Settings, Sun, Moon } from "lucide-react";
+import { useTheme } from "../../../context/ThemeContext";
 
 const HeaderComponentAdmin = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
+  const { theme, toggleTheme } = useTheme();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -49,7 +51,17 @@ const HeaderComponentAdmin = ({ onToggleSidebar }) => {
       </div>
 
       {/* Right: Notification & User profile */}
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-3 sm:gap-4">
+        {/* Theme Dark/Light Toggle */}
+        <button
+          type="button"
+          onClick={toggleTheme}
+          title={theme === 'dark' ? 'Chuyển sang Giao diện Sáng' : 'Chuyển sang Giao diện Tối'}
+          className="p-2.5 rounded-xl text-gray-500 hover:text-[#EE0033] hover:bg-red-50 transition-all cursor-pointer flex items-center justify-center"
+        >
+          {theme === 'dark' ? <Sun className="w-5 h-5 text-yellow-400 animate-in spin-in-90 duration-300" /> : <Moon className="w-5 h-5 text-slate-600 animate-in spin-in-90 duration-300" />}
+        </button>
+
         {/* Notifications */}
         <button className="relative p-2.5 text-gray-500 hover:text-[#EE0033] hover:bg-red-50 rounded-xl transition-all cursor-pointer">
           <Bell className="w-5 h-5" />

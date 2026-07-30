@@ -1,9 +1,11 @@
+import asyncio
 from datetime import datetime
 from typing import Dict, Any, Optional
 from uuid import UUID, uuid4
 
 from app.core.config import config
 from app.core.exceptions import AppException
+from app.core.email import send_invoice_email
 from app.common.vnpay_helper import VNPayHelper
 from app.modules.payment.repositories.payment_repository import PaymentRepository
 
@@ -133,6 +135,14 @@ class PaymentService:
         if response_code == "00":
             if payment["trang_thai"] != "ThanhCong":
                 await self.repository.update_payment_success(id_thanh_toan, transaction_no)
+
+            # Tự động gửi Hóa đơn điện tử qua Email khách hàng
+            try:
+                inv_data = await self.repository.get_full_order_invoice_data(payment["id_don_hang"])
+                if inv_data and inv_data.get("khach_hang", {}).get("email"):
+                    asyncio.create_task(send_invoice_email(inv_data["khach_hang"]["email"], inv_data))
+            except Exception as e_mail:
+                print(f"⚠️ [VNPAY INVOICE EMAIL ERROR] {str(e_mail)}")
 
             order_details = await self.repository.get_sim_order_details(payment["id_don_hang"])
 
@@ -278,6 +288,15 @@ class PaymentService:
 
     async def confirm_staff_sim_received(self, id_don_hang: UUID) -> Dict[str, Any]:
         res = await self.repository.confirm_staff_sim_received(id_don_hang)
+        if res:
+            # Tự động gửi Hóa đơn điện tử qua Email khách hàng khi nhân viên xác nhận giao SIM tại quầy
+            try:
+                inv_data = await self.repository.get_full_order_invoice_data(id_don_hang)
+                if inv_data and inv_data.get("khach_hang", {}).get("email"):
+                    asyncio.create_task(send_invoice_email(inv_data["khach_hang"]["email"], inv_data))
+            except Exception as e_mail:
+                print(f"⚠️ [STAFF INVOICE EMAIL ERROR] {str(e_mail)}")
+
         return {
             "success": res,
             "message": "Đã xác nhận giao SIM cho khách hàng thành công!"

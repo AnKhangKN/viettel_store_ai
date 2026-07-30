@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { Bell, ArrowLeft, LogOut, User, Menu, MapPin, Zap, Monitor, Lock, CheckCircle2, ShieldAlert } from "lucide-react";
+import { Bell, ArrowLeft, LogOut, User, Menu, MapPin, Zap, Monitor, Lock, CheckCircle2, ShieldAlert, Sun, Moon } from "lucide-react";
 import { getBoothsStatus, selectBooth, releaseBooth } from "../../../api/queue/booth.api";
+import { useTheme } from "../../../context/ThemeContext";
 
 const HeaderComponentStaff = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const user = useSelector((state) => state.auth.user);
+  const { theme, toggleTheme } = useTheme();
 
   const isDashboard = location.pathname === "/staff/dashboard";
   const [showNotification, setShowNotification] = useState(false);
@@ -194,7 +196,17 @@ const HeaderComponentStaff = ({ onToggleSidebar }) => {
         </div>
 
         {/* Right: Notifications & User profile & Logout */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {/* Theme Dark/Light Toggle */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Chuyển sang Giao diện Sáng' : 'Chuyển sang Giao diện Tối'}
+            className="p-2.5 rounded-xl text-gray-500 hover:text-[#EE0033] hover:bg-red-50 transition-all cursor-pointer flex items-center justify-center"
+          >
+            {theme === 'dark' ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-slate-600" />}
+          </button>
+
           {/* Notifications Button */}
           <div className="relative">
             <button

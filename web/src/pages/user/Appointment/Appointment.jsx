@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getAllBranches } from "../../../api/branch/branch.api";
-import { getQueueServices, createQueueTicket } from "../../../api/queue/queue.api";
-import { MapPin, Calendar, Clock, Phone, User, Loader2, CheckCircle2, AlertCircle, Monitor, Sparkles, QrCode, ArrowRight, ShieldCheck } from "lucide-react";
+import { getQueueServices, createQueueTicket, getQueueTicketDetails } from "../../../api/queue/queue.api";
+import { MapPin, Calendar, Clock, Phone, User, Loader2, CheckCircle2, AlertCircle, Monitor, Sparkles, QrCode, ArrowRight, ShieldCheck, Users } from "lucide-react";
 
 const Appointment = () => {
   const [branches, setBranches] = useState([]);
@@ -18,6 +18,56 @@ const Appointment = () => {
   });
 
   const [result, setResult] = useState(null);
+
+  // Lắng nghe cập nhật thời gian thực qua WebSocket cho phiếu thứ tự của khách hàng
+  useEffect(() => {
+    if (!result || !result.id_phieu) return;
+
+    const branchId = result.id_chi_nhanh || result.chi_nhanh?.id_chi_nhanh;
+    if (!branchId) return;
+
+    const ticketId = result.id_phieu;
+
+
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+    const hostUrl = backendUrl.replace(/^https?:\/\//, "");
+    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${wsProtocol}//${hostUrl}/api/queue/ws/${branchId}`;
+
+    const socket = new WebSocket(wsUrl);
+
+    socket.onmessage = async (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        if (message.event === "queue_updated") {
+          const ticketRes = await getQueueTicketDetails(ticketId);
+          if (ticketRes?.success && ticketRes?.data) {
+            const ticketData = ticketRes.data;
+            if (ticketData.is_completed) {
+              alert(`Phiếu thứ tự #${result.so_thu_tu} của bạn đã phục vụ thành công! Cảm ơn quý khách đã sử dụng dịch vụ Viettel Store.`);
+              setResult(null);
+            } else {
+              setResult((prev) => ({
+                ...prev,
+                ...ticketData,
+                so_phut_cho: ticketData.so_phut_cho,
+                thoi_gian_du_kien: ticketData.thoi_gian_du_kien,
+                so_nguoi_cho_truoc: ticketData.so_nguoi_cho_truoc,
+                trang_thai: ticketData.trang_thai
+              }));
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Lỗi cập nhật phiếu thứ tự thời gian thực:", err);
+      }
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, [result?.id_phieu]);
+
 
   useEffect(() => {
     const loadData = async () => {
@@ -298,7 +348,15 @@ const Appointment = () => {
                   </div>
                 )}
 
-                <div className="border-t border-slate-100 pt-3 text-xs space-y-1.5">
+                <div className="border-t border-slate-100 pt-3 text-xs space-y-2">
+                  <div className="flex justify-between items-center text-slate-600 bg-red-50/60 p-2.5 rounded-xl border border-red-100">
+                    <span className="flex items-center gap-1 font-bold text-slate-800">
+                      <Users className="w-3.5 h-3.5 text-[#EE0033]" />
+                      Số người đang chờ trước bạn:
+                    </span>
+                    <span className="font-black text-[#EE0033] text-sm">{result.so_nguoi_cho_truoc ?? 0} người</span>
+                  </div>
+
                   <div className="flex justify-between items-center text-slate-600">
                     <span>Thời gian chờ dự kiến:</span>
                     <span className="font-extrabold text-[#EE0033]">{result.so_phut_cho} phút</span>
@@ -317,6 +375,7 @@ const Appointment = () => {
                   <p><strong className="text-slate-800">Chi nhánh:</strong> {result.chi_nhanh.ten_chi_nhanh}</p>
                   <p className="text-[11px] text-slate-400">{result.chi_nhanh.dia_chi}</p>
                 </div>
+
 
               </div>
 

@@ -111,16 +111,26 @@ class ChatbotService:
         full_instruction = f"{system_instruction}\n\n"
         if packages_context:
             full_instruction += f"DANH SÁCH GÓI CƯỚC THỰC TẾ TRONG HỆ THỐNG:\n{packages_context}\n\n"
+        else:
+            full_instruction += "DANH SÁCH GÓI CƯỚC THỰC TẾ TRONG HỆ THỐNG: (Hiện tại hệ thống chưa có dữ liệu gói cước nào).\n\n"
+
         if branches_context:
             full_instruction += f"DANH SÁCH CHI NHÁNH CỬA HÀNG THỰC TẾ TRONG HỆ THỐNG:\n{branches_context}\n\n"
+        else:
+            full_instruction += "DANH SÁCH CHI NHÁNH CỬA HÀNG THỰC TẾ TRONG HỆ THỐNG: (Hiện tại hệ thống chưa có dữ liệu chi nhánh cửa hàng nào).\n\n"
+
         if sims_context:
             full_instruction += f"THÔNG TIN VỀ KHO SIM THỰC TẾ TRONG HỆ THỐNG:\n{sims_context}\n\n"
+        else:
+            full_instruction += "THÔNG TIN VỀ KHO SIM THỰC TẾ TRONG HỆ THỐNG: (Hiện tại hệ thống chưa có dữ liệu SIM nào).\n\n"
+
         if customer_context:
             full_instruction += (
                 "THÔNG TIN KHÁCH HÀNG TRA CỨU TỪ EXCEL THEO SỐ ĐIỆN THOẠI:\n"
                 f"{customer_context}\n\n"
                 "Khi người dùng hỏi về số điện thoại này, ưu tiên dùng đúng dữ liệu tra cứu ở trên và trả lời ngắn gọn, chính xác.\n\n"
             )
+
 
         message = body.message.strip()
         if not message:

@@ -378,4 +378,28 @@ class QueueRepository:
         db_uuid = uuid.UUID(id_quay) if isinstance(id_quay, str) else id_quay
         return await get_pool().fetchrow(sql, db_uuid)
 
+    async def get_ticket_details(self, id_phieu: str):
+        sql = """
+            SELECT 
+                p.id_phieu,
+                p.id_chi_nhanh,
+                p.so_thu_tu,
+                p.trang_thai,
+                p.ngay_tao,
+                k.ho_ten AS ten_khach_hang,
+                k.so_dien_thoai,
+                l.ten_giao_dich,
+                l.thoi_gian_xu_ly_trung_binh,
+                c.ten_chi_nhanh,
+                c.dia_chi AS dia_chi_chi_nhanh
+            FROM phieuxephang p
+            JOIN khachhang k ON p.id_khach_hang = k.id_khach_hang
+            JOIN loaigiaodich l ON p.id_loai_giao_dich = l.id_loai_giao_dich
+            JOIN chinhanh c ON p.id_chi_nhanh = c.id_chi_nhanh
+            WHERE p.id_phieu = $1 AND p.da_xoa = false
+        """
+        db_uuid = uuid.UUID(id_phieu) if isinstance(id_phieu, str) else id_phieu
+        return await get_pool().fetchrow(sql, db_uuid)
+
+
 

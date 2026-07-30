@@ -45,12 +45,14 @@ const BuySim = () => {
   }, []);
 
   const filteredSim = simList.filter((sim) => {
+    const isAvailable = sim.rawStatus !== "DaBan" && sim.rawStatus !== "DaThanhToan";
     const cleanSimNumber = sim.soSim.replace(/[^0-9]/g, "");
     const cleanKeyword = keyword.replace(/[^0-9]/g, "");
     const search = cleanSimNumber.includes(cleanKeyword) || sim.soSim.includes(keyword);
     const type = selectedType === "Tất cả" || sim.loaiSim === selectedType;
-    return search && type;
+    return isAvailable && search && type;
   });
+
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased pb-20">

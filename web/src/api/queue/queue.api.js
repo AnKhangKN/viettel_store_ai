@@ -23,6 +23,18 @@ export const createQueueTicket = async (ticketData) => {
     }
 };
 
+// API public - kiểm tra chi tiết & trạng thái thời gian thực của phiếu xếp hàng
+export const getQueueTicketDetails = async (idPhieu) => {
+    try {
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/queue/tickets/${idPhieu}`);
+        return response.data;
+    } catch (error) {
+        console.error("Lỗi lấy thông tin phiếu thứ tự:", error);
+        throw error;
+    }
+};
+
+
 // API staff - lấy danh sách hàng chờ hôm nay của chi nhánh nhân viên làm việc
 export const getStaffQueueTickets = async () => {
     try {

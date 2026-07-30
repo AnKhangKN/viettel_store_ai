@@ -40,11 +40,14 @@ function App() {
 
   useEffect(() => {
     const initApp = async () => {
-      // Nếu đã có accessToken trong Redux (đã đăng nhập), không cần refresh lại
-      if (store.getState().auth.accessToken) {
+      const isAuthPage = ["/login", "/register", "/verify-otp", "/forgot-password", "/forget-password"].includes(location.pathname);
+
+      // Nếu đã có accessToken trong Redux hoặc đang ở các trang Auth, không cần gọi refresh token
+      if (store.getState().auth.accessToken || isAuthPage) {
         setIsAuthReady(true);
         return;
       }
+
 
       try {
         const res = await refreshToken();
@@ -62,7 +65,6 @@ function App() {
           // Lấy thông tin user (lúc này Authorization header đã có token)
           const userRes = await getUserInfo();
 
-
           if (userRes?.success && userRes?.data) {
             const userData = userRes.data;
             store.dispatch(
@@ -79,21 +81,20 @@ function App() {
             } else if (userData.role === 'staff' && !currentPath.startsWith('/staff')) {
               navigate('/staff/dashboard', { replace: true });
             }
-          } else {
-            throw new Error("Không lấy được thông tin người dùng");
+          } else if (!isPublicPath) {
+            navigate("/login");
           }
-        } else {
-          throw new Error("Refresh token không hợp lệ");
+        } else if (!isPublicPath) {
+          navigate("/login");
         }
       } catch (error) {
-        console.error("Lỗi tự động đăng nhập:", error);
-        // Chỉ bắt buộc chuyển hướng về trang login nếu đang ở trang bảo mật (private path)
         if (!isPublicPath) {
           navigate("/login");
         }
       } finally {
         setIsAuthReady(true);
       }
+
     };
 
     initApp();
