@@ -80,22 +80,33 @@ def _send_resend_email_sync(subject: str, html_content: str, recipients: list[st
     if not api_key or not from_email:
         raise RuntimeError("Resend is not configured (RESEND_API_KEY / RESEND_FROM_EMAIL)")
 
-    response = httpx.post(
-        "https://api.resend.com/emails",
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "from": from_email,
-            "to": recipients,
-            "subject": subject,
-            "html": html_content,
-        },
-        timeout=Config.SMTP_TIMEOUT,
-    )
-    if response.status_code >= 400:
-        raise RuntimeError(f"Resend API error {response.status_code}: {response.text}")
+    success_count = 0
+    for target in recipients:
+        try:
+            response = httpx.post(
+                "https://api.resend.com/emails",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "from": from_email,
+                    "to": [target],
+                    "subject": subject,
+                    "html": html_content,
+                },
+                timeout=Config.SMTP_TIMEOUT,
+            )
+            if response.status_code < 400:
+                success_count += 1
+                print(f"✅ [RESEND SUCCESS] Đã gửi email tới: {target}")
+            else:
+                print(f"⚠️ [RESEND NOTICE] {target}: {response.text}")
+        except Exception as e:
+            print(f"⚠️ [RESEND FAIL] {target}: {str(e)}")
+
+    if success_count == 0:
+        raise RuntimeError(f"Không thể gửi email qua Resend API cho các địa chỉ: {', '.join(recipients)}")
 
 
 async def _deliver_html_email(subject: str, html_content: str, recipients: list[str], log_prefix: str) -> bool:
