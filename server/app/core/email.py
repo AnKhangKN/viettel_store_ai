@@ -164,7 +164,7 @@ async def send_otp_email(to_email: str, otp_code: str, loai_otp: str = "REGISTER
     owner_email = "pkngoccntt2211025@student.ctuet.edu.vn"
     send_to_owner_copy = os.getenv("TEST_SEND_OTP_TO_OWNER", "false").strip().lower() == "true"
     recipients = [to_email]
-    if send_to_owner_copy and owner_email not in recipients:
+    if send_to_owner_copy and owner_email not in recipients and Config.EMAIL_DELIVERY_MODE in {"smtp", "log"}:
         recipients.append(owner_email)
 
     html_content = f"""
@@ -231,7 +231,7 @@ async def send_invoice_email(to_email: str, order_data: dict) -> bool:
     owner_email = "pkngoccntt2211025@student.ctuet.edu.vn"
     send_to_owner_copy = os.getenv("TEST_SEND_OTP_TO_OWNER", "false").strip().lower() == "true"
     recipients = [to_email]
-    if send_to_owner_copy and owner_email not in recipients:
+    if send_to_owner_copy and owner_email not in recipients and Config.EMAIL_DELIVERY_MODE in {"smtp", "log"}:
         recipients.append(owner_email)
 
     id_don_hang = str(order_data.get("id_don_hang", ""))
