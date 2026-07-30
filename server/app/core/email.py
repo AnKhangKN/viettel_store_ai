@@ -4,6 +4,9 @@ import socket
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+import httpx
+
 from app.core.config import Config
 
 
@@ -60,6 +63,84 @@ def _send_smtp_email_sync(msg: MIMEMultipart, recipients: list[str]):
             server.quit()
     finally:
         socket.getaddrinfo = original_getaddrinfo
+
+
+def _send_resend_email_sync(subject: str, html_content: str, recipients: list[str]) -> None:
+    """
+    Gửi email qua Resend REST API (HTTPS port 443).
+    Dùng cho Render free tier vì Render chặn outbound SMTP cổng 25/465/587.
+    """
+    api_key = Config.RESEND_API_KEY
+    from_email = Config.RESEND_FROM_EMAIL or Config.SMTP_FROM_EMAIL
+    email_mode = Config.EMAIL_DELIVERY_MODE
+
+    if email_mode != "resend":
+        raise RuntimeError(f"Email delivery mode '{email_mode}' bypasses Resend API")
+
+    if not api_key or not from_email:
+        raise RuntimeError("Resend is not configured (RESEND_API_KEY / RESEND_FROM_EMAIL)")
+
+    response = httpx.post(
+        "https://api.resend.com/emails",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "from": from_email,
+            "to": recipients,
+            "subject": subject,
+            "html": html_content,
+        },
+        timeout=Config.SMTP_TIMEOUT,
+    )
+    if response.status_code >= 400:
+        raise RuntimeError(f"Resend API error {response.status_code}: {response.text}")
+
+
+async def _deliver_html_email(subject: str, html_content: str, recipients: list[str], log_prefix: str) -> bool:
+    email_mode = Config.EMAIL_DELIVERY_MODE
+
+    if email_mode == "log":
+        print(f"ℹ️ [{log_prefix}] EMAIL_DELIVERY_MODE=log; bỏ qua gửi email thật, chỉ ghi log.")
+        return True
+
+    if email_mode == "resend":
+        if not Config.RESEND_API_KEY or not (Config.RESEND_FROM_EMAIL or Config.SMTP_FROM_EMAIL):
+            print(f"⚠️ [{log_prefix}] Thiếu RESEND_API_KEY hoặc RESEND_FROM_EMAIL. Đã log nội dung lên console.")
+            return True
+
+        def _sync_send_resend():
+            _send_resend_email_sync(subject, html_content, recipients)
+
+        try:
+            await asyncio.to_thread(_sync_send_resend)
+            print(f"✅ [{log_prefix}] Gửi email qua Resend thành công tới {', '.join(recipients)}")
+            return True
+        except Exception as e:
+            print(f"⚠️ [{log_prefix}] Resend API không khả dụng tới {', '.join(recipients)}: {str(e)}")
+            return True
+
+    if not Config.SMTP_USERNAME or not Config.SMTP_PASSWORD or not Config.SMTP_SERVER:
+        print(f"⚠️ [{log_prefix}] Thiếu cấu hình SMTP. Đã log nội dung lên console.")
+        return True
+
+    def _sync_send_smtp():
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = Config.SMTP_FROM_EMAIL or "Viettel Store <noreply@viettelstore.vn>"
+        msg["To"] = ", ".join(recipients)
+        msg.attach(MIMEText(html_content, "html", "utf-8"))
+        _send_smtp_email_sync(msg, recipients)
+
+    try:
+        await asyncio.to_thread(_sync_send_smtp)
+        print(f"✅ [{log_prefix}] Gửi email qua SMTP thành công tới {', '.join(recipients)}")
+        return True
+    except Exception as e:
+        print(f"⚠️ [{log_prefix}] SMTP không khả dụng tới {', '.join(recipients)}: {str(e)}")
+        print(f"ℹ️ [{log_prefix}] Gợi ý: trên Render free tier hãy đặt EMAIL_DELIVERY_MODE=resend và cấu hình Resend API.")
+        return True
 
 
 async def send_otp_email(to_email: str, otp_code: str, loai_otp: str = "REGISTER") -> bool:
@@ -123,34 +204,9 @@ async def send_otp_email(to_email: str, otp_code: str, loai_otp: str = "REGISTER
     print(f"🔑 [MÃ OTP ({loai_otp})]: {otp_code}")
     print(f"==================================================\n")
 
-    email_mode = Config.EMAIL_DELIVERY_MODE
-    if email_mode != "smtp":
-        print(f"ℹ️ [EMAIL OTP SENDER] EMAIL_DELIVERY_MODE={email_mode}; bỏ qua gửi SMTP và chỉ log OTP để test.")
-        return True
-
-    # Kiểm tra cấu hình SMTP Server
-    if not Config.SMTP_USERNAME or not Config.SMTP_PASSWORD or not Config.SMTP_SERVER:
-        print("⚠️ [EMAIL OTP SENDER] Thiếu cấu hình SMTP trong .env (SMTP_USERNAME/SMTP_PASSWORD). Đã log mã OTP lên console để test.")
-        return True
-
-    def _sync_send():
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = f"[{title}] Mã OTP của bạn là {otp_code} - Viettel Store"
-        msg["From"] = Config.SMTP_FROM_EMAIL or "Viettel Store <noreply@viettelstore.vn>"
-        msg["To"] = ", ".join(recipients)
-        msg.attach(MIMEText(html_content, "html", "utf-8"))
-        _send_smtp_email_sync(msg, recipients)
-
-    try:
-        await asyncio.to_thread(_sync_send)
-        print(f"✅ [EMAIL OTP SENDER] Gửi email thành công tới {', '.join(recipients)}")
-        return True
-    except Exception as e:
-        # Trên Render, SMTP outbound đôi khi bị chặn hoặc timeout. Không làm fail đăng ký/đăng nhập,
-        # nhưng vẫn log rõ để theo dõi.
-        print(f"⚠️ [EMAIL OTP SENDER] SMTP không khả dụng tới {', '.join(recipients)}: {str(e)}")
-        print("ℹ️ [EMAIL OTP SENDER] OTP đã được tạo và lưu trong server memory; có thể hiển thị OTP qua log khi test.")
-        return True
+    subject = f"[{title}] Mã OTP của bạn là {otp_code} - Viettel Store"
+    await _deliver_html_email(subject, html_content, recipients, "EMAIL OTP SENDER")
+    return True
 
 
 async def send_invoice_email(to_email: str, order_data: dict) -> bool:
@@ -304,28 +360,7 @@ async def send_invoice_email(to_email: str, order_data: dict) -> bool:
     print(f"📄 Đơn hàng: #{id_don_hang} | SIM: {so_sim} | Tổng tiền: {tong_tien_str}")
     print(f"==================================================\n")
 
-    email_mode = Config.EMAIL_DELIVERY_MODE
-    if email_mode != "smtp":
-        print(f"ℹ️ [INVOICE EMAIL] EMAIL_DELIVERY_MODE={email_mode}; bỏ qua gửi SMTP và chỉ log hóa đơn để test.")
-        return True
-
-    if not Config.SMTP_USERNAME or not Config.SMTP_PASSWORD or not Config.SMTP_SERVER:
-        print("⚠️ [INVOICE EMAIL] Thiếu cấu hình SMTP trong .env. Đã log hóa đơn điện tử lên console.")
-        return True
-
-    def _sync_send_inv():
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = f"[HÓA ĐƠN ĐIỆN TỬ] Xác nhận mua SIM số đẹp {so_sim} - Viettel Store"
-        msg["From"] = Config.SMTP_FROM_EMAIL or "Viettel Store <noreply@viettelstore.vn>"
-        msg["To"] = ", ".join(recipients)
-        msg.attach(MIMEText(html_content, "html", "utf-8"))
-        _send_smtp_email_sync(msg, recipients)
-
-    try:
-        await asyncio.to_thread(_sync_send_inv)
-        print(f"✅ [INVOICE EMAIL] Gửi Hóa đơn điện tử thành công tới {', '.join(recipients)}")
-        return True
-    except Exception as e:
-        print(f"⚠️ [INVOICE EMAIL] SMTP không khả dụng tới {', '.join(recipients)}: {str(e)}")
-        return True
+    subject = f"[HÓA ĐƠN ĐIỆN TỬ] Xác nhận mua SIM số đẹp {so_sim} - Viettel Store"
+    await _deliver_html_email(subject, html_content, recipients, "INVOICE EMAIL")
+    return True
 

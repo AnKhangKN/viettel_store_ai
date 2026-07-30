@@ -63,11 +63,22 @@ class Config:
     SMTP_USERNAME = os.getenv("SMTP_USERNAME", "").strip() or None
     SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "").strip() or None
     SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", "").strip() or None
-    SMTP_TIMEOUT = int(os.getenv("SMTP_TIMEOUT", "3"))
-    EMAIL_DELIVERY_MODE = (
-        os.getenv("EMAIL_DELIVERY_MODE")
-        or ("log" if APP_ENV and APP_ENV.lower() == "production" and (not SMTP_SERVER or not SMTP_USERNAME or not SMTP_PASSWORD) else "smtp")
-    ).strip().lower()
+    smtp_timeout_raw = os.getenv("SMTP_TIMEOUT", "3")
+    SMTP_TIMEOUT = int(smtp_timeout_raw) if smtp_timeout_raw.strip() else 3
+    RESEND_API_KEY = os.getenv("RESEND_API_KEY", "").strip() or None
+    RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", "").strip() or None
+    _email_mode_raw = os.getenv("EMAIL_DELIVERY_MODE")
+    if _email_mode_raw and _email_mode_raw.strip():
+        EMAIL_DELIVERY_MODE = _email_mode_raw.strip().lower()
+    elif APP_ENV and APP_ENV.lower() == "production":
+        if RESEND_API_KEY and (RESEND_FROM_EMAIL or SMTP_FROM_EMAIL):
+            EMAIL_DELIVERY_MODE = "resend"
+        else:
+            # On Render Cloud hosting, direct outbound SMTP ports (587/465) are blocked by firewall.
+            # Fallback to "log" mode on production unless RESEND_API_KEY or EMAIL_DELIVERY_MODE is explicitly configured.
+            EMAIL_DELIVERY_MODE = "log"
+    else:
+        EMAIL_DELIVERY_MODE = "smtp"
 
 
 config = Config()
