@@ -1,3 +1,4 @@
+import asyncio
 import random
 from datetime import datetime, timezone, timedelta
 from fastapi import status, Response
@@ -51,7 +52,7 @@ class AuthService:
                 hashed_password = hash_password(body.password)
                 await self.repository.update_password(body.email, hashed_password)
                 otp_code, expires_at_str = self._generate_and_store_otp(body.email, "REGISTER")
-                await send_otp_email(body.email, otp_code, "REGISTER")
+                asyncio.create_task(send_otp_email(body.email, otp_code, "REGISTER"))
                 return {
                     "success": True,
                     "message": f"Tài khoản chưa được kích hoạt. Mã OTP mới đã được gửi về email (Hết hạn lúc: {expires_at_str}).",
@@ -91,7 +92,7 @@ class AuthService:
         )
 
         otp_code, expires_at_str = self._generate_and_store_otp(body.email, "REGISTER")
-        await send_otp_email(body.email, otp_code, "REGISTER")
+        asyncio.create_task(send_otp_email(body.email, otp_code, "REGISTER"))
 
         return {
             "success": True,
@@ -126,7 +127,7 @@ class AuthService:
         # Kiểm tra xác thực email
         if not user.get("da_xac_thuc_email") or user.get("trang_thai") == "ChoXacThuc":
             otp_code, expires_at_str = self._generate_and_store_otp(body.email, "REGISTER")
-            await send_otp_email(body.email, otp_code, "REGISTER")
+            asyncio.create_task(send_otp_email(body.email, otp_code, "REGISTER"))
 
             raise AppException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -222,7 +223,7 @@ class AuthService:
             )
 
         otp_code, expires_at_str = self._generate_and_store_otp(body.email, body.loai_otp)
-        await send_otp_email(body.email, otp_code, body.loai_otp)
+        asyncio.create_task(send_otp_email(body.email, otp_code, body.loai_otp))
 
         return {
             "success": True,
@@ -239,7 +240,7 @@ class AuthService:
             )
 
         otp_code, expires_at_str = self._generate_and_store_otp(body.email, "FORGOT_PASSWORD")
-        await send_otp_email(body.email, otp_code, "FORGOT_PASSWORD")
+        asyncio.create_task(send_otp_email(body.email, otp_code, "FORGOT_PASSWORD"))
 
         return {
             "success": True,

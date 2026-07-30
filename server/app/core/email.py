@@ -21,7 +21,7 @@ def _send_smtp_email_sync(msg: MIMEMultipart, recipients: list[str]):
     server_port = Config.SMTP_PORT or 587
     username = Config.SMTP_USERNAME
     password = Config.SMTP_PASSWORD
-    timeout = int(os.getenv("SMTP_TIMEOUT", "6"))
+    timeout = int(os.getenv("SMTP_TIMEOUT", "3"))
 
     if not server_host or not username or not password:
         raise RuntimeError("SMTP is not configured")
