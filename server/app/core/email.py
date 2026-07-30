@@ -125,41 +125,51 @@ def _send_brevo_email_sync(subject: str, html_content: str, recipients: list[str
 
 
 async def _deliver_html_email(subject: str, html_content: str, recipients: list[str], log_prefix: str) -> bool:
+    brevo_key = Config.BREVO_API_KEY or os.getenv("BREVO_API_KEY")
     email_mode = Config.EMAIL_DELIVERY_MODE
 
-    if email_mode == "log":
-        print(f"ℹ️ [{log_prefix}] EMAIL_DELIVERY_MODE=log; bỏ qua gửi email thật, chỉ ghi log.")
-        return True
+    print(f"\n📩 [{log_prefix}] Khởi chạy tác vụ gửi email tới: {', '.join(recipients)} | Mode: '{email_mode}'")
 
-    if email_mode == "brevo" or (Config.BREVO_API_KEY and email_mode != "smtp"):
+    # 1. Ưu tiên Brevo API nếu có BREVO_API_KEY hoặc mode là brevo
+    if brevo_key or email_mode == "brevo":
         def _sync_send_brevo():
             _send_brevo_email_sync(subject, html_content, recipients)
 
         try:
+            print(f"🚀 [{log_prefix}] Đang kết nối gửi email qua Brevo HTTPS REST API...")
             await asyncio.to_thread(_sync_send_brevo)
-            print(f"✅ [{log_prefix}] Gửi email qua Brevo API thành công tới {', '.join(recipients)}")
+            print(f"✅ [{log_prefix}] Đã gửi Email THẬT qua Brevo API thành công tới {', '.join(recipients)}!")
             return True
         except Exception as e:
-            print(f"⚠️ [{log_prefix}] Brevo API lỗi: {str(e)}")
+            print(f"❌ [{log_prefix}] Thất bại khi gửi qua Brevo API: {str(e)}")
+            return False
 
+    # 2. Chế độ log
+    if email_mode == "log":
+        print(f"ℹ️ [{log_prefix}] EMAIL_DELIVERY_MODE=log; đã log nội dung console thành công.")
+        return True
+
+    # 3. Chế độ Resend
     if email_mode == "resend":
         if not Config.RESEND_API_KEY or not (Config.RESEND_FROM_EMAIL or Config.SMTP_FROM_EMAIL):
-            print(f"⚠️ [{log_prefix}] Thiếu RESEND_API_KEY hoặc RESEND_FROM_EMAIL. Đã log nội dung lên console.")
+            print(f"⚠️ [{log_prefix}] Thiếu RESEND_API_KEY. Đã ghi log console.")
             return True
 
         def _sync_send_resend():
             _send_resend_email_sync(subject, html_content, recipients)
 
         try:
+            print(f"🚀 [{log_prefix}] Đang gửi qua Resend API...")
             await asyncio.to_thread(_sync_send_resend)
-            print(f"✅ [{log_prefix}] Gửi email qua Resend thành công tới {', '.join(recipients)}")
+            print(f"✅ [{log_prefix}] Gửi qua Resend thành công tới {', '.join(recipients)}")
             return True
         except Exception as e:
-            print(f"⚠️ [{log_prefix}] Resend API không khả dụng tới {', '.join(recipients)}: {str(e)}")
+            print(f"⚠️ [{log_prefix}] Resend API lỗi: {str(e)}")
             return True
 
+    # 4. Chế độ SMTP
     if not Config.SMTP_USERNAME or not Config.SMTP_PASSWORD or not Config.SMTP_SERVER:
-        print(f"⚠️ [{log_prefix}] Thiếu cấu hình SMTP. Đã log nội dung lên console.")
+        print(f"⚠️ [{log_prefix}] Thiếu cấu hình SMTP. Đã ghi log console.")
         return True
 
     def _sync_send_smtp():
@@ -171,12 +181,12 @@ async def _deliver_html_email(subject: str, html_content: str, recipients: list[
         _send_smtp_email_sync(msg, recipients)
 
     try:
+        print(f"🚀 [{log_prefix}] Đang gửi qua SMTP Server ({Config.SMTP_SERVER}:{Config.SMTP_PORT})...")
         await asyncio.to_thread(_sync_send_smtp)
         print(f"✅ [{log_prefix}] Gửi email qua SMTP thành công tới {', '.join(recipients)}")
         return True
     except Exception as e:
         print(f"⚠️ [{log_prefix}] SMTP không khả dụng tới {', '.join(recipients)}: {str(e)}")
-        print(f"ℹ️ [{log_prefix}] Gợi ý: trên Render free tier hãy đặt EMAIL_DELIVERY_MODE=resend và cấu hình Resend API.")
         return True
 
 
