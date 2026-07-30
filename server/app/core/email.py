@@ -9,43 +9,51 @@ from app.core.config import Config
 
 def _send_smtp_email_sync(msg: MIMEMultipart, recipients: list[str]):
     """
-    Gửi SMTP Email tương thích 100% với Render Cloud:
-    - Ép buộc phân giải IP qua IPv4 (socket.AF_INET) để sửa triệt để lỗi [Errno 101] Network is unreachable do Render không có IPv6 route.
-    - Tự động fallback sang cổng SSL 465 nếu cổng 587 gặp sự cố kết nối.
+    Gửi SMTP Email tương thích với Render Cloud.
+
+    Hành vi an toàn:
+    - Chỉ cố gắng gửi thật khi SMTP được cấu hình đầy đủ.
+    - Timeout ngắn để không làm treo request trên Render nếu SMTP chặn kết nối.
+    - Fallback IPv4 để tránh lỗi mạng trên môi trường không có IPv6 route.
+    - Nếu SMTP thất bại, hàm sẽ raise để tầng trên quyết định cách xử lý.
     """
     server_host = Config.SMTP_SERVER
     server_port = Config.SMTP_PORT or 587
     username = Config.SMTP_USERNAME
     password = Config.SMTP_PASSWORD
+    timeout = int(os.getenv("SMTP_TIMEOUT", "6"))
 
     if not server_host or not username or not password:
-        return
+        raise RuntimeError("SMTP is not configured")
 
-    # Ép socket chỉ phân giải IPv4 (khắc phục lỗi [Errno 101] Network is unreachable trên IPv6 của Render)
     original_getaddrinfo = socket.getaddrinfo
+
     def ipv4_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
         return original_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
 
     socket.getaddrinfo = ipv4_getaddrinfo
     try:
         if int(server_port) == 465:
-            server = smtplib.SMTP_SSL(server_host, 465, timeout=12)
+            server = smtplib.SMTP_SSL(server_host, 465, timeout=timeout)
             server.login(username, password)
             server.sendmail(msg["From"], recipients, msg.as_string())
             server.quit()
-        else:
-            try:
-                server = smtplib.SMTP(server_host, server_port, timeout=12)
-                server.starttls()
-                server.login(username, password)
-                server.sendmail(msg["From"], recipients, msg.as_string())
-                server.quit()
-            except Exception as e_starttls:
-                print(f"⚠️ [SMTP 587 FAIL] Thử lại bằng cổng SSL 465: {str(e_starttls)}")
-                server = smtplib.SMTP_SSL(server_host, 465, timeout=12)
-                server.login(username, password)
-                server.sendmail(msg["From"], recipients, msg.as_string())
-                server.quit()
+            return
+
+        try:
+            server = smtplib.SMTP(server_host, server_port, timeout=timeout)
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            server.login(username, password)
+            server.sendmail(msg["From"], recipients, msg.as_string())
+            server.quit()
+        except Exception as e_starttls:
+            print(f"⚠️ [SMTP 587 FAIL] Thử lại bằng cổng SSL 465: {str(e_starttls)}")
+            server = smtplib.SMTP_SSL(server_host, 465, timeout=timeout)
+            server.login(username, password)
+            server.sendmail(msg["From"], recipients, msg.as_string())
+            server.quit()
     finally:
         socket.getaddrinfo = original_getaddrinfo
 
@@ -129,8 +137,10 @@ async def send_otp_email(to_email: str, otp_code: str, loai_otp: str = "REGISTER
         print(f"✅ [EMAIL OTP SENDER] Gửi email thành công tới {', '.join(recipients)}")
         return True
     except Exception as e:
-        print(f"❌ [EMAIL OTP SENDER] Lỗi khi gửi SMTP email tới {', '.join(recipients)}: {str(e)}")
-        # Trả về True để không làm gián đoạn trải nghiệm test khi SMTP bị từ chối
+        # Trên Render, SMTP outbound đôi khi bị chặn hoặc timeout. Không làm fail đăng ký/đăng nhập,
+        # nhưng vẫn log rõ để theo dõi.
+        print(f"⚠️ [EMAIL OTP SENDER] SMTP không khả dụng tới {', '.join(recipients)}: {str(e)}")
+        print("ℹ️ [EMAIL OTP SENDER] OTP đã được tạo và lưu trong server memory; có thể hiển thị OTP qua log khi test.")
         return True
 
 
@@ -302,6 +312,6 @@ async def send_invoice_email(to_email: str, order_data: dict) -> bool:
         print(f"✅ [INVOICE EMAIL] Gửi Hóa đơn điện tử thành công tới {', '.join(recipients)}")
         return True
     except Exception as e:
-        print(f"❌ [INVOICE EMAIL] Lỗi khi gửi SMTP Hóa đơn tới {', '.join(recipients)}: {str(e)}")
+        print(f"⚠️ [INVOICE EMAIL] SMTP không khả dụng tới {', '.join(recipients)}: {str(e)}")
         return True
 
