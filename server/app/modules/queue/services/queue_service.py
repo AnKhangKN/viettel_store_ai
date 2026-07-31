@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from fastapi import status
 from app.core.exceptions import AppException
 from app.common.utils.uuid import generate_uuid7
@@ -196,7 +196,8 @@ class QueueService:
         else:
             so_phut_cho = max(3, booth_queue_length * thoi_gian_tb)
 
-        thoi_gian_du_kien = datetime.now() + timedelta(minutes=so_phut_cho)
+        base_time = ticket["ngay_tao"] if (ticket and "ngay_tao" in ticket and ticket["ngay_tao"]) else datetime.now(timezone.utc)
+        thoi_gian_du_kien = base_time + timedelta(minutes=so_phut_cho)
 
         # Lưu thông tin dự đoán
         prediction_id = generate_uuid7()
@@ -472,7 +473,7 @@ class QueueService:
         branch_booths[ten_quay] = {
             "staff_id": staff_user_id,
             "staff_name": staff_name,
-            "login_time": datetime.now().isoformat()
+            "login_time": datetime.now(timezone.utc).isoformat()
         }
 
         # 5. Broadcast sự kiện cập nhật quầy qua WebSocket cho tất cả nhân viên khác tại chi nhánh
@@ -692,7 +693,8 @@ class QueueService:
         else:
             so_phut_cho = max(3, booth_queue_length * avg_time)
 
-        thoi_gian_du_kien = datetime.now() + timedelta(minutes=so_phut_cho)
+        base_time = ticket["ngay_tao"] if (ticket and "ngay_tao" in ticket and ticket["ngay_tao"]) else datetime.now(timezone.utc)
+        thoi_gian_du_kien = base_time + timedelta(minutes=so_phut_cho)
 
         return {
             "success": True,
