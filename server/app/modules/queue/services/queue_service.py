@@ -223,6 +223,7 @@ class QueueService:
                 "so_phut_cho": so_phut_cho,
                 "thoi_gian_du_kien": thoi_gian_du_kien.isoformat(),
                 "quay_du_kien": quay_du_kien,
+                "so_nguoi_cho_truoc": waiting_count,
                 "tong_khach_dang_cho": waiting_count,
                 "so_quay_hoat_dong": num_active_booths,
                 "khach_hang": {

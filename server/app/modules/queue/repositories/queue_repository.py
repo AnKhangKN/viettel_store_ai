@@ -179,7 +179,7 @@ class QueueRepository:
             SELECT COUNT(*) 
             FROM phieuxephang 
             WHERE id_chi_nhanh = $1 
-              AND trang_thai IN ('ChoXuLy', 'DangPhucVu')
+              AND trang_thai = 'ChoXuLy'
               AND ngay_tao < $2
               AND da_xoa = false
         """
