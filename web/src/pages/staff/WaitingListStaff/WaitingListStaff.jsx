@@ -48,11 +48,20 @@ const WaitingListStaffPage = () => {
   useEffect(() => {
     fetchQueueTickets();
 
+    const handleBoothChanged = () => {
+      fetchQueueTickets(true);
+    };
+
+    window.addEventListener("staff_booth_changed", handleBoothChanged);
+
     const interval = setInterval(() => {
       fetchQueueTickets(false);
     }, 60000);
 
-    return () => clearInterval(interval);
+    return () => {
+      window.removeEventListener("staff_booth_changed", handleBoothChanged);
+      clearInterval(interval);
+    };
   }, []);
 
   // Lắng nghe cập nhật qua WebSocket thời gian thực
@@ -74,8 +83,8 @@ const WaitingListStaffPage = () => {
     socket.onmessage = (event) => {
       try {
         const message = JSON.parse(event.data);
-        if (message.event === "queue_updated") {
-          console.log("Phát hiện thay đổi hàng chờ qua WebSocket. Đang tự động tải lại...");
+        if (message.event === "queue_updated" || message.event === "booth_updated") {
+          console.log("Phát hiện thay đổi hàng chờ/quầy qua WebSocket. Đang tự động tải lại...");
           fetchQueueTickets(false);
         }
       } catch (err) {
@@ -260,7 +269,7 @@ const WaitingListStaffPage = () => {
                           <h3 className="font-extrabold text-gray-900 text-base sm:text-lg">{item.ho_ten}</h3>
                           {isServing && (
                             <span className="bg-blue-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full animate-pulse uppercase">
-                              Đang phục vụ
+                              Đang phục vụ {item.quay_du_kien ? `tại ${item.quay_du_kien}` : ""}
                             </span>
                           )}
                         </div>

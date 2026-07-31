@@ -269,15 +269,15 @@ class QueueService:
 
         # 2. Xác định quầy làm việc hiện tại của nhân viên (nếu có)
         str_id_chi_nhanh = str(id_chi_nhanh)
-        staff_booth = None
+        staff_booth: str | None = None
         if str_id_chi_nhanh in booth_occupancy_manager:
             for b_name, b_info in booth_occupancy_manager[str_id_chi_nhanh].items():
                 if b_info.get("staff_id") == id_khach_hang:
                     staff_booth = b_name
                     break
 
-        # 3. Lấy danh sách phiếu xếp hàng hôm nay đã phân bổ cho quầy này
-        rows = await self.repository.get_tickets_by_branch_today(id_chi_nhanh, ten_quay=staff_booth)
+        # 3. Lấy danh sách toàn bộ phiếu xếp hàng hôm nay của chi nhánh (Hàng chờ chung cho tất cả các quầy)
+        rows = await self.repository.get_tickets_by_branch_today(id_chi_nhanh)
         
         tickets = []
         for r in rows:
@@ -337,10 +337,30 @@ class QueueService:
                     message="Bạn không có quyền thao tác trên phiếu của chi nhánh khác"
                 )
 
-        # 3. Cập nhật trạng thái
-        res = await self.repository.update_ticket_status(id_phieu, trang_thai)
+        # 3. Lấy tên quầy làm việc hiện tại của nhân viên đang thao tác
+        str_id_chi_nhanh = str(id_chi_nhanh)
+        staff_booth: str | None = None
+        if str_id_chi_nhanh in booth_occupancy_manager:
+            for b_name, b_info in booth_occupancy_manager[str_id_chi_nhanh].items():
+                if b_info.get("staff_id") == staff_user_id:
+                    staff_booth = b_name
+                    break
+
+        # 4. Kiểm tra chống trùng lặp (Concurrency Protection):
+        # Khi nhân viên nhấn "Mời vào quầy" (DangPhucVu), phiếu phải còn ở trạng thái 'ChoXuLy'.
+        # Nếu quầy khác đã nhấn mời trước đó, báo lỗi và không cho mời trùng!
+        if trang_thai == "DangPhucVu":
+            if ticket["trang_thai"] != "ChoXuLy":
+                assigned = ticket.get("quay_du_kien") or "quầy khác"
+                raise AppException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    message=f"Phiếu thứ tự '{ticket['so_thu_tu']}' đã được {assigned} tiếp nhận phục vụ!"
+                )
+
+        # 5. Cập nhật trạng thái phiếu và lưu quầy phục vụ thực tế
+        res = await self.repository.update_ticket_status(id_phieu, trang_thai, quay_du_kien=staff_booth)
         
-        # Broadcast sự kiện cập nhật real-time
+        # Broadcast sự kiện real-time tức thì qua WebSocket cho toàn bộ nhân viên các quầy và khách hàng
         import asyncio
         asyncio.create_task(websocket_manager.broadcast(f"queue:{id_chi_nhanh}", {"event": "queue_updated"}))
 
@@ -350,7 +370,8 @@ class QueueService:
             "data": {
                 "id_phieu": str(res["id_phieu"]),
                 "so_thu_tu": res["so_thu_tu"],
-                "trang_thai": res["trang_thai"]
+                "trang_thai": res["trang_thai"],
+                "quay_du_kien": res.get("quay_du_kien")
             }
         }
 

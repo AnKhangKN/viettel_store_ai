@@ -79,6 +79,7 @@ const DashboardPageStaff = () => {
 
     const handleBoothChanged = () => {
       fetchBooths();
+      fetchTickets();
     };
 
     window.addEventListener("staff_booth_changed", handleBoothChanged);
@@ -99,11 +100,9 @@ const DashboardPageStaff = () => {
     socket.onmessage = (event) => {
       try {
         const message = JSON.parse(event.data);
-        if (message.event === "booth_updated") {
+        if (message.event === "booth_updated" || message.event === "queue_updated") {
           fetchBooths();
-        } else if (message.event === "queue_updated") {
           fetchTickets();
-          fetchBooths();
         }
       } catch (err) {
         console.error("Lỗi WebSocket:", err);

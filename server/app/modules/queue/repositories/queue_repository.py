@@ -230,73 +230,51 @@ class QueueRepository:
         db_uuid = uuid.UUID(id_khach_hang) if isinstance(id_khach_hang, str) else id_khach_hang
         return await get_pool().fetchrow(sql, db_uuid)
 
-    async def get_tickets_by_branch_today(self, id_chi_nhanh: str, ten_quay: str | None = None):
-        # Lấy phiếu xếp hàng hôm nay của chi nhánh, lọc theo quầy (nếu có)
+    async def get_tickets_by_branch_today(self, id_chi_nhanh: str):
+        # Lấy danh sách toàn bộ phiếu xếp hàng hôm nay của chi nhánh (hàng chờ chung cho tất cả các quầy)
         db_uuid = uuid.UUID(id_chi_nhanh) if isinstance(id_chi_nhanh, str) else id_chi_nhanh
-        if ten_quay:
-            sql = """
-                SELECT 
-                    p.id_phieu,
-                    p.so_thu_tu,
-                    p.trang_thai,
-                    p.quay_du_kien,
-                    p.ngay_tao,
-                    k.ho_ten,
-                    k.so_dien_thoai,
-                    l.ten_giao_dich,
-                    l.thoi_gian_xu_ly_trung_binh
-                FROM phieuxephang p
-                JOIN khachhang k ON p.id_khach_hang = k.id_khach_hang
-                JOIN loaigiaodich l ON p.id_loai_giao_dich = l.id_loai_giao_dich
-                WHERE p.id_chi_nhanh = $1
-                  AND p.ngay_tao >= CURRENT_DATE
-                  AND p.da_xoa = false
-                  AND (p.quay_du_kien = $2 OR p.quay_du_kien IS NULL)
-                ORDER BY p.ngay_tao ASC
-            """
-            return await get_pool().fetch(sql, db_uuid, ten_quay)
-        else:
-            sql = """
-                SELECT 
-                    p.id_phieu,
-                    p.so_thu_tu,
-                    p.trang_thai,
-                    p.quay_du_kien,
-                    p.ngay_tao,
-                    k.ho_ten,
-                    k.so_dien_thoai,
-                    l.ten_giao_dich,
-                    l.thoi_gian_xu_ly_trung_binh
-                FROM phieuxephang p
-                JOIN khachhang k ON p.id_khach_hang = k.id_khach_hang
-                JOIN loaigiaodich l ON p.id_loai_giao_dich = l.id_loai_giao_dich
-                WHERE p.id_chi_nhanh = $1
-                  AND p.ngay_tao >= CURRENT_DATE
-                  AND p.da_xoa = false
-                ORDER BY p.ngay_tao ASC
-            """
-            return await get_pool().fetch(sql, db_uuid)
+        sql = """
+            SELECT 
+                p.id_phieu,
+                p.so_thu_tu,
+                p.trang_thai,
+                p.quay_du_kien,
+                p.ngay_tao,
+                k.ho_ten,
+                k.so_dien_thoai,
+                l.ten_giao_dich,
+                l.thoi_gian_xu_ly_trung_binh
+            FROM phieuxephang p
+            JOIN khachhang k ON p.id_khach_hang = k.id_khach_hang
+            JOIN loaigiaodich l ON p.id_loai_giao_dich = l.id_loai_giao_dich
+            WHERE p.id_chi_nhanh = $1
+              AND p.ngay_tao >= CURRENT_DATE
+              AND p.da_xoa = false
+            ORDER BY p.ngay_tao ASC
+        """
+        return await get_pool().fetch(sql, db_uuid)
 
     async def get_ticket_by_id(self, id_phieu: str):
         sql = """
-            SELECT id_phieu, id_chi_nhanh, trang_thai
+            SELECT id_phieu, id_chi_nhanh, so_thu_tu, trang_thai, quay_du_kien
             FROM phieuxephang
             WHERE id_phieu = $1 AND da_xoa = false
         """
         db_uuid = uuid.UUID(id_phieu) if isinstance(id_phieu, str) else id_phieu
         return await get_pool().fetchrow(sql, db_uuid)
 
-    async def update_ticket_status(self, id_phieu: str, trang_thai: str):
+    async def update_ticket_status(self, id_phieu: str, trang_thai: str, quay_du_kien: str | None = None):
         sql = """
             UPDATE phieuxephang
             SET 
                 trang_thai = $2,
+                quay_du_kien = COALESCE($3, quay_du_kien),
                 cap_nhat = CURRENT_TIMESTAMP
             WHERE id_phieu = $1 AND da_xoa = false
-            RETURNING id_phieu, so_thu_tu, trang_thai
+            RETURNING id_phieu, so_thu_tu, trang_thai, quay_du_kien
         """
         db_uuid = uuid.UUID(id_phieu) if isinstance(id_phieu, str) else id_phieu
-        return await get_pool().fetchrow(sql, db_uuid, trang_thai)
+        return await get_pool().fetchrow(sql, db_uuid, trang_thai, quay_du_kien)
 
     async def get_booths_by_branch(self, id_chi_nhanh: str):
         sql = """
