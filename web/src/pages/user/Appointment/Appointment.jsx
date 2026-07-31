@@ -349,13 +349,7 @@ const Appointment = () => {
                 )}
 
                 <div className="border-t border-slate-100 pt-3 text-xs space-y-2">
-                  {/* <div className="flex justify-between items-center text-slate-600 bg-red-50/60 p-2.5 rounded-xl border border-red-100">
-                    <span className="flex items-center gap-1 font-bold text-slate-800">
-                      <Users className="w-3.5 h-3.5 text-[#EE0033]" />
-                      Số người đang chờ trước bạn:
-                    </span>
-                    <span className="font-black text-[#EE0033] text-sm">{result.so_nguoi_cho_truoc ?? 0} người</span>
-                  </div> */}
+
 
                   <div className="flex justify-between items-center text-slate-600">
                     <span>Thời gian chờ dự kiến:</span>
