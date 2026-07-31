@@ -146,7 +146,8 @@ class QueueRepository:
         id_khach_hang: str,
         id_chi_nhanh: str,
         id_loai_giao_dich: str,
-        so_thu_tu: str
+        so_thu_tu: str,
+        quay_du_kien: str | None = None
     ):
         sql = """
             INSERT INTO phieuxephang (
@@ -155,10 +156,11 @@ class QueueRepository:
                 id_chi_nhanh,
                 id_loai_giao_dich,
                 so_thu_tu,
+                quay_du_kien,
                 trang_thai
             )
-            VALUES ($1, $2, $3, $4, $5, 'ChoXuLy')
-            RETURNING id_phieu, id_khach_hang, id_chi_nhanh, id_loai_giao_dich, so_thu_tu, trang_thai, ngay_tao
+            VALUES ($1, $2, $3, $4, $5, $6, 'ChoXuLy')
+            RETURNING id_phieu, id_khach_hang, id_chi_nhanh, id_loai_giao_dich, so_thu_tu, quay_du_kien, trang_thai, ngay_tao
         """
         uuid_phieu = uuid.UUID(id_phieu) if isinstance(id_phieu, str) else id_phieu
         uuid_kh = uuid.UUID(id_khach_hang) if isinstance(id_khach_hang, str) else id_khach_hang
@@ -171,7 +173,8 @@ class QueueRepository:
             uuid_kh,
             uuid_cn,
             uuid_lgd,
-            so_thu_tu
+            so_thu_tu,
+            quay_du_kien
         )
 
     async def count_waiting_tickets_before(self, id_chi_nhanh: str, ngay_tao_limit: datetime):
@@ -227,28 +230,52 @@ class QueueRepository:
         db_uuid = uuid.UUID(id_khach_hang) if isinstance(id_khach_hang, str) else id_khach_hang
         return await get_pool().fetchrow(sql, db_uuid)
 
-    async def get_tickets_by_branch_today(self, id_chi_nhanh: str):
-        # Lấy toàn bộ phiếu xếp hàng hôm nay của chi nhánh, sắp xếp theo thời gian đăng ký tăng dần
-        sql = """
-            SELECT 
-                p.id_phieu,
-                p.so_thu_tu,
-                p.trang_thai,
-                p.ngay_tao,
-                k.ho_ten,
-                k.so_dien_thoai,
-                l.ten_giao_dich,
-                l.thoi_gian_xu_ly_trung_binh
-            FROM phieuxephang p
-            JOIN khachhang k ON p.id_khach_hang = k.id_khach_hang
-            JOIN loaigiaodich l ON p.id_loai_giao_dich = l.id_loai_giao_dich
-            WHERE p.id_chi_nhanh = $1
-              AND p.ngay_tao >= CURRENT_DATE
-              AND p.da_xoa = false
-            ORDER BY p.ngay_tao ASC
-        """
+    async def get_tickets_by_branch_today(self, id_chi_nhanh: str, ten_quay: str | None = None):
+        # Lấy phiếu xếp hàng hôm nay của chi nhánh, lọc theo quầy (nếu có)
         db_uuid = uuid.UUID(id_chi_nhanh) if isinstance(id_chi_nhanh, str) else id_chi_nhanh
-        return await get_pool().fetch(sql, db_uuid)
+        if ten_quay:
+            sql = """
+                SELECT 
+                    p.id_phieu,
+                    p.so_thu_tu,
+                    p.trang_thai,
+                    p.quay_du_kien,
+                    p.ngay_tao,
+                    k.ho_ten,
+                    k.so_dien_thoai,
+                    l.ten_giao_dich,
+                    l.thoi_gian_xu_ly_trung_binh
+                FROM phieuxephang p
+                JOIN khachhang k ON p.id_khach_hang = k.id_khach_hang
+                JOIN loaigiaodich l ON p.id_loai_giao_dich = l.id_loai_giao_dich
+                WHERE p.id_chi_nhanh = $1
+                  AND p.ngay_tao >= CURRENT_DATE
+                  AND p.da_xoa = false
+                  AND (p.quay_du_kien = $2 OR p.quay_du_kien IS NULL)
+                ORDER BY p.ngay_tao ASC
+            """
+            return await get_pool().fetch(sql, db_uuid, ten_quay)
+        else:
+            sql = """
+                SELECT 
+                    p.id_phieu,
+                    p.so_thu_tu,
+                    p.trang_thai,
+                    p.quay_du_kien,
+                    p.ngay_tao,
+                    k.ho_ten,
+                    k.so_dien_thoai,
+                    l.ten_giao_dich,
+                    l.thoi_gian_xu_ly_trung_binh
+                FROM phieuxephang p
+                JOIN khachhang k ON p.id_khach_hang = k.id_khach_hang
+                JOIN loaigiaodich l ON p.id_loai_giao_dich = l.id_loai_giao_dich
+                WHERE p.id_chi_nhanh = $1
+                  AND p.ngay_tao >= CURRENT_DATE
+                  AND p.da_xoa = false
+                ORDER BY p.ngay_tao ASC
+            """
+            return await get_pool().fetch(sql, db_uuid)
 
     async def get_ticket_by_id(self, id_phieu: str):
         sql = """

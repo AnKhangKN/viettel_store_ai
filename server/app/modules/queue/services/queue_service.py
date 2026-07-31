@@ -162,30 +162,31 @@ class QueueService:
         # Sinh dạng A001, A002...
         so_thu_tu = f"A{str(count_today + 1).zfill(3)}"
 
-        # 4. Tạo phiếu xếp hàng
+        # 4. Thuật toán phân bổ quầy thông minh (Smart Dispatching) dựa trên số lượng khách & thời gian chờ
+        active_booths = await self.repository.get_booths_by_branch(body.id_chi_nhanh)
+        num_active_booths = len(active_booths) if active_booths else 1
+
+        # Lựa chọn quầy có thời gian chờ & lượng khách ít nhất
+        booth_index = count_today % num_active_booths
+        if active_booths:
+            selected_booth = active_booths[booth_index]
+            quay_du_kien = selected_booth["ten_quay"]
+        else:
+            quay_du_kien = f"Quầy {booth_index + 1}"
+
+        # 5. Tạo phiếu xếp hàng kèm quầy đã phân bổ
         ticket_id = generate_uuid7()
         ticket = await self.repository.create_ticket(
             id_phieu=ticket_id,
             id_khach_hang=id_khach_hang,
             id_chi_nhanh=body.id_chi_nhanh,
             id_loai_giao_dich=body.id_loai_giao_dich,
-            so_thu_tu=so_thu_tu
+            so_thu_tu=so_thu_tu,
+            quay_du_kien=quay_du_kien
         )
-
-        # 5. Thuật toán phân bổ quầy thông minh (Smart Dispatching) dựa trên số lượng khách & thời gian chờ
-        active_booths = await self.repository.get_booths_by_branch(body.id_chi_nhanh)
-        num_active_booths = len(active_booths) if active_booths else 1
 
         waiting_count = await self.repository.count_waiting_tickets_before(body.id_chi_nhanh, ticket["ngay_tao"])
         thoi_gian_tb = service["thoi_gian_xu_ly_trung_binh"] or 10
-
-        # Lựa chọn quầy có thời gian chờ & lượng khách ít nhất
-        booth_index = waiting_count % num_active_booths
-        if active_booths:
-            selected_booth = active_booths[booth_index]
-            quay_du_kien = selected_booth["ten_quay"]
-        else:
-            quay_du_kien = f"Quầy {booth_index + 1}"
 
         # Số lượt chờ tại quầy được phân bổ
         booth_queue_length = waiting_count // num_active_booths
@@ -266,8 +267,17 @@ class QueueService:
         else:
             id_chi_nhanh = branch_row["id_chi_nhanh"]
 
-        # 2. Lấy danh sách phiếu xếp hàng hôm nay
-        rows = await self.repository.get_tickets_by_branch_today(id_chi_nhanh)
+        # 2. Xác định quầy làm việc hiện tại của nhân viên (nếu có)
+        str_id_chi_nhanh = str(id_chi_nhanh)
+        staff_booth = None
+        if str_id_chi_nhanh in booth_occupancy_manager:
+            for b_name, b_info in booth_occupancy_manager[str_id_chi_nhanh].items():
+                if b_info.get("staff_id") == id_khach_hang:
+                    staff_booth = b_name
+                    break
+
+        # 3. Lấy danh sách phiếu xếp hàng hôm nay đã phân bổ cho quầy này
+        rows = await self.repository.get_tickets_by_branch_today(id_chi_nhanh, ten_quay=staff_booth)
         
         tickets = []
         for r in rows:
@@ -275,6 +285,7 @@ class QueueService:
                 "id_phieu": str(r["id_phieu"]),
                 "so_thu_tu": r["so_thu_tu"],
                 "trang_thai": r["trang_thai"],
+                "quay_du_kien": r["quay_du_kien"],
                 "ngay_tao": r["ngay_tao"].isoformat(),
                 "ho_ten": r["ho_ten"],
                 "so_dien_thoai": r["so_dien_thoai"],
@@ -285,6 +296,7 @@ class QueueService:
         return {
             "success": True,
             "id_chi_nhanh": str(id_chi_nhanh),
+            "staff_booth": staff_booth,
             "data": tickets
         }
 

@@ -270,6 +270,11 @@ const WaitingListStaffPage = () => {
                           <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-xl font-bold border border-gray-200/80">
                             {item.ten_giao_dich || "Dịch vụ chung"}
                           </span>
+                          {item.quay_du_kien && (
+                            <span className="bg-red-50 text-[#EE0033] px-2.5 py-1 rounded-xl font-extrabold border border-red-100 text-xs">
+                              {item.quay_du_kien}
+                            </span>
+                          )}
                           <span className="flex items-center gap-1.5 text-gray-400 text-xs">
                             <Clock className="w-3.5 h-3.5 text-gray-400" />
                             Lấy số lúc: <strong>{registerTime}</strong>
