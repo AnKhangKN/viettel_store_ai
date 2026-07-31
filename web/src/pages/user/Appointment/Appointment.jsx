@@ -157,7 +157,7 @@ const Appointment = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8 pb-20">
-      
+
       {/* HERO SECTION */}
       <div className="max-w-3xl mx-auto text-center mb-8">
         <span className="inline-flex items-center gap-1.5 bg-red-50 text-[#EE0033] border border-red-100 text-xs font-black px-3.5 py-1 rounded-full uppercase tracking-wider mb-3 shadow-2xs">
@@ -186,10 +186,10 @@ const Appointment = () => {
       </div>
 
       <div className="max-w-3xl mx-auto">
-        
+
         {/* CARD CONTAINER */}
         <div className="bg-white rounded-3xl shadow-[0_10px_30px_-10px_rgba(0,0,0,0.08)] border-2 border-slate-100 p-6 sm:p-10 relative overflow-hidden">
-          
+
           {error && (
             <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3 text-rose-800 text-xs font-semibold">
               <AlertCircle className="w-4 h-4 text-rose-600 mt-0.5 shrink-0" />
@@ -199,10 +199,10 @@ const Appointment = () => {
 
           {!result ? (
             <form onSubmit={handleSubmit} className="space-y-6">
-              
+
               {/* Form step header */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                
+
                 {/* Họ và tên */}
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
@@ -312,7 +312,7 @@ const Appointment = () => {
           ) : (
             /* TICKET DIGITAL DISPLAY CARD */
             <div className="bg-gradient-to-br from-red-50/50 via-white to-orange-50/50 border-2 border-red-200 rounded-3xl p-6 sm:p-8 text-center relative overflow-hidden animate-in fade-in zoom-in duration-200">
-              
+
               <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
@@ -322,7 +322,7 @@ const Appointment = () => {
 
               {/* Digital Ticket Box */}
               <div className="bg-white rounded-3xl border-2 border-red-100 shadow-md p-6 max-w-md mx-auto space-y-4">
-                
+
                 <div>
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">MÃ SỐ THỨ TỰ CỦA BẠN</span>
                   <div className="text-5xl sm:text-6xl font-black text-[#EE0033] tracking-widest my-2 select-all drop-shadow-xs">
@@ -349,13 +349,13 @@ const Appointment = () => {
                 )}
 
                 <div className="border-t border-slate-100 pt-3 text-xs space-y-2">
-                  <div className="flex justify-between items-center text-slate-600 bg-red-50/60 p-2.5 rounded-xl border border-red-100">
+                  {/* <div className="flex justify-between items-center text-slate-600 bg-red-50/60 p-2.5 rounded-xl border border-red-100">
                     <span className="flex items-center gap-1 font-bold text-slate-800">
                       <Users className="w-3.5 h-3.5 text-[#EE0033]" />
                       Số người đang chờ trước bạn:
                     </span>
                     <span className="font-black text-[#EE0033] text-sm">{result.so_nguoi_cho_truoc ?? 0} người</span>
-                  </div>
+                  </div> */}
 
                   <div className="flex justify-between items-center text-slate-600">
                     <span>Thời gian chờ dự kiến:</span>
