@@ -196,7 +196,7 @@ class QueueService:
         else:
             so_phut_cho = max(3, booth_queue_length * thoi_gian_tb)
 
-        thoi_gian_du_kien = ticket["ngay_tao"] + timedelta(minutes=so_phut_cho)
+        thoi_gian_du_kien = datetime.now() + timedelta(minutes=so_phut_cho)
 
         # Lưu thông tin dự đoán
         prediction_id = generate_uuid7()
@@ -681,8 +681,17 @@ class QueueService:
 
         # Đếm số người chờ trước phiếu này
         waiting_count = await self.repository.count_waiting_tickets_before(id_chi_nhanh, ticket["ngay_tao"])
-        avg_time = ticket["thoi_gian_xu_ly_trung_binh"] or 15
-        so_phut_cho = max(5, waiting_count * avg_time)
+        active_booths = await self.repository.get_booths_by_branch(id_chi_nhanh)
+        num_active_booths = len(active_booths) if active_booths else 1
+        booth_queue_length = waiting_count // num_active_booths
+
+        avg_time = ticket["thoi_gian_xu_ly_trung_binh"] or 10
+
+        if waiting_count == 0:
+            so_phut_cho = 3
+        else:
+            so_phut_cho = max(3, booth_queue_length * avg_time)
+
         thoi_gian_du_kien = datetime.now() + timedelta(minutes=so_phut_cho)
 
         return {

@@ -364,7 +364,7 @@ const Appointment = () => {
                   <div className="flex justify-between items-center text-slate-600">
                     <span>Dự kiến phục vụ lúc:</span>
                     <span className="font-bold text-slate-800">
-                      {new Date(result.thoi_gian_du_kien).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })}
+                      {result.thoi_gian_du_kien ? new Date(result.thoi_gian_du_kien).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' }) : "--:--"}
                     </span>
                   </div>
                 </div>
