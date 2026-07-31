@@ -239,8 +239,10 @@ const WaitingListStaffPage = () => {
             {tickets
               .filter((t) => t.trang_thai === "ChoXuLy" || t.trang_thai === "DangPhucVu")
               .map((item) => {
+                const activeBooth = localStorage.getItem("staff_active_booth");
                 const isWaiting = item.trang_thai === "ChoXuLy";
                 const isServing = item.trang_thai === "DangPhucVu";
+                const isMyBoothServing = !item.quay_du_kien || !activeBooth || item.quay_du_kien === activeBooth;
 
                 const registerTime = new Date(item.ngay_tao).toLocaleTimeString("vi-VN", {
                   hour: "2-digit",
@@ -294,7 +296,7 @@ const WaitingListStaffPage = () => {
 
                     {/* Actions Group */}
                     <div className="flex items-center gap-3 self-end sm:self-auto w-full sm:w-auto justify-end pt-3 sm:pt-0 border-t sm:border-t-0 border-gray-100">
-                      {/* Call Customer Button */}
+                      {/* Call Customer Button (Only for waiting tickets) */}
                       {isWaiting && (
                         <button
                           onClick={() => handleUpdateStatus(item.id_phieu, "DangPhucVu")}
@@ -306,8 +308,8 @@ const WaitingListStaffPage = () => {
                         </button>
                       )}
 
-                      {/* Complete Ticket Button */}
-                      {isServing && (
+                      {/* Complete Ticket Button (Only for staff of the booth serving this customer) */}
+                      {isServing && isMyBoothServing && (
                         <button
                           onClick={() => handleUpdateStatus(item.id_phieu, "HoanThanh")}
                           disabled={actionLoading}
@@ -318,8 +320,15 @@ const WaitingListStaffPage = () => {
                         </button>
                       )}
 
+                      {/* Read-only status indicator if serving at another booth */}
+                      {isServing && !isMyBoothServing && (
+                        <span className="text-xs text-blue-700 bg-blue-50 border border-blue-200 font-bold px-3 py-2 rounded-xl">
+                          Đang giao dịch tại {item.quay_du_kien}
+                        </span>
+                      )}
+
                       {/* Cancel Ticket Button */}
-                      {(isWaiting || isServing) && (
+                      {(isWaiting || (isServing && isMyBoothServing)) && (
                         <button
                           onClick={() => handleUpdateStatus(item.id_phieu, "DaHuy")}
                           disabled={actionLoading}

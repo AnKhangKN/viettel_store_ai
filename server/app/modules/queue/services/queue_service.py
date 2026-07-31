@@ -346,15 +346,23 @@ class QueueService:
                     staff_booth = b_name
                     break
 
-        # 4. Kiểm tra chống trùng lặp (Concurrency Protection):
-        # Khi nhân viên nhấn "Mời vào quầy" (DangPhucVu), phiếu phải còn ở trạng thái 'ChoXuLy'.
-        # Nếu quầy khác đã nhấn mời trước đó, báo lỗi và không cho mời trùng!
+        # 4. Kiểm tra chống trùng lặp & Phân quyền thao tác theo Quầy (Booth Ownership Protection):
+        # - Khi nhân viên nhấn "Mời vào quầy" (DangPhucVu), phiếu phải còn ở trạng thái 'ChoXuLy'.
+        # - Khi phiếu đang ở trạng thái 'DangPhucVu', chỉ nhân viên của Quầy đã mời (hoặc Admin) mới được bấm 'Hoàn thành' hoặc 'Hủy'!
         if trang_thai == "DangPhucVu":
             if ticket["trang_thai"] != "ChoXuLy":
                 assigned = ticket.get("quay_du_kien") or "quầy khác"
                 raise AppException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     message=f"Phiếu thứ tự '{ticket['so_thu_tu']}' đã được {assigned} tiếp nhận phục vụ!"
+                )
+        elif ticket["trang_thai"] == "DangPhucVu" and trang_thai in ["HoanThanh", "DaHuy"]:
+            assigned = ticket.get("quay_du_kien")
+            role = await self.user_service.get_user_role(staff_user_id)
+            if assigned and staff_booth and staff_booth != assigned and role != "admin":
+                raise AppException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    message=f"Phiếu thứ tự '{ticket['so_thu_tu']}' đang được phục vụ tại {assigned}. Chỉ nhân viên {assigned} mới có quyền kết thúc giao dịch!"
                 )
 
         # 5. Cập nhật trạng thái phiếu và lưu quầy phục vụ thực tế
