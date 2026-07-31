@@ -1,12 +1,28 @@
+import random
+import asyncio
+from datetime import datetime, timezone, timedelta
 from fastapi import status
 from app.core.exceptions import AppException
+from app.core.email import send_otp_email
 from app.common.utils.uuid import generate_uuid7
 from app.core.security import hash_password, verify_password
 from app.modules.user.repositories.user_repository import UserRepository
-from app.modules.user.schemas.user_schema import EmployeeCreateRequest, EmployeeApproveRequest, AccountRoleUpdateRequest, StaffProfileUpdateRequest, ChangePasswordRequest
+from app.modules.user.schemas.user_schema import (
+    EmployeeCreateRequest,
+    EmployeeApproveRequest,
+    AccountRoleUpdateRequest,
+    StaffProfileUpdateRequest,
+    UserProfileUpdateRequest,
+    ChangePasswordRequest,
+    RequestChangeEmailRequest,
+    ConfirmChangeEmailRequest
+)
 from app.common.enums.role_enum import RoleEnum
 from app.modules.branch.repositories.branch_repository import BranchRepository
 from app.modules.cskh.services.cskh_service import CSKHService
+
+_email_change_otp_store: dict[str, dict] = {}
+
 
 class UserService:
 
@@ -277,7 +293,7 @@ class UserService:
     async def get_user_role(self, id_khach_hang: str) -> str | None:
         return await self.repository.get_user_role(id_khach_hang)
 
-    async def update_profile(self, payload: dict, body):
+    async def update_profile(self, payload: dict, body: UserProfileUpdateRequest):
         id_khach_hang = payload.get("id_khach_hang")
         if not id_khach_hang:
             raise AppException(
@@ -285,23 +301,23 @@ class UserService:
                 message="Không xác định được người dùng"
             )
 
-        if body.email:
-            existing = await self.repository.find_by_email_or_phone(body.email, "")
-            if existing and str(existing["id_khach_hang"]) != str(id_khach_hang):
-                raise AppException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    message="Email này đã được sử dụng bởi tài khoản khác"
-                )
-
         await self._ensure_phone_unique(body.so_dien_thoai, id_khach_hang)
+
+        # Kiểm tra CCCD chỉ được cập nhật 1 lần duy nhất
+        if body.cccd:
+            current_cccd = await self.repository.get_cccd_by_id(id_khach_hang)
+            if current_cccd:
+                raise AppException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    message="Số CCCD đã được cập nhật trước đó. Không thể thay đổi số CCCD sau khi đã xác nhận!"
+                )
 
         res = await self.repository.update_profile(
             id_khach_hang=id_khach_hang,
             ho_ten=body.ho_ten,
             so_dien_thoai=body.so_dien_thoai,
             cccd=body.cccd or "",
-            dia_chi=body.dia_chi or "",
-            email=body.email
+            dia_chi=body.dia_chi or ""
         )
 
         if not res:
@@ -375,14 +391,21 @@ class UserService:
 
         await self._ensure_phone_unique(body.so_dien_thoai, id_khach_hang)
 
+        # Kiểm tra CCCD chỉ được cập nhật 1 lần duy nhất
+        if body.cccd:
+            current_cccd = await self.repository.get_cccd_by_id(id_khach_hang)
+            if current_cccd:
+                raise AppException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    message="Số CCCD đã được cập nhật trước đó. Không thể thay đổi số CCCD sau khi đã xác nhận!"
+                )
+
         res = await self.repository.update_staff_profile(
             id_khach_hang=id_khach_hang,
             ho_ten=body.ho_ten,
             so_dien_thoai=body.so_dien_thoai,
             cccd=body.cccd,
-            dia_chi=body.dia_chi,
-            gioi_tinh=body.gioi_tinh,
-            ngay_sinh=body.ngay_sinh
+            dia_chi=body.dia_chi
         )
 
         if not res:
@@ -400,8 +423,6 @@ class UserService:
                 "so_dien_thoai": res["so_dien_thoai"],
                 "cccd": res["cccd"],
                 "dia_chi": res["dia_chi"],
-                "gioi_tinh": res["gioi_tinh"],
-                "ngay_sinh": str(res["ngay_sinh"]) if res["ngay_sinh"] else None,
                 "email": res["email"]
             }
         }
@@ -434,5 +455,100 @@ class UserService:
             "success": True,
             "message": "Đổi mật khẩu thành công"
         }
+
+    async def request_change_email(self, payload: dict, body: RequestChangeEmailRequest):
+        id_khach_hang = payload.get("id_khach_hang")
+        if not id_khach_hang:
+            raise AppException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                message="Không xác định được người dùng"
+            )
+
+        new_email = body.new_email.strip().lower()
+
+        # 1. Kiểm tra email mới có trùng với tài khoản khác không
+        existing = await self.repository.find_by_email_or_phone(new_email, "")
+        if existing:
+            if str(existing["id_khach_hang"]) == str(id_khach_hang):
+                raise AppException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    message="Email mới trùng với email hiện tại của bạn"
+                )
+            raise AppException(
+                status_code=status.HTTP_409_CONFLICT,
+                message="Email này đã được sử dụng bởi tài khoản khác trong hệ thống"
+            )
+
+        # 2. Tạo mã OTP 6 chữ số, hết hạn trong 10 phút
+        otp_code = str(random.randint(100000, 999999))
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+        _email_change_otp_store[str(id_khach_hang)] = {
+            "new_email": new_email,
+            "code": otp_code,
+            "expires_at": expires_at
+        }
+
+        # 3. Gửi email chứa OTP tới new_email
+        asyncio.create_task(send_otp_email(new_email, otp_code, "CHANGE_EMAIL"))
+
+        expires_at_str = (expires_at + timedelta(hours=7)).strftime("%H:%M:%S")
+        return {
+            "success": True,
+            "message": f"Mã OTP xác thực đã được gửi tới email mới ({new_email}). Vui lòng nhập mã OTP để hoàn tất (Hết hạn lúc: {expires_at_str}).",
+            "new_email": new_email,
+            "expires_at_str": expires_at_str
+        }
+
+    async def confirm_change_email(self, payload: dict, body: ConfirmChangeEmailRequest):
+        id_khach_hang = payload.get("id_khach_hang")
+        if not id_khach_hang:
+            raise AppException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                message="Không xác định được người dùng"
+            )
+
+        new_email = body.new_email.strip().lower()
+        user_key = str(id_khach_hang)
+
+        otp_data = _email_change_otp_store.get(user_key)
+        if not otp_data or otp_data["new_email"] != new_email:
+            raise AppException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message="Yêu cầu thay đổi email không tồn tại hoặc đã bị hủy. Vui lòng gửi lại yêu cầu mới."
+            )
+
+        if datetime.now(timezone.utc) > otp_data["expires_at"]:
+            _email_change_otp_store.pop(user_key, None)
+            raise AppException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message="Mã OTP đã hết hạn. Vui lòng gửi lại yêu cầu OTP mới."
+            )
+
+        if otp_data["code"] != body.otp_code.strip():
+            raise AppException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message="Mã OTP không chính xác. Vui lòng kiểm tra lại hộp thư email mới của bạn."
+            )
+
+        # Xóa OTP sau khi xác thực thành công
+        _email_change_otp_store.pop(user_key, None)
+
+        # Cập nhật email trong DB
+        res = await self.repository.update_user_email(id_khach_hang, new_email)
+        if not res:
+            raise AppException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Người dùng không tồn tại"
+            )
+
+        return {
+            "success": True,
+            "message": "Cập nhật email mới thành công!",
+            "data": {
+                "id_khach_hang": str(res["id_khach_hang"]),
+                "email": res["email"]
+            }
+        }
+
 
 

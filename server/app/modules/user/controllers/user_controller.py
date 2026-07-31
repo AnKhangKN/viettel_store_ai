@@ -1,6 +1,15 @@
 from fastapi import Depends
 from app.modules.user.services.user_service import UserService
-from app.modules.user.schemas.user_schema import EmployeeCreateRequest, EmployeeApproveRequest, AccountRoleUpdateRequest, UserProfileUpdateRequest, StaffProfileUpdateRequest, ChangePasswordRequest
+from app.modules.user.schemas.user_schema import (
+    EmployeeCreateRequest,
+    EmployeeApproveRequest,
+    AccountRoleUpdateRequest,
+    UserProfileUpdateRequest,
+    StaffProfileUpdateRequest,
+    ChangePasswordRequest,
+    RequestChangeEmailRequest,
+    ConfirmChangeEmailRequest
+)
 from app.common.dependencies.user_dependency import get_current_user
 from app.common.dependencies.staff_dependency import get_current_staff
 
@@ -44,4 +53,11 @@ class UserController:
 
     async def update_staff_profile(self, body: StaffProfileUpdateRequest, current_staff: dict = Depends(get_current_staff)):
         return await self.service.update_staff_profile(current_staff, body)
+
+    async def request_change_email(self, body: RequestChangeEmailRequest, current_user: dict = Depends(get_current_user)):
+        return await self.service.request_change_email(current_user, body)
+
+    async def confirm_change_email(self, body: ConfirmChangeEmailRequest, current_user: dict = Depends(get_current_user)):
+        return await self.service.confirm_change_email(current_user, body)
+
 

@@ -46,9 +46,8 @@ class AccountRoleUpdateRequest(BaseModel):
 class UserProfileUpdateRequest(BaseModel):
     ho_ten: str = Field(..., description="Họ và tên")
     so_dien_thoai: str = Field(..., description="Số điện thoại")
-    email: EmailStr | None = Field(None, description="Email mới")
-    cccd: str | None = Field(None, description="Số CCCD/CMND")
-    dia_chi: str | None = Field(None, description="Địa chỉ giao hàng")
+    cccd: str | None = Field(None, description="Số CCCD/CMND (chỉ được cập nhật 1 lần)")
+    dia_chi: str | None = Field(None, description="Địa chỉ thường trú")
 
     @field_validator("ho_ten")
     @classmethod
@@ -82,10 +81,8 @@ class UserProfileUpdateRequest(BaseModel):
 class StaffProfileUpdateRequest(BaseModel):
     ho_ten: str = Field(..., description="Họ và tên nhân viên")
     so_dien_thoai: str = Field(..., description="Số điện thoại")
-    cccd: str | None = Field(None, description="Số CCCD/CMND")
+    cccd: str | None = Field(None, description="Số CCCD/CMND (chỉ được cập nhật 1 lần)")
     dia_chi: str | None = Field(None, description="Địa chỉ thường trú")
-    gioi_tinh: str | None = Field(None, description="Giới tính ('Nam', 'Nữ', 'Khác')")
-    ngay_sinh: str | None = Field(None, description="Ngày sinh (YYYY-MM-DD)")
 
     @field_validator("ho_ten")
     @classmethod
@@ -126,5 +123,23 @@ class ChangePasswordRequest(BaseModel):
         if len(v) < 6:
             raise ValueError("Mật khẩu mới phải chứa ít nhất 6 ký tự.")
         return v
+
+
+class RequestChangeEmailRequest(BaseModel):
+    new_email: EmailStr = Field(..., description="Email mới cần thay đổi")
+
+
+class ConfirmChangeEmailRequest(BaseModel):
+    new_email: EmailStr = Field(..., description="Email mới")
+    otp_code: str = Field(..., description="Mã OTP 6 chữ số")
+
+    @field_validator("otp_code")
+    @classmethod
+    def validate_otp(cls, v: str) -> str:
+        v_clean = v.strip()
+        if not re.match(r"^[0-9]{6}$", v_clean):
+            raise ValueError("Mã OTP không hợp lệ! Vui lòng nhập đúng 6 chữ số.")
+        return v_clean
+
 
 

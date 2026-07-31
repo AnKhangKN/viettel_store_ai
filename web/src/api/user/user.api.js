@@ -138,3 +138,29 @@ export const changePassword = async (passwordData) => {
     }
 };
 
+// API user - yêu cầu gửi mã OTP để đổi email
+export const requestChangeEmail = async (newEmail) => {
+    try {
+        const response = await axiosJWT.post(`/api/user/request-change-email`, { new_email: newEmail });
+        return response.data;
+    } catch (error) {
+        console.error("Lỗi yêu cầu đổi email:", error);
+        throw error;
+    }
+};
+
+// API user - xác nhận mã OTP để đổi email
+export const confirmChangeEmail = async (newEmail, otpCode) => {
+    try {
+        const response = await axiosJWT.post(`/api/user/confirm-change-email`, {
+            new_email: newEmail,
+            otp_code: otpCode
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Lỗi xác nhận đổi email:", error);
+        throw error;
+    }
+};
+
+

@@ -195,8 +195,15 @@ async def send_otp_email(to_email: str, otp_code: str, loai_otp: str = "REGISTER
     Gửi email chứa mã OTP xác thực (Đăng ký hoặc Quên mật khẩu) cho khách hàng.
     Nếu bật TEST_SEND_OTP_TO_OWNER=true, hệ thống sẽ gửi thêm 1 bản sao tới mail chủ để test.
     """
-    title = "XÁC THỰC TÀI KHOẢN" if loai_otp == "REGISTER" else "KHÔI PHỤC MẬT KHẨU"
-    action_text = "đăng ký tài khoản" if loai_otp == "REGISTER" else "khôi phục mật khẩu"
+    if loai_otp == "REGISTER":
+        title = "XÁC THỰC TÀI KHOẢN"
+        action_text = "đăng ký tài khoản"
+    elif loai_otp == "CHANGE_EMAIL":
+        title = "XÁC THỰC THAY ĐỔI EMAIL"
+        action_text = "xác nhận thay đổi địa chỉ email"
+    else:
+        title = "KHÔI PHỤC MẬT KHẨU"
+        action_text = "khôi phục mật khẩu"
     owner_email = "pkngoccntt2211025@student.ctuet.edu.vn"
     send_to_owner_copy = os.getenv("TEST_SEND_OTP_TO_OWNER", "false").strip().lower() == "true"
     recipients = [to_email]

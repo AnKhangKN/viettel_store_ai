@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setCredentials } from '../../../features/auth/authSlice';
 import { updateProfile, changePassword } from '../../../api/user/user.api';
 import { User, Phone, MapPin, CreditCard, Mail, Edit2, Check, X, Loader2, Lock, KeyRound, ShieldCheck, Zap, Sparkles } from 'lucide-react';
+import ChangeEmailModal from '../../../components/common/ChangeEmailModal/ChangeEmailModal';
 
 const UserProfilePage = () => {
   const dispatch = useDispatch();
@@ -10,7 +11,9 @@ const UserProfilePage = () => {
   
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
+
   
   const [formData, setFormData] = useState({
     ho_ten: '',
@@ -59,14 +62,6 @@ const UserProfilePage = () => {
       }
     }
 
-    const emailClean = formData.email.trim();
-    if (emailClean) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(emailClean)) {
-        return "Địa chỉ Email không đúng định dạng (VD: example@gmail.com)!";
-      }
-    }
-
     const cccdClean = formData.cccd.trim();
     if (cccdClean) {
       const cccdRegex = /^[0-9]{12}$/;
@@ -93,9 +88,8 @@ const UserProfilePage = () => {
       await updateProfile({
         ho_ten: formData.ho_ten.trim(),
         so_dien_thoai: formData.so_dien_thoai.trim(),
-        email: formData.email.trim(),
-        cccd: formData.cccd.trim(),
-        dia_chi: formData.dia_chi.trim()
+        cccd: formData.cccd.trim() || null,
+        dia_chi: formData.dia_chi.trim() || null
       });
       
       dispatch(setCredentials({ 
@@ -267,34 +261,49 @@ const UserProfilePage = () => {
                     />
                   </div>
 
-                  {/* Email */}
+                  {/* Email liên hệ & Nút đổi Email bằng OTP */}
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                      <Mail size={13} className="text-slate-400" /> Email liên hệ
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                        <Mail size={13} className="text-slate-400" /> Email liên hệ
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setIsEmailModalOpen(true)}
+                        className="text-[11px] font-extrabold text-[#EE0033] hover:bg-red-50 px-2 py-0.5 rounded-lg transition border border-red-100 flex items-center gap-1 cursor-pointer"
+                      >
+                        Đổi Email (OTP)
+                      </button>
+                    </div>
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
-                      onChange={handleInputChange}
-                      disabled={!isEditing}
-                      required
-                      className="w-full bg-slate-50 border border-slate-300 text-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-[#EE0033] focus:bg-white transition disabled:opacity-75 outline-none"
+                      disabled={true}
+                      className="w-full bg-slate-100 border border-slate-200 text-slate-500 rounded-xl px-3.5 py-2.5 text-xs font-semibold cursor-not-allowed outline-none"
                     />
                   </div>
 
-                  {/* CCCD */}
+                  {/* CCCD (Chỉ được cập nhật 1 lần) */}
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                       <CreditCard size={13} className="text-slate-400" /> Số CCCD / CMND
+                      {(user?.cccd) && (
+                        <span className="text-[10px] text-emerald-600 font-semibold ml-1">✓ Đã xác nhận</span>
+                      )}
                     </label>
                     <input
                       type="text"
                       name="cccd"
                       value={formData.cccd}
                       onChange={handleInputChange}
-                      disabled={!isEditing}
-                      className="w-full bg-slate-50 border border-slate-300 text-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-[#EE0033] focus:bg-white transition disabled:opacity-75 outline-none"
+                      disabled={!isEditing || !!(user?.cccd)}
+                      placeholder={user?.cccd ? "" : "Nhập số CCCD 12 chữ số"}
+                      className={`w-full border rounded-xl px-3.5 py-2.5 text-xs font-semibold outline-none transition ${
+                        user?.cccd
+                          ? "bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed"
+                          : "bg-slate-50 border-slate-300 text-slate-900 focus:ring-2 focus:ring-[#EE0033] focus:bg-white disabled:opacity-75"
+                      }`}
                     />
                   </div>
 
@@ -437,6 +446,28 @@ const UserProfilePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal Thay đổi Email OTP */}
+      <ChangeEmailModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        currentEmail={formData.email}
+        onSuccess={(updatedEmail) => {
+          setFormData((prev) => ({ ...prev, email: updatedEmail }));
+          dispatch(
+            setCredentials({
+              user: {
+                ...user,
+                email: updatedEmail,
+              },
+            })
+          );
+          setMessage({
+            text: `Đã cập nhật email mới thành công: ${updatedEmail}`,
+            type: 'success',
+          });
+        }}
+      />
     </div>
   );
 };

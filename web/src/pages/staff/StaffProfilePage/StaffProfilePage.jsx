@@ -18,13 +18,16 @@ import {
   X
 } from "lucide-react";
 import { getStaffProfile, updateStaffProfile } from "../../../api/user/user.api";
+import ChangeEmailModal from "../../../components/common/ChangeEmailModal/ChangeEmailModal";
 
 const StaffProfilePage = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
+
 
   const [formData, setFormData] = useState({
     ho_ten: "",
@@ -75,7 +78,12 @@ const StaffProfilePage = () => {
     e.preventDefault();
     try {
       setSaving(true);
-      const res = await updateStaffProfile(formData);
+      const res = await updateStaffProfile({
+        ho_ten: formData.ho_ten,
+        so_dien_thoai: formData.so_dien_thoai,
+        cccd: formData.cccd || null,
+        dia_chi: formData.dia_chi || null,
+      });
       if (res.success) {
         showToast("success", "Cập nhật thông tin cá nhân thành công!");
         setIsEditing(false);
@@ -258,23 +266,35 @@ const StaffProfilePage = () => {
                   )}
                 </div>
 
-                {/* Email (Readonly) */}
+                {/* Email tài khoản & Nút đổi Email xác thực OTP */}
                 <div>
-                  <label className="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
-                    Email tài khoản
-                  </label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-xs font-extrabold text-gray-700 uppercase tracking-wider">
+                      Email tài khoản
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setIsEmailModalOpen(true)}
+                      className="text-xs font-bold text-[#EE0033] hover:bg-red-50 px-2.5 py-1 rounded-lg transition border border-red-100 flex items-center gap-1 cursor-pointer"
+                    >
+                      Đổi Email (OTP)
+                    </button>
+                  </div>
                   <div className="bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-gray-500 flex items-center gap-2 cursor-not-allowed">
                     <Mail className="w-4 h-4 text-gray-400" />
                     {profile?.email}
                   </div>
                 </div>
 
-                {/* Số CCCD/CMND */}
+                {/* Số CCCD/CMND (Chỉ được cập nhật 1 lần) */}
                 <div>
                   <label className="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
                     Số CCCD / CMND
+                    {profile?.cccd && (
+                      <span className="text-emerald-600 text-[10px] normal-case font-semibold ml-2">✓ Đã xác nhận</span>
+                    )}
                   </label>
-                  {isEditing ? (
+                  {isEditing && !profile?.cccd ? (
                     <input
                       type="text"
                       name="cccd"
@@ -284,55 +304,34 @@ const StaffProfilePage = () => {
                       placeholder="Số CCCD 12 chữ số"
                     />
                   ) : (
-                    <div className="bg-gray-50/80 border border-gray-200/70 rounded-xl px-4 py-3 text-sm font-semibold text-gray-800 flex items-center gap-2">
+                    <div className={`border rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-2 ${
+                      profile?.cccd ? "bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed" : "bg-gray-50/80 border-gray-200/70 text-gray-800"
+                    }`}>
                       <CreditCard className="w-4 h-4 text-gray-400" />
                       {profile?.cccd || "Chưa cập nhật"}
                     </div>
                   )}
                 </div>
 
-                {/* Giới tính */}
+                {/* Giới tính (Chỉ đọc) */}
                 <div>
                   <label className="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
-                    Giới tính
+                    Giới tính <span className="text-gray-400 text-[10px] normal-case font-semibold">(Chỉ đọc)</span>
                   </label>
-                  {isEditing ? (
-                    <select
-                      name="gioi_tinh"
-                      value={formData.gioi_tinh}
-                      onChange={handleInputChange}
-                      className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] focus:bg-white transition-all"
-                    >
-                      <option value="Nam">Nam</option>
-                      <option value="Nữ">Nữ</option>
-                      <option value="Khác">Khác</option>
-                    </select>
-                  ) : (
-                    <div className="bg-gray-50/80 border border-gray-200/70 rounded-xl px-4 py-3 text-sm font-semibold text-gray-800">
-                      {profile?.gioi_tinh || "Nam"}
-                    </div>
-                  )}
+                  <div className="bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold text-gray-500 cursor-not-allowed">
+                    {profile?.gioi_tinh || "Chưa cập nhật"}
+                  </div>
                 </div>
 
-                {/* Ngày sinh */}
+                {/* Ngày sinh (Chỉ đọc) */}
                 <div>
                   <label className="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
-                    Ngày sinh
+                    Ngày sinh <span className="text-gray-400 text-[10px] normal-case font-semibold">(Chỉ đọc)</span>
                   </label>
-                  {isEditing ? (
-                    <input
-                      type="date"
-                      name="ngay_sinh"
-                      value={formData.ngay_sinh}
-                      onChange={handleInputChange}
-                      className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#EE0033] focus:bg-white transition-all"
-                    />
-                  ) : (
-                    <div className="bg-gray-50/80 border border-gray-200/70 rounded-xl px-4 py-3 text-sm font-semibold text-gray-800 flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-gray-400" />
-                      {profile?.ngay_sinh || "Chưa cập nhật"}
-                    </div>
-                  )}
+                  <div className="bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold text-gray-500 flex items-center gap-2 cursor-not-allowed">
+                    <Calendar className="w-4 h-4 text-gray-400" />
+                    {profile?.ngay_sinh || "Chưa cập nhật"}
+                  </div>
                 </div>
               </div>
 
@@ -490,6 +489,17 @@ const StaffProfilePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal Thay đổi Email OTP */}
+      <ChangeEmailModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        currentEmail={profile?.email}
+        onSuccess={(updatedEmail) => {
+          setProfile((prev) => (prev ? { ...prev, email: updatedEmail } : prev));
+          showToast("success", `Đã cập nhật email mới thành công: ${updatedEmail}`);
+        }}
+      />
     </div>
   );
 };
