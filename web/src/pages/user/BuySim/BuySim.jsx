@@ -45,13 +45,16 @@ const BuySim = () => {
   }, []);
 
   const filteredSim = simList.filter((sim) => {
-    const isAvailable = sim.rawStatus !== "DaBan" && sim.rawStatus !== "DaThanhToan";
+    const status = (sim.rawStatus || "").trim().toLowerCase();
+    // Ẩn hoàn toàn các SIM đã bán (DaBan, DaThanhToan), đã đặt (DaDat), hoặc không sẵn có
+    const isAvailable = status === "conhang" || status === "dangban";
     const cleanSimNumber = sim.soSim.replace(/[^0-9]/g, "");
     const cleanKeyword = keyword.replace(/[^0-9]/g, "");
     const search = cleanSimNumber.includes(cleanKeyword) || sim.soSim.includes(keyword);
     const type = selectedType === "Tất cả" || sim.loaiSim === selectedType;
     return isAvailable && search && type;
   });
+
 
 
   return (

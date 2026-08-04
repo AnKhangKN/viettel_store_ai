@@ -190,9 +190,10 @@ export default function SimCheckoutPage() {
     );
   }
 
-  const isSold = sim && (sim.trang_thai === "DaBan" || sim.trang_thai === "DaThanhToan");
+  const simStatus = (sim?.trang_thai || "").trim().toLowerCase();
+  const isAvailable = simStatus === "conhang" || simStatus === "dangban";
 
-  if (!sim || isSold) {
+  if (!sim || !isAvailable) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-xl border border-slate-200">
