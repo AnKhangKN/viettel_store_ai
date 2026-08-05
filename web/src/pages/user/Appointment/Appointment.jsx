@@ -167,22 +167,6 @@ const Appointment = () => {
         <p className="text-slate-500 text-xs sm:text-sm max-w-lg mx-auto leading-relaxed">
           Chủ động lấy số thứ tự trực tuyến trước khi đến cửa hàng Viettel Store. Tiết kiệm thời gian, không lo xếp hàng chờ đợi!
         </p>
-
-        {/* 3-Step Visual Process Bar */}
-        <div className="grid grid-cols-3 gap-2 mt-6 bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-red-50 text-[#EE0033]">
-            <span className="w-5 h-5 rounded-full bg-[#EE0033] text-white font-black text-[10px] flex items-center justify-center shrink-0">1</span>
-            <span className="text-[11px] font-extrabold truncate">1. Điền thông tin</span>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 text-slate-600">
-            <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 font-black text-[10px] flex items-center justify-center shrink-0">2</span>
-            <span className="text-[11px] font-bold truncate">2. Chọn dịch vụ</span>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 text-slate-600">
-            <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 font-black text-[10px] flex items-center justify-center shrink-0">3</span>
-            <span className="text-[11px] font-bold truncate">3. Nhận phiếu</span>
-          </div>
-        </div>
       </div>
 
       <div className="max-w-3xl mx-auto">
