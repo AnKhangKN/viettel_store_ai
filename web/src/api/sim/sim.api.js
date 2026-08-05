@@ -35,12 +35,15 @@ export const createSim = async (simData) => {
 };
 
 // API admin - lấy toàn bộ SIM trong hệ thống
-export const getAllSims = async () => {
+export const getAllSims = async (onlyAvailable = false) => {
     try {
-        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/sim`);
+        const url = onlyAvailable 
+            ? `${import.meta.env.VITE_BACKEND_URL}/api/sim?only_available=true`
+            : `${import.meta.env.VITE_BACKEND_URL}/api/sim`;
+        const response = await axios.get(url);
         return response.data;
     } catch (error) {
-        console.error("Lỗi lấy danh sách tất cả SIM:", error);
+        console.error("Lỗi lấy danh sách SIM:", error);
         throw error;
     }
 };

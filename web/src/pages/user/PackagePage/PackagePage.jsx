@@ -244,7 +244,7 @@ export default function PackagePage() {
                       onClick={() => navigate(`/package/${pkg.id_goi}`)}
                       className="w-full bg-white border-2 border-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs hover:border-[#EE0033] hover:text-[#EE0033] hover:bg-red-50/40 transition shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer"
                     >
-                      <span>Xem chi tiết & Đăng ký</span>
+                      <span>Chi tiết gói cước</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>

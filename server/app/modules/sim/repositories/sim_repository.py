@@ -94,20 +94,35 @@ class SimRepository:
         """
         return await get_pool().fetch(sql)
 
-    async def get_all_sims(self):
-        sql = """
-            SELECT 
-                s.id_sim,
-                s.so_sim,
-                s.gia_ban,
-                s.trang_thai,
-                s.id_loai_sim,
-                l.ten_loai_sim
-            FROM sim s
-            LEFT JOIN loaisim l ON s.id_loai_sim = l.id_loai_sim
-            WHERE s.da_xoa = false
-            ORDER BY s.ngay_tao DESC
-        """
+    async def get_all_sims(self, only_available: bool = False):
+        if only_available:
+            sql = """
+                SELECT 
+                    s.id_sim,
+                    s.so_sim,
+                    s.gia_ban,
+                    s.trang_thai,
+                    s.id_loai_sim,
+                    l.ten_loai_sim
+                FROM sim s
+                LEFT JOIN loaisim l ON s.id_loai_sim = l.id_loai_sim
+                WHERE s.da_xoa = false AND s.trang_thai IN ('ConHang', 'DangBan')
+                ORDER BY s.ngay_tao DESC
+            """
+        else:
+            sql = """
+                SELECT 
+                    s.id_sim,
+                    s.so_sim,
+                    s.gia_ban,
+                    s.trang_thai,
+                    s.id_loai_sim,
+                    l.ten_loai_sim
+                FROM sim s
+                LEFT JOIN loaisim l ON s.id_loai_sim = l.id_loai_sim
+                WHERE s.da_xoa = false
+                ORDER BY s.ngay_tao DESC
+            """
         return await get_pool().fetch(sql)
 
     async def update_sim(

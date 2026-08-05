@@ -344,7 +344,7 @@ export default function HomePage() {
 
                   <div className="p-6 pt-0 relative z-10">
                     <Link to={`/package/${idGoi}`} className="w-full bg-slate-900 hover:bg-[#EE0033] font-bold py-4 rounded-2xl transition-colors duration-300 flex items-center justify-center gap-2 shadow-md" style={{ color: '#ffffff' }}>
-                      Đăng ký ngay <ArrowRight className="w-4 h-4" />
+                      Chi tiết gói cước <ArrowRight className="w-4 h-4" />
                     </Link>
                   </div>
                 </div>

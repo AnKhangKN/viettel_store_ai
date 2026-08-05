@@ -99,8 +99,8 @@ class SimService:
             "data": sims
         }
 
-    async def get_all_sims(self):
-        rows = await self.repository.get_all_sims()
+    async def get_all_sims(self, only_available: bool = False):
+        rows = await self.repository.get_all_sims(only_available=only_available)
         sims = []
         for r in rows:
             sims.append({

@@ -41,6 +41,10 @@ class PaymentService:
             )
         except ValueError as e:
             raise AppException(400, str(e))
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            raise AppException(400, f"Không thể khởi tạo đơn hàng SIM: {str(e)}")
 
     async def create_sim_payment_url(
         self,

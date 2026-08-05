@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Search, ShoppingCart, Eye, Loader2, Sparkles, Filter, ShieldCheck, PhoneCall, Star } from "lucide-react";
+import { Search, ShoppingCart, Loader2, Sparkles, Filter, ShieldCheck, PhoneCall, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getAllSims, getSimTypes } from "../../../api/sim/sim.api";
 
@@ -22,8 +22,8 @@ const BuySim = () => {
           setTypes(typeNames);
         }
         
-        // 2. Tải danh sách SIM
-        const simsRes = await getAllSims();
+        // 2. Tải danh sách SIM khả dụng
+        const simsRes = await getAllSims(true);
         if (simsRes?.success && simsRes?.data) {
           const formattedSims = simsRes.data.map(sim => ({
             maSim: sim.id_sim,
@@ -187,21 +187,13 @@ const BuySim = () => {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-3 pt-2">
+                  <div className="pt-2">
                     <Link
                       to={`/buysim/${sim.maSim}`}
-                      className="flex-1 flex items-center justify-center gap-1.5 bg-slate-50 border-2 border-slate-200 rounded-xl py-2.5 text-xs font-extrabold hover:bg-slate-100 transition text-slate-700 shadow-[0_4px_0_#e5e7eb] hover:shadow-[0_6px_0_#d1d5db] hover:-translate-y-0.5 active:shadow-none active:translate-y-0.5 cursor-pointer"
-                    >
-                      <Eye size={15} />
-                      Chi tiết
-                    </Link>
-
-                    <Link
-                      to={`/buysim/${sim.maSim}`}
-                      className="flex-1 flex items-center justify-center gap-1.5 bg-[#EE0033] text-white rounded-xl py-2.5 text-xs font-black hover:bg-red-700 transition shadow-[0_4px_0_#A00022] hover:shadow-[0_6px_0_#A00022] hover:-translate-y-0.5 active:shadow-none active:translate-y-0.5 cursor-pointer"
+                      className="w-full flex items-center justify-center gap-1.5 bg-[#EE0033] text-white rounded-xl py-2.5 text-xs font-black hover:bg-red-700 transition shadow-[0_4px_0_#A00022] hover:shadow-[0_6px_0_#A00022] hover:-translate-y-0.5 active:shadow-none active:translate-y-0.5 cursor-pointer"
                     >
                       <ShoppingCart size={15} />
-                      Đặt mua
+                      Đặt mua ngay
                     </Link>
                   </div>
                 </div>

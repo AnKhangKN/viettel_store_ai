@@ -141,8 +141,8 @@ class PaymentRepository:
                 sim_row = await conn.fetchrow(sql_sim, id_sim)
                 if not sim_row:
                     raise ValueError("Không tìm thấy thông tin SIM")
-                if sim_row["trang_thai"] in ("DaBan", "DaThanhToan"):
-                    raise ValueError("Số SIM này đã được đặt mua thành công và không còn sẵn có.")
+                if sim_row["trang_thai"] in ("DaBan", "DaThanhToan", "DaDat"):
+                    raise ValueError("Số SIM này đã được đặt mua hoặc giữ chỗ, không còn sẵn có.")
 
 
                 # 2. Xử lý thông tin khách hàng (người mua thực sự)
@@ -220,11 +220,11 @@ class PaymentRepository:
                             sql_ins_tt = """
                                 INSERT INTO thanhtoan (id_thanh_toan, id_don_hang, so_tien, phuong_thuc, trang_thai)
                                 VALUES ($1, $2, $3, 'TienMat', 'ChoThanhToan')
-                                ON CONFLICT (id_don_hang) DO UPDATE SET phuong_thuc = 'TienMat'
+                                ON CONFLICT (id_don_hang) DO UPDATE SET phuong_thuc = 'TienMat', trang_thai = 'ChoThanhToan'
                             """
                             await conn.execute(sql_ins_tt, uuid4(), id_don_hang, tong_tien)
-                            # Đánh dấu SIM thành Đã bán
-                            await conn.execute("UPDATE sim SET trang_thai = 'DaBan', cap_nhat = CURRENT_TIMESTAMP WHERE id_sim = $1", id_sim)
+                            # Đánh dấu SIM thành Đã đặt (để chờ thanh toán tại quầy)
+                            await conn.execute("UPDATE sim SET trang_thai = 'DaDat', cap_nhat = CURRENT_TIMESTAMP WHERE id_sim = $1", id_sim)
 
                         return {
                             "id_don_hang": str(id_don_hang),
@@ -254,9 +254,10 @@ class PaymentRepository:
                             sql_ins_tt = """
                                 INSERT INTO thanhtoan (id_thanh_toan, id_don_hang, so_tien, phuong_thuc, trang_thai)
                                 VALUES ($1, $2, $3, 'TienMat', 'ChoThanhToan')
+                                ON CONFLICT (id_don_hang) DO UPDATE SET phuong_thuc = 'TienMat', trang_thai = 'ChoThanhToan'
                             """
                             await conn.execute(sql_ins_tt, uuid4(), id_don_hang, tong_tien)
-                            await conn.execute("UPDATE sim SET trang_thai = 'DaBan', cap_nhat = CURRENT_TIMESTAMP WHERE id_sim = $1", id_sim)
+                            await conn.execute("UPDATE sim SET trang_thai = 'DaDat', cap_nhat = CURRENT_TIMESTAMP WHERE id_sim = $1", id_sim)
 
                         return {
                             "id_don_hang": str(dh_row["id_don_hang"]),
@@ -287,9 +288,10 @@ class PaymentRepository:
                     sql_ins_tt = """
                         INSERT INTO thanhtoan (id_thanh_toan, id_don_hang, so_tien, phuong_thuc, trang_thai)
                         VALUES ($1, $2, $3, 'TienMat', 'ChoThanhToan')
+                        ON CONFLICT (id_don_hang) DO UPDATE SET phuong_thuc = 'TienMat', trang_thai = 'ChoThanhToan'
                     """
                     await conn.execute(sql_ins_tt, uuid4(), id_don_hang, tong_tien)
-                    await conn.execute("UPDATE sim SET trang_thai = 'DaBan', cap_nhat = CURRENT_TIMESTAMP WHERE id_sim = $1", id_sim)
+                    await conn.execute("UPDATE sim SET trang_thai = 'DaDat', cap_nhat = CURRENT_TIMESTAMP WHERE id_sim = $1", id_sim)
 
                 return {
                     "id_don_hang": str(dh_row["id_don_hang"]),
