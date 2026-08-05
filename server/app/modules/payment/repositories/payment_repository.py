@@ -147,33 +147,36 @@ class PaymentRepository:
 
                 # 2. Xử lý thông tin khách hàng (người mua thực sự)
                 customer_id = None
+                kh_uuid = None
+                if id_khach_hang:
+                    kh_uuid = UUID(str(id_khach_hang)) if isinstance(id_khach_hang, str) else id_khach_hang
 
-                if so_dien_thoai:
-                    sql_kh_by_phone = "SELECT id_khach_hang FROM khachhang WHERE so_dien_thoai = $1 AND da_xoa = false"
-                    existing_kh_id = await conn.fetchval(sql_kh_by_phone, so_dien_thoai)
-                    if existing_kh_id:
-                        customer_id = existing_kh_id
-                        sql_up_kh = """
-                            UPDATE khachhang
-                            SET ho_ten = COALESCE($2, ho_ten),
-                                cccd = COALESCE($3, cccd),
-                                email = COALESCE($4, email),
-                                dia_chi = COALESCE($5, dia_chi),
-                                cap_nhat = CURRENT_TIMESTAMP
-                            WHERE id_khach_hang = $1
-                        """
-                        await conn.execute(sql_up_kh, customer_id, ho_ten, cccd, email, dia_chi)
-                    else:
-                        new_kh_id = uuid4()
-                        ten_dn = f"kh_{so_dien_thoai}"
-                        sql_ins_kh = """
-                            INSERT INTO khachhang (id_khach_hang, ten_dang_nhap, mat_khau, ho_ten, so_dien_thoai, cccd, email, dia_chi, vai_tro, trang_thai)
-                            VALUES ($1, $2, '123456', $3, $4, $5, $6, $7, 'user', 'HoatDong')
-                        """
-                        await conn.execute(sql_ins_kh, new_kh_id, ten_dn, ho_ten or "Khách hàng Mua SIM", so_dien_thoai, cccd, email, dia_chi)
-                        customer_id = new_kh_id
-                elif id_khach_hang:
-                    customer_id = id_khach_hang
+                # Tra cứu bản ghi khách hàng hiện có theo thứ tự: id_khach_hang -> so_dien_thoai -> email -> cccd
+                existing_kh = None
+                if kh_uuid:
+                    sql_by_id = "SELECT id_khach_hang FROM khachhang WHERE id_khach_hang = $1 AND da_xoa = false"
+                    existing_kh = await conn.fetchrow(sql_by_id, kh_uuid)
+
+                if not existing_kh and so_dien_thoai:
+                    sql_by_phone = "SELECT id_khach_hang FROM khachhang WHERE so_dien_thoai = $1 AND da_xoa = false"
+                    existing_kh = await conn.fetchrow(sql_by_phone, so_dien_thoai)
+
+                if not existing_kh and email:
+                    sql_by_email = "SELECT id_khach_hang FROM khachhang WHERE email = $1 AND da_xoa = false"
+                    existing_kh = await conn.fetchrow(sql_by_email, email)
+
+                if not existing_kh and cccd:
+                    sql_by_cccd = "SELECT id_khach_hang FROM khachhang WHERE cccd = $1 AND da_xoa = false"
+                    existing_kh = await conn.fetchrow(sql_by_cccd, cccd)
+
+                clean_ho_ten = ho_ten.strip() if ho_ten and ho_ten.strip() else None
+                clean_sdt = so_dien_thoai.strip() if so_dien_thoai and so_dien_thoai.strip() else None
+                clean_cccd = cccd.strip() if cccd and cccd.strip() else None
+                clean_email = email.strip() if email and email.strip() else None
+                clean_dia_chi = dia_chi.strip() if dia_chi and dia_chi.strip() else None
+
+                if existing_kh:
+                    customer_id = existing_kh["id_khach_hang"]
                     sql_up_kh = """
                         UPDATE khachhang
                         SET ho_ten = COALESCE($2, ho_ten),
@@ -184,10 +187,29 @@ class PaymentRepository:
                             cap_nhat = CURRENT_TIMESTAMP
                         WHERE id_khach_hang = $1
                     """
-                    await conn.execute(sql_up_kh, customer_id, ho_ten, so_dien_thoai, cccd, email, dia_chi)
+                    await conn.execute(sql_up_kh, customer_id, clean_ho_ten, clean_sdt, clean_cccd, clean_email, clean_dia_chi)
                 else:
-                    sql_default_kh = "SELECT id_khach_hang FROM khachhang WHERE vai_tro = 'user' AND da_xoa = false LIMIT 1"
-                    customer_id = await conn.fetchval(sql_default_kh) or id_khach_hang
+                    new_kh_id = uuid4()
+                    base_username = f"kh_{clean_sdt}" if clean_sdt else f"kh_{new_kh_id.hex[:8]}"
+                    sql_check_un = "SELECT id_khach_hang FROM khachhang WHERE ten_dang_nhap = $1"
+                    if await conn.fetchval(sql_check_un, base_username):
+                        base_username = f"kh_{new_kh_id.hex[:8]}"
+
+                    sql_ins_kh = """
+                        INSERT INTO khachhang (id_khach_hang, ten_dang_nhap, mat_khau, ho_ten, so_dien_thoai, cccd, email, dia_chi, vai_tro, trang_thai)
+                        VALUES ($1, $2, '123456', $3, $4, $5, $6, $7, 'user', 'HoatDong')
+                    """
+                    await conn.execute(
+                        sql_ins_kh,
+                        new_kh_id,
+                        base_username,
+                        clean_ho_ten or "Khách hàng Mua SIM",
+                        clean_sdt,
+                        clean_cccd,
+                        clean_email,
+                        clean_dia_chi
+                    )
+                    customer_id = new_kh_id
 
                 # 3. Tính tổng tiền
                 gia_sim = float(sim_row["gia_ban"])

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { CheckCircle, ShieldCheck, Truck, Loader2, Building2, X, MapPin, CreditCard, Store, ArrowLeft } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setCredentials } from "../../../features/auth/authSlice";
+import { getUserInfo } from "../../../api/shared/aixos.api";
 import { getSimDetails } from "../../../api/sim/sim.api";
 import { getAllBranches } from "../../../api/branch/branch.api";
 import { updateProfile } from "../../../api/user/user.api";
@@ -30,6 +32,7 @@ const getSearchMapUrl = (address, name) => {
 export default function SimCheckoutPage() {
   const { id } = useParams(); // id_sim
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const loggedInUser = useSelector((state) => state.auth.user);
 
   const [sim, setSim] = useState(null);
@@ -48,13 +51,33 @@ export default function SimCheckoutPage() {
 
   // Điền sẵn thông tin khi khách hàng đã đăng nhập
   useEffect(() => {
-    if (loggedInUser) {
-      setFullname(loggedInUser.ho_ten || loggedInUser.name || "");
-      setPhone(loggedInUser.so_dien_thoai || loggedInUser.phone || "");
-      setCccd(loggedInUser.cccd || "");
-      setAddress(loggedInUser.dia_chi || loggedInUser.address || "");
-    }
-  }, [loggedInUser]);
+    const initUserData = async () => {
+      if (loggedInUser) {
+        setFullname(loggedInUser.ho_ten || loggedInUser.name || "");
+        setPhone(loggedInUser.so_dien_thoai || loggedInUser.phone || "");
+        setCccd(loggedInUser.cccd || "");
+        setAddress(loggedInUser.dia_chi || loggedInUser.address || "");
+
+        // Nếu loggedInUser thiếu thông tin chi tiết (chỉ có id/name/email), gọi API lấy đầy đủ
+        if (!loggedInUser.so_dien_thoai && !loggedInUser.phone && !loggedInUser.cccd && !loggedInUser.dia_chi && !loggedInUser.address) {
+          try {
+            const res = await getUserInfo();
+            if (res?.success && res?.data) {
+              const freshUser = res.data;
+              dispatch(setCredentials({ user: { ...loggedInUser, ...freshUser } }));
+              setFullname(freshUser.name || freshUser.ho_ten || "");
+              setPhone(freshUser.phone || freshUser.so_dien_thoai || "");
+              setCccd(freshUser.cccd || "");
+              setAddress(freshUser.dia_chi || freshUser.address || "");
+            }
+          } catch (e) {
+            console.error("Không thể lấy thông tin chi tiết user:", e);
+          }
+        }
+      }
+    };
+    initUserData();
+  }, [loggedInUser, dispatch]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -135,25 +158,41 @@ export default function SimCheckoutPage() {
       if (loggedInUser) {
         try {
           await updateProfile({
-            ho_ten: fullname,
-            so_dien_thoai: phone,
-            cccd: cccd || undefined,
-            dia_chi: address || undefined,
+            ho_ten: fullname.trim(),
+            so_dien_thoai: phone.trim(),
+            cccd: cccd.trim() || undefined,
+            dia_chi: address.trim() || undefined,
           });
         } catch (err) {
           console.error("Không cập nhật được hồ sơ:", err);
         }
+
+        // Lưu và đồng bộ lại thông tin mới vào Redux store
+        dispatch(setCredentials({
+          user: {
+            ...loggedInUser,
+            name: fullname.trim(),
+            ho_ten: fullname.trim(),
+            phone: phone.trim(),
+            so_dien_thoai: phone.trim(),
+            cccd: cccd.trim(),
+            address: address.trim(),
+            dia_chi: address.trim()
+          }
+        }));
       }
+
+      const customerId = loggedInUser?.id || loggedInUser?.id_khach_hang;
 
       const orderRes = await createSimOrder({
         id_sim: simId,
         id_chi_nhanh: branchId,
-        id_khach_hang: (loggedInUser?.vai_tro === "user" && loggedInUser?.id_khach_hang) ? loggedInUser.id_khach_hang : undefined,
-        ho_ten: fullname || undefined,
-        so_dien_thoai: phone || undefined,
-        cccd: cccd || undefined,
+        id_khach_hang: customerId || undefined,
+        ho_ten: fullname.trim() || undefined,
+        so_dien_thoai: phone.trim() || undefined,
+        cccd: cccd.trim() || undefined,
         email: loggedInUser?.email || undefined,
-        dia_chi: address || undefined,
+        dia_chi: address.trim() || undefined,
         phuong_thuc: paymentMethod === "cod" ? "TienMat" : "VNPay",
       });
 

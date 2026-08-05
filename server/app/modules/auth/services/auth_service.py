@@ -169,9 +169,17 @@ class AuthService:
             "data": {
                 "user": {
                     "id": user_id,
-                    "name": user["ho_ten"],
-                    "email": user["email"],
-                    "anh_dai_dien": user["anh_dai_dien"] if "anh_dai_dien" in user else None
+                    "name": user.get("ho_ten"),
+                    "ho_ten": user.get("ho_ten"),
+                    "email": user.get("email"),
+                    "phone": user.get("so_dien_thoai"),
+                    "so_dien_thoai": user.get("so_dien_thoai"),
+                    "cccd": user.get("cccd"),
+                    "address": user.get("dia_chi"),
+                    "dia_chi": user.get("dia_chi"),
+                    "role": user.get("vai_tro", "user"),
+                    "vai_tro": user.get("vai_tro", "user"),
+                    "anh_dai_dien": user.get("anh_dai_dien")
                 },
                 "accessToken": access_token,
                 "refreshToken": refresh_token
@@ -477,9 +485,17 @@ class AuthService:
             "data": {
                 "user": {
                     "id": str(user["id_khach_hang"]),
-                    "name": user["ho_ten"],
-                    "email": user["email"],
-                    "anh_dai_dien": user["anh_dai_dien"] if "anh_dai_dien" in user else None
+                    "name": user.get("ho_ten"),
+                    "ho_ten": user.get("ho_ten"),
+                    "email": user.get("email"),
+                    "phone": user.get("so_dien_thoai"),
+                    "so_dien_thoai": user.get("so_dien_thoai"),
+                    "cccd": user.get("cccd"),
+                    "address": user.get("dia_chi"),
+                    "dia_chi": user.get("dia_chi"),
+                    "role": user.get("vai_tro", "user"),
+                    "vai_tro": user.get("vai_tro", "user"),
+                    "anh_dai_dien": user.get("anh_dai_dien")
                 },
                 "accessToken": access_token,
                 "refreshToken": refresh_token
